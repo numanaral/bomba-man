@@ -1,0 +1,152 @@
+/**
+ *
+ * {{properCase name }}
+ *
+ * Description
+ *
+ */
+
+{{#if memo}}
+	{{#if wantAsync}}
+import React, { memo, useEffect } from 'react';		
+	{{else}}		
+import React, { memo } from 'react';
+	{{/if}}
+{{else}}
+	{{#if wantAsync}}
+import React, { useEffect } from 'react';		
+	{{else}}		
+import React from 'react';
+	{{/if}}
+{{/if}}
+import { string, bool, func } from 'prop-types';
+// import { string, bool, func, objectOf } from 'prop-types';
+import { connect } from 'react-redux';
+{{#if wantHeaders}}
+import { Helmet } from 'react-helmet';
+{{/if}}
+{{#if wantActionsAndReducer}}
+import { createStructuredSelector } from 'reselect';
+{{/if}}
+{{#if memo}}
+import { compose } from 'redux';
+{{/if}}
+{{#if wantActionsAndReducer}}
+import { useInjectReducer } from 'utils/injectReducer';
+{{#if wantAsync}}
+import { fetchResultArrayType } from 'types';
+import LoadingIndicator from 'components/LoadingIndicator';
+import Error from 'components/Error';
+import {
+	makeSelectLoading,
+	makeSelectError,
+	makeSelectData,
+} from './selectors';
+import { getData } from 'thunks';
+{{else}}	
+import makeSelect{{properCase defaultStateName}} from './selectors';
+{{/if}}
+import PrettyJson from 'components/PrettyJson/Lazy';
+import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems/Lazy';
+import reducer from './reducer';
+import { KEY } from './constants';
+{{/if}}
+
+{{#if wantActionsAndReducer}}
+	{{#if wantAsync}}
+export const {{properCase name}} = ({ makeRequest, loading, error, data }) => {
+	{{else}}
+export const {{properCase name }} = ({ makeRequest, {{ camelCase defaultStateName}} }) => {
+	{{/if}}
+{{else}}
+export const {{properCase name}} = () => {
+{{/if}}
+	{{#if wantActionsAndReducer}}
+	useInjectReducer({ key: KEY, reducer });
+	{{/if}}
+
+	useEffect(() => {
+		makeRequest();
+	}, [makeRequest])
+	
+	// useEffect(() => {
+	// 	makeRequest(fetchFunc, params);
+	// }, [makeRequest, fetchFunc, params])
+
+	return (
+		<ContainerWithCenteredItems>
+			{{#if wantHeaders}}
+			<Helmet>
+				<title>{{properCase name}}</title>
+				<meta name="description" content="Description of {{properCase name}}" />
+			</Helmet>
+			{{/if}}
+			{{#if wantActionsAndReducer}}
+				{{#if wantAsync}}
+					{loading && <LoadingIndicator />}
+					{(error && <Error title="Fetch error" message={error} />) ||
+						(data?.length && (
+							<PrettyJson json={data} rel={`${KEY} State`} />
+						) || 
+						'No result'}
+				{{else}}
+					<PrettyJson json={{{camelCase defaultStateName}}} rel={`${KEY} State`} />;				
+				{{/if}}
+			{{/if}}
+		</ContainerWithCenteredItems>
+	);
+}
+
+{{properCase name}}.propTypes = {
+	{{#if wantActionsAndReducer}}
+		{{#if wantAsync}}
+	loading: bool,
+	error: string,
+	data: fetchResultArrayType,
+		{{else}}			
+	{{camelCase defaultStateName}}: string,
+	// {{camelCase defaultStateName}}: objectOf(string),
+		{{/if}}
+	{{/if}}
+	makeRequest: func.isRequired,
+};
+
+
+{{properCase name}}.defaultProps = {
+	{{#if wantActionsAndReducer}}
+		{{#if wantAsync}}
+	loading: false,
+	error: null,
+	data: null,
+		{{else}}			
+	{{camelCase defaultStateName}}: null,
+		{{/if}}
+	{{/if}}
+};
+
+{{#if wantActionsAndReducer}}
+const mapStateToProps = createStructuredSelector({
+	{{#if condition}}
+	{{camelCase defaultStateName}}: makeSelect{{properCase defaultStateName}}(),		
+	{{else}}
+	loading: makeSelectLoading(),
+	error: makeSelectError(),
+	data: makeSelectData(),
+	{{/if}}
+});
+{{else}}
+const mapStateToProps = null;
+{{/if}}
+
+export const mapDispatchToProps = {
+	makeRequest: getData,
+};
+
+{{#if memo}}
+export default compose(
+	connect(mapStateToProps, mapDispatchToProps),
+	memo,
+)({{properCase name}});
+{{else}}
+export default connect(mapStateToProps, mapDispatchToProps)({{properCase name}});
+{{/if}}

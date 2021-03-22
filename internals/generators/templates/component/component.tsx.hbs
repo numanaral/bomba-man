@@ -1,0 +1,60 @@
+{{#if memo}}
+import { memo } from 'react';
+{{/if}}
+{{#if styled}}
+import styled from 'styled-components';
+import theme from 'theme';
+{{/if}}
+{{#if styled}}
+
+const Container = styled.div`
+	background-color: ${theme.palette.background.secondary};
+`;
+{{/if}}
+{{#if propTypes}}
+
+interface Props {
+	{{#each _props as |prop|}}
+	{{prop}}: string,
+	{{/each}}
+}
+{{/if}}
+
+const {{properCase name}} = (
+{{#if propTypes}}
+	{ 
+		{{#each _props as |prop|}}
+		{{prop}},
+		{{/each}}
+	}: Props
+{{/if}}
+) => 
+{{#if propTypes}} 
+{
+	return {{/if}} (
+	{{#if styled}}
+		<Container>
+	{{else}}
+		<div>
+	{{/if}}
+			<p>{{properCase name}}</p>
+		{{#if propTypes}} 
+			{{#each _props as |prop|}}
+			<p>{{prop}}: ${{curly true}}{{prop}}{{curly}}</p>
+			{{/each}}
+		{{/if}}
+	{{#if styled}}
+		</Container>
+	{{else}}
+		</div>
+	{{/if}}
+	);
+{{#if propTypes}} 
+};
+{{/if}}
+
+{{#if memo}}
+export default memo({{properCase name}});
+{{else}}
+export default {{properCase name}};
+{{/if}}

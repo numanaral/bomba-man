@@ -1,0 +1,109 @@
+{{#ifCond memo '||' redux}} 
+import React {{#ifCond memo '&&' redux}}, { 
+	memo,
+//	useCallback,
+} {{else if memo}}, { memo } {{else}} /* , { useCallback } */ {{/ifCond}} from 'react';
+{{else}}
+import React from 'react';
+{{/ifCond}}
+{{#if redux}}
+// import { useDispatch, useSelector } from 'react-redux';
+{{/if}}
+{{#if styled}}
+import styled from 'styled-components';
+{{/if}}
+{{#ifCond propTypes '||' redux}}
+
+	{{#if redux}}
+// import {
+	{{#each _reduxActions as |action|}}
+//	{{action}},
+	{{/each}}
+// } from 'store/redux/reducers/{{reducerName}}/actions';
+// import makeSelect{{properCase reducerName}}s, {
+	{{#each _reduxSelectors as |selector|}}
+//	makeSelect{{properCase selector}},
+	{{/each}}
+// } from 'store/redux/reducers/{{reducerName}}/selectors';
+	{{/if}}
+	{{#if propTypes}}
+import { propTypes, defaultProps } from './types';
+	{{/if}}
+{{/ifCond}}
+{{#if styled}}
+
+const Container = styled.div`
+	${({ theme }) => `
+		background-color: ${theme.palette.background.paper};
+	`}
+`;
+{{/if}}
+
+const {{properCase name}} = (
+{{#if propTypes}}
+	{ 
+		{{#each _props as |prop|}}
+		{{prop}},
+		{{/each}}
+	}
+{{/if}}
+) => 
+{{#ifCond propTypes '||' redux}} 
+{
+	{{#if redux}}
+	// const dispatch = useDispatch();
+	{{#each _reduxActions as |action|}}
+	// const dispatch{{properCase action}} = useCallback(
+	// 	() => dispatch({{action}}()),
+	// 	[dispatch]
+	// );
+	{{/each}}
+	//
+	// const {{camelCase reducerName}}s = useSelector(makeSelect{{properCase reducerName}}s());
+	{{#each _reduxSelectors as |selector|}}
+	// const {{selector}} = useSelector(makeSelect{{properCase selector}}());
+	{{/each}}
+	
+	{{/if}}
+	return {{/ifCond}} (
+	{{#if styled}}
+		<Container>
+	{{else}}
+		<div>
+	{{/if}}
+			<p>{{properCase name}}</p>
+		{{#if propTypes}} 
+			{{#each _props as |prop|}}
+			<p>{{prop}}: { {{prop}} }</p>
+			{{/each}}
+		{{/if}}
+		{{#if redux}}
+			{/*
+			<p>
+			{{camelCase reducerName}}s: <pre>{ {{camelCase reducerName}}s }</pre>
+			</p>
+			{{#each _reduxSelectors as |selector|}}
+			<p>{{selector}}: { {{selector}} }</p>
+			{{/each}}
+			*/}
+		{{/if}}
+	{{#if styled}}
+		</Container>
+	{{else}}
+		</div>
+	{{/if}}
+	);
+{{#ifCond propTypes '||' redux}} 
+};
+{{/ifCond}}
+
+{{#if propTypes}}
+{{properCase name}}.propTypes = propTypes;
+{{properCase name}}.defaultProps = defaultProps;
+{{/if}}
+
+{{#if memo}}
+export default memo({{properCase name}});
+{{else}}
+export default {{properCase name}};
+{{/if}}

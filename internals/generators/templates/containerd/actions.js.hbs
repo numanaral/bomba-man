@@ -1,0 +1,50 @@
+{{#if wantAsync}}
+import {
+	FETCH_DATA_REQUEST,
+	FETCH_DATA_SUCCESS,
+	FETCH_DATA_ERROR
+} from './constants';
+{{else}}
+import { SET_{{ constantCase defaultStateName }} } from './constants';
+{{/if}}
+
+{{#if wantAsync}}
+/**
+ * Fetch the data, this action starts the request
+ *
+ * @return {object} An action object with a type of FETCH_DATA_REQUEST
+ */
+export const fetchDataRequest = () => ({
+	type: FETCH_DATA_REQUEST,
+});
+
+
+/**
+ * Dispatched when the data is loaded by the request
+ *
+ * @param {array} data - The fetched data
+ *
+ * @return {object} An action object with a type of FETCH_DATA_SUCCESS passing the data
+ */
+export const dataFetched = data => ({
+	type: FETCH_DATA_SUCCESS,
+	payload: data,
+});
+
+/**
+ * Dispatched when loading the dataitories fails
+ *
+ * @param  {object} error - The error
+ *
+ * @return {object} An action object with a type of FETCH_DATA_ERROR passing the error
+ */
+export const dataFetchingError = error => ({
+	type: FETCH_DATA_ERROR,
+	error,
+});
+{{else}}
+export const set{{properCase defaultStateName}} = payload => ({
+	type: SET_{{ constantCase defaultStateName }},
+	payload,
+});
+{{/if}}

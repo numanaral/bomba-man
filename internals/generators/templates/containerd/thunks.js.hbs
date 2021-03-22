@@ -1,0 +1,39 @@
+import request from 'utils/request';
+import { FETCH_URL } from './constants';
+import { fetchData, dataFetched, dataFetchingError } from './actions';
+
+/**
+ * Data request/response handler
+ */
+export const getData = () => (dispatch, getState) => {
+	// Set params to pass along in the request
+	const params = {};
+	
+	// Begin request
+	dispatch(fetchData());
+
+	// Fetch and populate
+	request(FETCH_URL, params)
+		.then(data => dispatch(dataFetched(data, incremental)))
+		.catch(err => dispatch(dataFetchingError(error)));
+}
+
+// /**
+//  * Data request/response handler
+//  *
+//  * @param {Function} fetchFunc - Async function to call
+//  * @param {Object} [params=null] - Params to pass to the async function
+//  * @param {Boolean} [incremental=false] - If incremental, prepend the new result (merge unique)
+//  */
+// export const getData = (fetchFunc, params = null, incremental = false) => (
+// 	dispatch,
+// 	getState
+// ) => {
+// 	// Begin request
+// 	dispatch(fetchData());
+
+// 	// Fetch and populate
+// 	fetchFunc(params)
+// 		.then(data => dispatch(dataFetched(data, incremental)))
+// 		.catch(err => dispatch(dataFetchingError(err)));
+// }

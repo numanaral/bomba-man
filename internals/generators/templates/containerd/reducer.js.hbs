@@ -1,0 +1,60 @@
+import produce from 'immer';
+{{#if wantPersistedReducer}}
+import getPersistedReducer from 'utils/getPersistedReducer';
+{{/if}}
+
+{{#if wantAsync}}
+import {
+	{{#if wantPersistedReducer}}KEY,{{/if}}
+	FETCH_DATA_REQUEST,
+	FETCH_DATA_SUCCESS,
+	FETCH_DATA_ERROR
+} from './constants';
+{{else}}
+import { SET_{{ constantCase defaultStateName }}, {{#if wantPersistedReducer}}KEY,{{/if}} } from './constants';
+{{/if}}
+
+export const initialState = {
+{{#if wantAsync}}
+	loading: false,
+	error: null,
+	data: null,
+{{else}}
+	// {{camelCase defaultStateName}}: '',
+{{/if}}
+};
+
+const {{camelCase name}}Reducer = (state = initialState, action) =>
+produce(state, draft => {
+	switch (action.type) {
+	{{#if wantAsync}}
+		case FETCH_DATA_REQUEST:
+			draft.loading = true;
+			draft.error = null;
+			draft.data = null;
+			break;
+		case FETCH_DATA_SUCCESS:
+			draft.data = action.payload;
+			draft.loading = false;
+			break;
+		case FETCH_DATA_ERROR:
+			draft.error = action.error;
+			draft.loading = false;
+			break;
+	{{else}}
+		case SET_{{ constantCase defaultStateName }}:
+			draft.{{camelCase defaultStateName}} = action.payload;
+			break;
+	{{/if}}
+		default:
+			// No default
+			break;
+	}
+});
+
+
+{{#if wantPersistedReducer}}
+export default getPersistedReducer(KEY, {{camelCase name}}Reducer);
+{{else}}
+export default {{camelCase name}}Reducer;
+{{/if}}
