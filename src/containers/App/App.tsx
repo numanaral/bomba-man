@@ -1,5 +1,12 @@
+import Container from 'components/Container';
+import Game from 'containers/Game';
+
 const App = () => {
-	return <div>Hi</div>;
+	return (
+		<Container>
+			<Game />
+		</Container>
+	);
 };
 
 export default App;
