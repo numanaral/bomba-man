@@ -1,5 +1,5 @@
 :root {
-	--border-radius: 4px;
+	// Colors
 	--primary-background: #13141b;
 	--secondary-background: #1a1d28;
 
@@ -10,4 +10,11 @@
 	--supplementary-color-2: rgb(241, 168, 23);
 	--supplementary-color-3: rgb(49, 162, 76);
 	--supplementary-color-4: rgb(228, 230, 235);
+
+	// Utilities
+	--border-radius: 4px;
+	--padding: 10px;
+
+	// Game
+	--character-size: 32px;
 }

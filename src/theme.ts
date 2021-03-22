@@ -5,12 +5,18 @@ const theme = {
 			secondary: 'var(--secondary-background)',
 		},
 		color: {
-			primary: 'var(--color-primary)',
-			secondary: 'var(--color-secondary)',
+			primary: 'var(--primary-color)',
+			secondary: 'var(--secondary-color)',
 		},
 	},
 	shape: {
 		borderRadius: 'var(--border-radius)',
+		padding: 'var(--padding)',
+	},
+	game: {
+		character: {
+			size: 'var(--character-size)',
+		},
 	},
 };
 
