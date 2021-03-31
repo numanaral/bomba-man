@@ -47,9 +47,19 @@ const Game = () => {
 	const [collisionCoordinates, setCollisionCoordinates] = useState(() =>
 		generateRandomCollision()
 	);
+	const [is3D, setIs3D] = useState(true);
+	const [isTopView, setIsTopView] = useState(true);
 
 	const generateNewCollisionCoordinates = () => {
 		setCollisionCoordinates(generateRandomCollision());
+	};
+
+	const toggle3D = () => {
+		setIs3D(v => !v);
+	};
+
+	const toggleView = () => {
+		setIsTopView(v => !v);
 	};
 
 	return (
@@ -62,6 +72,23 @@ const Game = () => {
 			>
 				New Collision Coordinates
 			</Button>
+			<Button
+				variant={is3D ? 'primary' : 'secondary'}
+				size="medium"
+				onClick={toggle3D}
+			>
+				Toggle 3D (Experimental)
+			</Button>
+
+			<Button
+				variant={isTopView ? 'secondary' : 'primary'}
+				size="medium"
+				onClick={toggleView}
+				disabled={!is3D}
+			>
+				Toggle Side View
+			</Button>
+
 			<br />
 			<br />
 			<Map size={GAME_SIZE} collisionCoordinates={collisionCoordinates}>
