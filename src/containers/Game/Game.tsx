@@ -26,8 +26,8 @@ const generateRandomCollision = () => {
 	return Array(numberOfCollisions)
 		.fill(0)
 		.reduce<{ [key: number]: number }>(acc => {
-			const x = getRandomInt(GAME_SIZE);
-			const y = getRandomInt(GAME_SIZE);
+			const x = getRandomInt(2, GAME_SIZE);
+			const y = getRandomInt(2, GAME_SIZE);
 
 			// while (true) {
 			// 	x = getRandomInt(GAME_SIZE);
