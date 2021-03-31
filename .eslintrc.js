@@ -54,7 +54,11 @@ module.exports = {
 		'default-case': [ERROR, { commentPattern: 'No Default' }],
 		'no-param-reassign': [
 			ERROR,
-			{ props: true, ignorePropertyModificationsFor: ['draft', 'acc'] },
+			{
+				props: true,
+				ignorePropertyModificationsFor: ['draft', 'acc'],
+				ignorePropertyModificationsForRegex: ['[Rr]ef$'],
+			},
 		],
 		'import/no-named-as-default': OFF,
 		'import/no-unresolved': [ERROR, { caseSensitive: false }],
@@ -92,6 +96,7 @@ module.exports = {
 		'react/no-array-index-key': OFF,
 		'prettier/prettier': ERROR,
 		// Overrides for ts
+		'react/prop-types': OFF,
 		'react/require-default-props': OFF,
 		'react/jsx-uses-react': OFF,
 		'react/react-in-jsx-scope': OFF,
@@ -118,5 +123,7 @@ module.exports = {
 		'@typescript-eslint/no-use-before-define': [ERROR],
 		'no-redeclare': OFF,
 		'@typescript-eslint/no-redeclare': [ERROR],
+		'no-shadow': 'off',
+		'@typescript-eslint/no-shadow': [ERROR],
 	},
 };
