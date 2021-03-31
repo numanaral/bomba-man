@@ -39,8 +39,9 @@ const generateRandomCollision = () => {
 		}, {});
 };
 
-const CenteredDiv = styled.div`
+const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	text-align: center;
+	${({ $is3D }) => ($is3D && 'perspective: 1000') || ''}
 `;
 
 const Game = () => {
@@ -63,7 +64,7 @@ const Game = () => {
 	};
 
 	return (
-		<CenteredDiv>
+		<CenteredDiv $is3D={is3D}>
 			<h1>Bomberman - Work In Progress</h1>
 			<Button
 				variant="secondary"
