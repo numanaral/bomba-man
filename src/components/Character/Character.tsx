@@ -98,9 +98,6 @@ const ROTATION_REGEX = {
 };
 
 const rotateMove = (originalTransform: string, direction: Direction) => {
-	// 90deg is a lot harder to handle for movements on the y axis
-	// This is because on
-	// let rotate = 180;
 	let rotate = 90;
 	let side = Axis.Y;
 	if (direction === Direction.DOWN || direction === Direction.LEFT) {
@@ -110,36 +107,9 @@ const rotateMove = (originalTransform: string, direction: Direction) => {
 		side = Axis.X;
 	}
 
-	if (side === Axis.Y) {
-		const xDegree = Number(
-			originalTransform.match(ROTATION_REGEX[Axis.X].FIND)?.groups
-				?.degree || 0
-		);
-		if (Math.abs((xDegree / 180) % 2) === 1) {
-			rotate *= -1;
-		} else if (Math.abs((xDegree / 90) % 2) === 1) {
-			rotate *= -1;
-			side = Axis.Z;
-		}
-	}
-	// if (side === AXIS.Y) {
-	// 	const xDegree = Number(
-	// 		originalTransform.match(ROTATION_REGEX[AXIS.X].FIND)?.groups
-	// 			?.degree || 0
-	// 	);
-	// 	if (Math.abs((xDegree / 90) % 2) === 1) {
-	// 		rotate *= 1;
-	// 		side = AXIS.X;
-	// 	}
-	// }
-
-	const currentDegree = Number(
-		originalTransform.match(ROTATION_REGEX[side].FIND)?.groups?.degree || 0
-	);
-
 	return originalTransform.replace(
 		ROTATION_REGEX[side].REPLACE,
-		`rotate${side}(${currentDegree + rotate}deg)`
+		`rotate${side}(${rotate}deg)`
 	);
 };
 
@@ -150,11 +120,31 @@ const handleRotateMove = (
 ) => {
 	if (!is3D) return;
 	/* eslint-disable no-param-reassign */
+	// enable animation
+	characterRef!.current!.style.transition = `${MOVE_DURATION}ms`;
+	// move
 	characterRef!.current!.style.transform = rotateMove(
 		characterRef!.current!.style.transform,
 		direction
 	);
 	/* eslint-enable no-param-reassign */
+};
+
+/**
+ * Since we are moving a flat plane and not a cube, the logical sense of
+ * rotating a cube doesn't work. Different type of rotations do no always
+ * help. One solution is resetting the rotation to 0 so the rotation
+ * movement is smooth on each rotation without worrying about boundaries.
+ *
+ * NOTE: We need to be aware of the animation cancelling
+ *
+ * @param characterRef ref object
+ */
+const resetRotation = (characterRef: React.RefObject<HTMLDivElement>) => {
+	// disable animation
+	characterRef!.current!.style.transition = '0ms';
+	// reset
+	characterRef!.current!.style.transform = `translateZ(calc(var(--size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`;
 };
 
 const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
@@ -168,6 +158,9 @@ const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 		const move = () => {
 			if (!characterRef.current) return;
 			if (!keyMap.current) return;
+
+			// reset rotation to 0 so the animations are consistent
+			resetRotation(characterRef);
 
 			if (keyMap.current.ArrowUp) {
 				const newX = characterRef.current.offsetLeft;
