@@ -42,6 +42,15 @@ const Map = ({
 }: Props) => {
 	const map = Array(size).fill(Array(size).fill(0));
 
+	const previousCoordinates = usePrevious(
+		JSON.stringify(collisionCoordinates)
+	);
+
+	// we only need to animate when new collision is set
+	// not when the view changes
+	const shouldAnimate =
+		JSON.stringify(collisionCoordinates) !== previousCoordinates;
+
 	let collisionIndex = 1;
 	return (
 		<Wrapper $size={size} $is3D={is3D} $isTopView={isTopView}>
