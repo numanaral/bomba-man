@@ -2,17 +2,9 @@ import { memo } from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import theme from 'theme';
 
-interface Props {
-	size: number;
-	top: number;
-	left: number;
-	color?: string;
-	collisionIndex?: number;
-}
-
 type WrapperProps = StyledProps<
-	Props,
-	'size' | 'top' | 'left' | 'color' | 'collisionIndex'
+	TileProps,
+	'size' | 'top' | 'left' | 'animate' | 'color' | 'collisionIndex'
 >;
 
 /** @see https://codepen.io/nelledejones/pen/gOOPWrK#L68 */
@@ -52,12 +44,20 @@ const Wrapper = styled.div.attrs<WrapperProps>(
 	}}
 `;
 
-const Tile = ({ size, top, left, color, collisionIndex }: Props) => {
+const Tile = ({
+	size,
+	top,
+	left,
+	animate,
+	color,
+	collisionIndex,
+}: TileProps) => {
 	return (
 		<Wrapper
 			$size={size}
 			$top={top}
 			$left={left}
+			$animate={animate}
 			$color={color}
 			$collisionIndex={collisionIndex}
 		/>
