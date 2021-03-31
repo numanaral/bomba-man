@@ -30,9 +30,10 @@ const Wrapper = styled.div.attrs<WrapperProps>(
 	position: absolute;
 	/* background-color: ${theme.palette.background.secondary}; */
 	border: 1px solid ${theme.palette.background.primary};
-	${({ $color, $collisionIndex }) => {
+	${({ $color, $collisionIndex, $animate }) => {
 		return (
-			($color &&
+			($animate &&
+				$color &&
 				css`
 					transform: scale(0, 0);
 					z-index: 9999;
