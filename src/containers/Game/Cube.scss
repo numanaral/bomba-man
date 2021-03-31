@@ -1,12 +1,13 @@
-// Grab this from settings
-$game-size: 15;
+// below doesn't work..
+// $gameSize: var(--game-size, 15);
+// global
+$gameSize: 15;
 
-/** @see https://codepen.io/jh3y/pen/BaKqQLJ */
 @mixin bouncy-block($i) {
 	animation: bouncy 0.5s ease calc(#{$i} * 0.08s) forwards;
 }
 
-@for $i from 1 through $game-size {
+@for $i from 1 through $gameSize {
 	.bouncy-block-#{$i} {
 		@include bouncy-block($i);
 
@@ -18,27 +19,21 @@ $game-size: 15;
 
 @keyframes bouncy {
 	from {
-		transform: scale(1, 1) translateZ(calc(var(--size) / 2 * -1px));
+		transform: scale(1, 1) translateZ(calc(var(--tile-size) / 2 * -1px));
 	}
 	to {
-		transform: scale(1, 1) translateZ(calc(var(--size) / 2 * 1px));
+		transform: scale(1, 1) translateZ(calc(var(--tile-size) / 2 * 1px));
 	}
 	55% {
-		transform: scale(0.7, 1.3) translateZ(calc(var(--size) / 2 * -1px));
+		transform: scale(0.7, 1.3) translateZ(calc(var(--tile-size) / 2 * -1px));
 	}
 	65% {
-		transform: scale(1.3, 0.7) translateZ(calc(var(--size) / 2 * 0px));
+		transform: scale(1.3, 0.7) translateZ(calc(var(--tile-size) / 2 * 0px));
 	}
 	75% {
-		transform: scale(0.95, 1.05) translateZ(calc(var(--size) / 2 * 0px));
+		transform: scale(0.95, 1.05)
+			translateZ(calc(var(--tile-size) / 2 * 0px));
 	}
-	// Too much bounce
-	// 85% {
-	// 	transform: scale(1.3, 0.7) translateZ(calc(var(--size) / 2 * 1px));
-	// }
-	// 95% {
-	// 	transform: scale(0.7, 1.3) translateZ(calc(var(--size) / 2 * 1px));
-	// }
 }
 
 @keyframes transition-color {
@@ -52,74 +47,64 @@ $game-size: 15;
 }
 
 .cuboid {
-	--size: var(--cuboid-width, 32);
-
-	height: calc(var(--size) * 1px);
-	width: calc(var(--size) * 1px);
+	height: calc(var(--tile-size) * 1px);
+	width: calc(var(--tile-size) * 1px);
 	transform-style: preserve-3d;
 	position: absolute;
 	transform-origin: center center;
 	transition: 300ms;
 
-	transform: scale(1, 1) translateZ(calc(var(--size) / 2 * -1px));
-	// translate3d(
-	// 	calc(var(--x, 5) * 1px),
-	// 	calc(var(--y, 5) * 1px),
-	// 	calc(var(--z, 5) * 1px)
-	// )
-	// rotateX(calc(var(--rotate-cuboid-x, 0) * 1deg))
-	// rotateY(calc(var(--rotate-cuboid-y, 0) * 1deg))
-	// rotateZ(calc(var(--rotate-cuboid-z, 0) * 1deg));
+	transform: scale(1, 1) translateZ(calc(var(--tile-size) / 2 * -1px));
 
 	& > div {
 		border: 1px solid var(--primary-background);
 
-		height: calc(var(--size) * 1px);
-		width: calc(var(--size) * 1px);
+		height: calc(var(--tile-size) * 1px);
+		width: calc(var(--tile-size) * 1px);
 		// transform-origin: 50% 50%;
 		top: 50%;
 		left: 50%;
 		position: absolute;
 
+		/** @see https://codepen.io/jh3y/pen/BaKqQLJ */
 		&:nth-of-type(1) {
 			transform: translate(-50%, -50%) rotateX(-90deg)
-				translateZ(calc((var(--size) / 2) * 1px));
+				translateZ(calc((var(--tile-size) / 2) * 1px));
 		}
 		&:nth-of-type(2) {
 			transform: translate(-50%, -50%) rotateX(-90deg) rotateY(180deg)
-				translateZ(calc((var(--size) / 2) * 1px));
+				translateZ(calc((var(--tile-size) / 2) * 1px));
 		}
 		&:nth-of-type(3) {
 			transform: translate(-50%, -50%) rotateX(-90deg) rotateY(90deg)
-				translateZ(calc((var(--size) / 2) * 1px));
+				translateZ(calc((var(--tile-size) / 2) * 1px));
 		}
 		&:nth-of-type(4) {
 			transform: translate(-50%, -50%) rotateX(-90deg) rotateY(-90deg)
-				translateZ(calc((var(--size) / 2) * 1px));
+				translateZ(calc((var(--tile-size) / 2) * 1px));
 		}
 		&:nth-of-type(5) {
 			background-color: var(--secondary-background);
 			transform: translate(-50%, -50%)
-				translateZ(calc((var(--size) / 2) * 1px));
+				translateZ(calc((var(--tile-size) / 2) * 1px));
 		}
 		&:nth-of-type(6) {
 			transform: translate(-50%, -50%)
-				translateZ(calc((var(--size) / 2) * -1px)) rotateX(180deg);
+				translateZ(calc((var(--tile-size) / 2) * -1px)) rotateX(180deg);
 		}
 	}
 
 	&.bouncy-block- {
-		// &0,
 		&no-animation {
-			transform: translateZ(calc(var(--size) / 2 * 1px));
+			transform: translateZ(calc(var(--tile-size) / 2 * 1px));
 			& > div {
 				background-color: var(--secondary-color);
 			}
 		}
 
 		&0 {
-			transform: translateZ(calc(var(--size) / 2 * 1px)) rotateX(0deg)
-				rotateY(0deg) rotateZ(0deg);
+			transform: translateZ(calc(var(--tile-size) / 2 * 1px))
+				rotateX(0deg) rotateY(0deg) rotateZ(0deg);
 		}
 	}
 }

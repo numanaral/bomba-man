@@ -84,7 +84,7 @@ const handleRotateMove = (
 	/* eslint-enable no-param-reassign */
 };
 
-const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--size) / 2 * 1px)) rotateX(0deg) rotateY(0deg)`;
+const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg)`;
 /**
  * Since we are moving a flat plane and not a cube, the logical sense of
  * rotating a cube doesn't work. Different type of rotations do no always
