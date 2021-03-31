@@ -1,3 +1,4 @@
+import Cube from 'containers/Game/Cube';
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import theme from 'theme';
@@ -6,6 +7,7 @@ interface Props {
 	name: string;
 	// skin: Skin;
 	collisionCoordinates?: CollisionCoordinates;
+	is3D: boolean;
 }
 
 const StyledTempCharacterName = styled.span`
@@ -136,14 +138,28 @@ const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
 	}, [collisionCoordinates]);
 
 	return (
-		<StyledTempCharacter ref={characterRef} $name={name}>
-			<StyledTempCharacterName>{name}</StyledTempCharacterName>
-			<StyledTempCharacterFace>
-				<StyledTempCharacterEyes>o-o</StyledTempCharacterEyes>
-				<br />
-				<StyledTempCharacterMouth>===</StyledTempCharacterMouth>
-			</StyledTempCharacterFace>
-		</StyledTempCharacter>
+		(is3D && (
+			<Cube
+				ref={characterRef}
+				size={32}
+				left={0}
+				top={0} /* name={name} */
+				animate
+				color={theme.palette.color.primary}
+				style={{
+					transform: `translateZ(calc(var(--size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`,
+				}}
+			/>
+		)) || (
+			<StyledTempCharacter ref={characterRef} $name={name}>
+				<StyledTempCharacterName>{name}</StyledTempCharacterName>
+				<StyledTempCharacterFace>
+					<StyledTempCharacterEyes>o-o</StyledTempCharacterEyes>
+					<br />
+					<StyledTempCharacterMouth>===</StyledTempCharacterMouth>
+				</StyledTempCharacterFace>
+			</StyledTempCharacter>
+		)
 	);
 };
 

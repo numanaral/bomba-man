@@ -101,6 +101,7 @@ const Game = () => {
 				<Character
 					name="temp"
 					collisionCoordinates={collisionCoordinates}
+					is3D={is3D}
 				/>
 			</Map>
 		</CenteredDiv>
