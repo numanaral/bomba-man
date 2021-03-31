@@ -27,54 +27,19 @@ const Cube = forwardRef<HTMLDivElement, TileProps>(
 				ref={ref}
 				{...rest}
 			>
-				<div
-					className="cuboid__side"
-					style={{
-						...(backgroundColor && { backgroundColor }),
-						width: size,
-						height: size,
-					}}
-				/>
-				<div
-					className="cuboid__side"
-					style={{
-						...(backgroundColor && { backgroundColor }),
-						width: size,
-						height: size,
-					}}
-				/>
-				<div
-					className="cuboid__side"
-					style={{
-						...(backgroundColor && { backgroundColor }),
-						width: size,
-						height: size,
-					}}
-				/>
-				<div
-					className="cuboid__side"
-					style={{
-						...(backgroundColor && { backgroundColor }),
-						width: size,
-						height: size,
-					}}
-				/>
-				<div
-					className="cuboid__side"
-					style={{
-						...(backgroundColor && { backgroundColor }),
-						width: size,
-						height: size,
-					}}
-				/>
-				<div
-					className="cuboid__side"
-					style={{
-						...(backgroundColor && { backgroundColor }),
-						width: size,
-						height: size,
-					}}
-				/>
+				{Array(6)
+					.fill(0)
+					.map((_, ind) => (
+						<div
+							key={ind}
+							className="cuboid__side"
+							style={{
+								...(backgroundColor && { backgroundColor }),
+								width: size,
+								height: size,
+							}}
+						/>
+					))}
 			</div>
 		);
 	}

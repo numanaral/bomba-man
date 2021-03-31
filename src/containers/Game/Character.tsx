@@ -1,14 +1,15 @@
+import config from 'config';
 import Cube from 'containers/Game/Cube';
+import { Direction } from 'enums';
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import theme from 'theme';
-
-interface Props {
-	name: string;
-	// skin: Skin;
-	collisionCoordinates?: CollisionCoordinates;
-	is3D: boolean;
-}
+import {
+	resetRotation,
+	canMove,
+	handleRotateMove,
+	CUBE_BASE_TRANSFORM,
+} from 'utils/game';
 
 const StyledTempCharacterName = styled.span`
 	color: red;
@@ -19,12 +20,6 @@ const StyledTempCharacterFace = styled.div`
 `;
 const StyledTempCharacterEyes = styled.span``;
 const StyledTempCharacterMouth = styled.span``;
-
-const MOVE_SIZE = 32;
-const BOUNDARY_MIN = 0;
-const BOUNDARY_MAX = MOVE_SIZE * (15 - 1);
-const MOVE_DURATION = 300;
-// const MOVE_DURATION = 50;
 
 const StyledTempCharacter = styled.div<{ $name: string }>`
 	width: ${theme.game.character.size};
@@ -37,7 +32,8 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 	display: flex;
 	justify-content: center;
 
-	transition: top ${MOVE_DURATION}ms, left ${MOVE_DURATION}ms;
+	transition: top ${config.duration.movement}ms,
+		left ${config.duration.movement}ms;
 
 	& > ${StyledTempCharacterName} {
 		z-index: 9999;
@@ -58,94 +54,12 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 	}
 `;
 
-const canMove = (
-	x: number,
-	y: number,
-	collisionCoordinates: CollisionCoordinates = {}
-) => {
-	const isObstacle = collisionCoordinates[x / MOVE_SIZE] === y / MOVE_SIZE;
-	const isHorizontalEnd = x < BOUNDARY_MIN || x > BOUNDARY_MAX;
-	const isVerticalEnd = y < BOUNDARY_MIN || y > BOUNDARY_MAX;
-	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
-};
-
-enum Direction {
-	UP = 'UP',
-	RIGHT = 'RIGHT',
-	DOWN = 'DOWN',
-	LEFT = 'LEFT',
+interface Props {
+	name: string;
+	// skin: Skin;
+	collisionCoordinates?: CollisionCoordinates;
+	is3D: boolean;
 }
-
-enum Axis {
-	X = 'X',
-	Y = 'Y',
-	Z = 'Z',
-}
-
-const ROTATION_REGEX = {
-	[Axis.X]: {
-		REPLACE: /rotateX\(-?\d+deg\)/g,
-		FIND: /rotateX\((?<degree>-?\d+)deg\)/,
-	},
-	[Axis.Y]: {
-		REPLACE: /rotateY\(-?\d+deg\)/g,
-		FIND: /rotateY\((?<degree>-?\d+)deg\)/,
-	},
-	[Axis.Z]: {
-		REPLACE: /rotateZ\(-?\d+deg\)/g,
-		FIND: /rotateZ\((?<degree>-?\d+)deg\)/,
-	},
-};
-
-const rotateMove = (originalTransform: string, direction: Direction) => {
-	let rotate = 90;
-	let side = Axis.Y;
-	if (direction === Direction.DOWN || direction === Direction.LEFT) {
-		rotate *= -1;
-	}
-	if (direction === Direction.UP || direction === Direction.DOWN) {
-		side = Axis.X;
-	}
-
-	return originalTransform.replace(
-		ROTATION_REGEX[side].REPLACE,
-		`rotate${side}(${rotate}deg)`
-	);
-};
-
-const handleRotateMove = (
-	characterRef: React.RefObject<HTMLDivElement>,
-	is3D: boolean,
-	direction: Direction
-) => {
-	if (!is3D) return;
-	/* eslint-disable no-param-reassign */
-	// enable animation
-	characterRef!.current!.style.transition = `${MOVE_DURATION}ms`;
-	// move
-	characterRef!.current!.style.transform = rotateMove(
-		characterRef!.current!.style.transform,
-		direction
-	);
-	/* eslint-enable no-param-reassign */
-};
-
-/**
- * Since we are moving a flat plane and not a cube, the logical sense of
- * rotating a cube doesn't work. Different type of rotations do no always
- * help. One solution is resetting the rotation to 0 so the rotation
- * movement is smooth on each rotation without worrying about boundaries.
- *
- * NOTE: We need to be aware of the animation cancelling
- *
- * @param characterRef ref object
- */
-const resetRotation = (characterRef: React.RefObject<HTMLDivElement>) => {
-	// disable animation
-	characterRef!.current!.style.transition = '0ms';
-	// reset
-	characterRef!.current!.style.transform = `translateZ(calc(var(--size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`;
-};
 
 const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 	const characterRef = useRef<HTMLDivElement>(null);
@@ -164,14 +78,16 @@ const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 
 			if (keyMap.current.ArrowUp) {
 				const newX = characterRef.current.offsetLeft;
-				const newY = characterRef.current.offsetTop - MOVE_SIZE;
+				const newY =
+					characterRef.current.offsetTop - config.size.movement;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.top = `${newY}px`;
 					handleRotateMove(characterRef, is3D, Direction.UP);
 				}
 			}
 			if (keyMap.current.ArrowRight) {
-				const newX = characterRef.current.offsetLeft + MOVE_SIZE;
+				const newX =
+					characterRef.current.offsetLeft + config.size.movement;
 				const newY = characterRef.current.offsetTop;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.left = `${newX}px`;
@@ -180,14 +96,16 @@ const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 			}
 			if (keyMap.current.ArrowDown) {
 				const newX = characterRef.current.offsetLeft;
-				const newY = characterRef.current.offsetTop + MOVE_SIZE;
+				const newY =
+					characterRef.current.offsetTop + config.size.movement;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.top = `${newY}px`;
 					handleRotateMove(characterRef, is3D, Direction.DOWN);
 				}
 			}
 			if (keyMap.current.ArrowLeft) {
-				const newX = characterRef.current.offsetLeft - MOVE_SIZE;
+				const newX =
+					characterRef.current.offsetLeft - config.size.movement;
 				const newY = characterRef.current.offsetTop;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.left = `${newX}px`;
@@ -204,7 +122,7 @@ const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 
 			if (e.type === 'keydown') {
 				const newTime = new Date().getTime();
-				if (newTime - timeOutRef.current > MOVE_DURATION) {
+				if (newTime - timeOutRef.current > config.duration.movement) {
 					timeOutRef.current = newTime;
 					move();
 				}
@@ -230,7 +148,7 @@ const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 				animate
 				color={theme.palette.color.primary}
 				style={{
-					transform: `translateZ(calc(var(--size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`,
+					transform: CUBE_BASE_TRANSFORM,
 				}}
 			/>
 		)) || (

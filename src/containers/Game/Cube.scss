@@ -1,6 +1,7 @@
 // Grab this from settings
 $game-size: 15;
 
+/** @see https://codepen.io/jh3y/pen/BaKqQLJ */
 @mixin bouncy-block($i) {
 	animation: bouncy 0.5s ease calc(#{$i} * 0.08s) forwards;
 }

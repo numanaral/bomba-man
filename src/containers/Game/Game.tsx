@@ -1,43 +1,10 @@
 import Button from 'components/Button';
-import Character from 'components/Character';
+import config from 'config';
 import { useState } from 'react';
 import styled from 'styled-components';
+import { generateRandomCollision } from 'utils/game';
+import Character from './Character';
 import Map from './Map';
-
-const GAME_SIZE = 15;
-const COLLISION_RANGE_MIN = Math.floor((GAME_SIZE * GAME_SIZE) / 3);
-const COLLISION_RANGE_MAX = Math.floor((GAME_SIZE * GAME_SIZE) / 2);
-
-function getRandomInt(max: number): number;
-function getRandomInt(min: number, max: number): number;
-function getRandomInt(min: number, max?: number | undefined) {
-	const _max = max || min;
-	const _min = (max !== undefined && min) || 0;
-	return Math.floor(Math.random() * (_max - _min)) + _min;
-}
-
-// TODO: If a spot is already filled, fille another one
-// TOOD: User start spot cannot have a collision
-const generateRandomCollision = () => {
-	const numberOfCollisions = getRandomInt(
-		COLLISION_RANGE_MIN,
-		COLLISION_RANGE_MAX
-	);
-	return Array(numberOfCollisions)
-		.fill(0)
-		.reduce<{ [key: number]: number }>(acc => {
-			const x = getRandomInt(2, GAME_SIZE);
-			const y = getRandomInt(2, GAME_SIZE);
-
-			// while (true) {
-			// 	x = getRandomInt(GAME_SIZE);
-			// 	y = getRandomInt(GAME_SIZE);
-			// 	if (acc[x] !== y) break;
-			// }
-			acc[x] = y;
-			return acc;
-		}, {});
-};
 
 const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	text-align: center;
@@ -93,7 +60,7 @@ const Game = () => {
 			<br />
 			<br />
 			<Map
-				size={GAME_SIZE}
+				size={config.size.game}
 				collisionCoordinates={collisionCoordinates}
 				is3D={is3D}
 				isTopView={isTopView}

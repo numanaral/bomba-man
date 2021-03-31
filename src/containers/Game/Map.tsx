@@ -1,10 +1,9 @@
 import usePrevious from 'hooks/usePrevious';
+import config from 'config';
 import styled from 'styled-components';
 import theme from 'theme';
 import Cube from './Cube';
 import Tile from './Tile';
-
-const TILE_SIZE = 32;
 
 interface Props {
 	size: RangeOf<15>;
@@ -65,9 +64,9 @@ const Map = ({
 							((hasCollision && (
 								<Cube
 									key={`${outerInd}_${innerInd}`}
-									size={TILE_SIZE}
-									top={outerInd * TILE_SIZE}
-									left={innerInd * TILE_SIZE}
+									size={config.size.tile}
+									top={outerInd * config.size.tile}
+									left={innerInd * config.size.tile}
 									animate={shouldAnimate}
 									{...(hasCollision && {
 										// color: theme.palette.color.secondary,
@@ -77,9 +76,9 @@ const Map = ({
 							)) || (
 								<Tile
 									key={`${outerInd}_${innerInd}`}
-									size={TILE_SIZE}
-									top={outerInd * TILE_SIZE}
-									left={innerInd * TILE_SIZE}
+									size={config.size.tile}
+									top={outerInd * config.size.tile}
+									left={innerInd * config.size.tile}
 									animate={false}
 									// animate={shouldAnimate}
 									// {...(hasCollision && {
@@ -90,9 +89,9 @@ const Map = ({
 							))) || (
 							<Tile
 								key={`${outerInd}_${innerInd}`}
-								size={TILE_SIZE}
-								top={outerInd * TILE_SIZE}
-								left={innerInd * TILE_SIZE}
+								size={config.size.tile}
+								top={outerInd * config.size.tile}
+								left={innerInd * config.size.tile}
 								animate={shouldAnimate}
 								{...(hasCollision && {
 									color: theme.palette.color.secondary,
