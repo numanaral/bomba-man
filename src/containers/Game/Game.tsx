@@ -15,7 +15,7 @@ const Game = () => {
 	const [collisionCoordinates, setCollisionCoordinates] = useState(() =>
 		generateRandomCollision()
 	);
-	const [is3D, setIs3D] = useState(true);
+	const [is3D, setIs3D] = useState(false);
 	const [isTopView, setIsTopView] = useState(true);
 
 	const generateNewCollisionCoordinates = () => {
