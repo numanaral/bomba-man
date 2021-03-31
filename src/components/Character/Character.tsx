@@ -23,7 +23,8 @@ const StyledTempCharacterMouth = styled.span``;
 const MOVE_SIZE = 32;
 const BOUNDARY_MIN = 0;
 const BOUNDARY_MAX = MOVE_SIZE * (15 - 1);
-const MOVE_DURATION = 200;
+const MOVE_DURATION = 300;
+// const MOVE_DURATION = 50;
 
 const StyledTempCharacter = styled.div<{ $name: string }>`
 	width: ${theme.game.character.size};
@@ -62,21 +63,107 @@ const canMove = (
 	y: number,
 	collisionCoordinates: CollisionCoordinates = {}
 ) => {
-	console.log('collisionCoordinates:', collisionCoordinates);
-	console.log('y:', y);
-	console.log('x:', x);
 	const isObstacle = collisionCoordinates[x / MOVE_SIZE] === y / MOVE_SIZE;
 	const isHorizontalEnd = x < BOUNDARY_MIN || x > BOUNDARY_MAX;
 	const isVerticalEnd = y < BOUNDARY_MIN || y > BOUNDARY_MAX;
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
 };
 
-const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
+enum Direction {
+	UP = 'UP',
+	RIGHT = 'RIGHT',
+	DOWN = 'DOWN',
+	LEFT = 'LEFT',
+}
+
+enum Axis {
+	X = 'X',
+	Y = 'Y',
+	Z = 'Z',
+}
+
+const ROTATION_REGEX = {
+	[Axis.X]: {
+		REPLACE: /rotateX\(-?\d+deg\)/g,
+		FIND: /rotateX\((?<degree>-?\d+)deg\)/,
+	},
+	[Axis.Y]: {
+		REPLACE: /rotateY\(-?\d+deg\)/g,
+		FIND: /rotateY\((?<degree>-?\d+)deg\)/,
+	},
+	[Axis.Z]: {
+		REPLACE: /rotateZ\(-?\d+deg\)/g,
+		FIND: /rotateZ\((?<degree>-?\d+)deg\)/,
+	},
+};
+
+const rotateMove = (originalTransform: string, direction: Direction) => {
+	// 90deg is a lot harder to handle for movements on the y axis
+	// This is because on
+	// let rotate = 180;
+	let rotate = 90;
+	let side = Axis.Y;
+	if (direction === Direction.DOWN || direction === Direction.LEFT) {
+		rotate *= -1;
+	}
+	if (direction === Direction.UP || direction === Direction.DOWN) {
+		side = Axis.X;
+	}
+
+	if (side === Axis.Y) {
+		const xDegree = Number(
+			originalTransform.match(ROTATION_REGEX[Axis.X].FIND)?.groups
+				?.degree || 0
+		);
+		if (Math.abs((xDegree / 180) % 2) === 1) {
+			rotate *= -1;
+		} else if (Math.abs((xDegree / 90) % 2) === 1) {
+			rotate *= -1;
+			side = Axis.Z;
+		}
+	}
+	// if (side === AXIS.Y) {
+	// 	const xDegree = Number(
+	// 		originalTransform.match(ROTATION_REGEX[AXIS.X].FIND)?.groups
+	// 			?.degree || 0
+	// 	);
+	// 	if (Math.abs((xDegree / 90) % 2) === 1) {
+	// 		rotate *= 1;
+	// 		side = AXIS.X;
+	// 	}
+	// }
+
+	const currentDegree = Number(
+		originalTransform.match(ROTATION_REGEX[side].FIND)?.groups?.degree || 0
+	);
+
+	return originalTransform.replace(
+		ROTATION_REGEX[side].REPLACE,
+		`rotate${side}(${currentDegree + rotate}deg)`
+	);
+};
+
+const handleRotateMove = (
+	characterRef: React.RefObject<HTMLDivElement>,
+	is3D: boolean,
+	direction: Direction
+) => {
+	if (!is3D) return;
+	/* eslint-disable no-param-reassign */
+	characterRef!.current!.style.transform = rotateMove(
+		characterRef!.current!.style.transform,
+		direction
+	);
+	/* eslint-enable no-param-reassign */
+};
+
+const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 	const characterRef = useRef<HTMLDivElement>(null);
 	const timeOutRef = useRef(new Date().getTime());
 	const keyMap = useRef<{
 		[key: string]: boolean;
 	}>({});
+
 	useEffect(() => {
 		const move = () => {
 			if (!characterRef.current) return;
@@ -87,6 +174,7 @@ const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
 				const newY = characterRef.current.offsetTop - MOVE_SIZE;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.top = `${newY}px`;
+					handleRotateMove(characterRef, is3D, Direction.UP);
 				}
 			}
 			if (keyMap.current.ArrowRight) {
@@ -94,6 +182,7 @@ const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
 				const newY = characterRef.current.offsetTop;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.left = `${newX}px`;
+					handleRotateMove(characterRef, is3D, Direction.RIGHT);
 				}
 			}
 			if (keyMap.current.ArrowDown) {
@@ -101,6 +190,7 @@ const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
 				const newY = characterRef.current.offsetTop + MOVE_SIZE;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.top = `${newY}px`;
+					handleRotateMove(characterRef, is3D, Direction.DOWN);
 				}
 			}
 			if (keyMap.current.ArrowLeft) {
@@ -108,6 +198,7 @@ const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
 				const newY = characterRef.current.offsetTop;
 				if (canMove(newX, newY, collisionCoordinates)) {
 					characterRef.current.style.left = `${newX}px`;
+					handleRotateMove(characterRef, is3D, Direction.LEFT);
 				}
 			}
 		};
@@ -127,7 +218,6 @@ const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
 			}
 		};
 
-		// window.addEventListener('keypress', move);
 		window.addEventListener('keyup', registerKeys);
 		window.addEventListener('keydown', registerKeys);
 
@@ -135,7 +225,7 @@ const Character = ({ name /* skin */, collisionCoordinates }: Props) => {
 			window.removeEventListener('keyup', registerKeys);
 			window.removeEventListener('keydown', registerKeys);
 		};
-	}, [collisionCoordinates]);
+	}, [collisionCoordinates, is3D]);
 
 	return (
 		(is3D && (
