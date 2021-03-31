@@ -92,7 +92,12 @@ const Game = () => {
 
 			<br />
 			<br />
-			<Map size={GAME_SIZE} collisionCoordinates={collisionCoordinates}>
+			<Map
+				size={GAME_SIZE}
+				collisionCoordinates={collisionCoordinates}
+				is3D={is3D}
+				isTopView={isTopView}
+			>
 				<Character
 					name="temp"
 					collisionCoordinates={collisionCoordinates}
