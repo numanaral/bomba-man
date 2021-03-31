@@ -1,5 +1,7 @@
+import usePrevious from 'hooks/usePrevious';
 import styled from 'styled-components';
 import theme from 'theme';
+import Cube from './Cube';
 import Tile from './Tile';
 
 const TILE_SIZE = 32;
@@ -59,16 +61,45 @@ const Map = ({
 					const hasCollision =
 						collisionCoordinates[innerInd] === outerInd;
 					return (
-						<Tile
-							key={`${outerInd}_${innerInd}`}
-							size={TILE_SIZE}
-							top={outerInd * TILE_SIZE}
-							left={innerInd * TILE_SIZE}
-							{...(hasCollision && {
-								color: theme.palette.color.secondary,
-								collisionIndex: collisionIndex++,
-							})}
-						/>
+						(is3D &&
+							((hasCollision && (
+								<Cube
+									key={`${outerInd}_${innerInd}`}
+									size={TILE_SIZE}
+									top={outerInd * TILE_SIZE}
+									left={innerInd * TILE_SIZE}
+									animate={shouldAnimate}
+									{...(hasCollision && {
+										// color: theme.palette.color.secondary,
+										collisionIndex: collisionIndex++,
+									})}
+								/>
+							)) || (
+								<Tile
+									key={`${outerInd}_${innerInd}`}
+									size={TILE_SIZE}
+									top={outerInd * TILE_SIZE}
+									left={innerInd * TILE_SIZE}
+									animate={false}
+									// animate={shouldAnimate}
+									// {...(hasCollision && {
+									// 	color: theme.palette.color.secondary,
+									// 	collisionIndex: collisionIndex++,
+									// })}
+								/>
+							))) || (
+							<Tile
+								key={`${outerInd}_${innerInd}`}
+								size={TILE_SIZE}
+								top={outerInd * TILE_SIZE}
+								left={innerInd * TILE_SIZE}
+								animate={shouldAnimate}
+								{...(hasCollision && {
+									color: theme.palette.color.secondary,
+									collisionIndex: collisionIndex++,
+								})}
+							/>
+						)
 					);
 				});
 			})}
