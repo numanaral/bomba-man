@@ -10,3 +10,15 @@ To create a customizable/extendable bomberman game where any mechanic and style 
 - [ ] clean up, decouple `APP_SETTINGS`, allow pure generation via JSON
 - [ ] work on dumb NPCs
 - [ ] ...?
+
+# NOT SO IMPORTANT THINGS
+- [ ] 3D
+	- [x] perspective
+	- [x] character
+		- [x] 3d move
+	- [ ] bomb
+		- [ ] explosion
+- [ ] Theme/Customization
+	- [ ] 3D Perspective
+	- [ ] colors
+	- [ ] characters
