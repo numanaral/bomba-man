@@ -1,8 +1,10 @@
-declare type CollisionCoordinates = {
+import { Player, Tile, PowerUp } from 'enums';
+
+type CollisionCoordinates = {
 	[key: number]: number;
 };
 
-declare interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	size: number;
 	top: number;
 	left: number;
@@ -18,3 +20,10 @@ type BombType = {
 };
 
 type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
+
+export type {
+	CollisionCoordinates,
+	TileProps,
+	BombType,
+	AddBomb,
+};

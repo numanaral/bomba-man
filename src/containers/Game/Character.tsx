@@ -10,6 +10,7 @@ import {
 	handleRotateMove,
 	CUBE_BASE_TRANSFORM,
 } from 'utils/game';
+import { AddBomb } from './types';
 
 const StyledTempCharacterName = styled.span`
 	color: red;

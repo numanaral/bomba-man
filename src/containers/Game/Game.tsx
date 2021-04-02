@@ -6,6 +6,7 @@ import { generateRandomCollision } from 'utils/game';
 import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
+import { BombType, AddBomb } from './types';
 
 const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	text-align: center;
