@@ -1,40 +1,31 @@
 import config from 'config';
-import { Axis, Direction } from 'enums';
+import { GameMap } from 'containers/Game/types';
+import { Axis, Direction, Tile } from 'enums';
 import { getRandomInt } from './math';
 
-// TODO: If a spot is already filled, fille another one
-// TOOD: User start spot cannot have a collision
-const generateRandomCollision = () => {
-	const numberOfCollisions = getRandomInt(
-		config.size.collisionMin,
-		config.size.collisionMax
-	);
-	return Array(numberOfCollisions)
+const generateRandomGameMap = (size: number): GameMap => {
+	const tiles: Array<KeysOf<typeof Tile>> = [
+		...Object.keys(Tile),
+		// we want there to be more of a chance for empty tiles for now
+		...Array(3).fill('Empty'),
+	];
+	return Array(size)
 		.fill(0)
-		.reduce<{ [key: number]: number }>(acc => {
-			const x = getRandomInt(2, config.size.game);
-			const y = getRandomInt(2, config.size.game);
-
-			// while (true) {
-			// 	x = getRandomInt(config.size.game);
-			// 	y = getRandomInt(config.size.game);
-			// 	if (acc[x] !== y) break;
-			// }
-			acc[x] = y;
-			return acc;
-		}, {});
+		.map(() =>
+			Array(size)
+				.fill(0)
+				.map(() => Tile[tiles[getRandomInt(tiles.length)]])
+		);
 };
 
 const BOUNDARY_MIN = 0;
 const BOUNDARY_MAX = config.size.movement * (config.size.game - 1);
-const canMove = (
-	x: number,
-	y: number,
-	collisionCoordinates: CollisionCoordinates = {}
-) => {
+const canMove = (x: number, y: number, map: GameMap) => {
+	const xSquare = x / config.size.movement;
+	const ySquare = y / config.size.movement;
+	const nextSquare = map[ySquare]?.[xSquare];
 	const isObstacle =
-		collisionCoordinates[x / config.size.movement] ===
-		y / config.size.movement;
+		nextSquare === Tile.Breaking || nextSquare === Tile.NonBreaking;
 	const isHorizontalEnd = x < BOUNDARY_MIN || x > BOUNDARY_MAX;
 	const isVerticalEnd = y < BOUNDARY_MIN || y > BOUNDARY_MAX;
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
@@ -117,7 +108,7 @@ const getExplosionScaleSize = (explosionSize: number) => {
 };
 
 export {
-	generateRandomCollision,
+	generateRandomGameMap,
 	canMove,
 	rotateMove,
 	handleRotateMove,

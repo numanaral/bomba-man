@@ -2,7 +2,7 @@ import Button from 'components/Button';
 import config from 'config';
 import { useState } from 'react';
 import styled from 'styled-components';
-import { generateRandomCollision } from 'utils/game';
+import { generateRandomGameMap } from 'utils/game';
 import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
@@ -14,15 +14,15 @@ const CenteredDiv = styled.div<{ $is3D: boolean }>`
 `;
 
 const Game = () => {
-	const [collisionCoordinates, setCollisionCoordinates] = useState(() =>
-		generateRandomCollision()
+	const [gameMap, setGameMap] = useState(() =>
+		generateRandomGameMap(config.size.game)
 	);
 	const [is3D, setIs3D] = useState(false);
 	const [isTopView, setIsTopView] = useState(true);
 	const [bombs, setBombs] = useState<Array<BombType>>([]);
 
 	const generateNewCollisionCoordinates = () => {
-		setCollisionCoordinates(generateRandomCollision());
+		setGameMap(generateRandomGameMap(config.size.game));
 	};
 
 	const toggle3D = () => {
@@ -68,13 +68,13 @@ const Game = () => {
 			<br />
 			<Map
 				size={config.size.game}
-				collisionCoordinates={collisionCoordinates}
+				gameMap={gameMap}
 				is3D={is3D}
 				isTopView={isTopView}
 			>
 				<Character
 					name="temp"
-					collisionCoordinates={collisionCoordinates}
+					gameMap={gameMap}
 					is3D={is3D}
 					addBomb={addBomb}
 				/>

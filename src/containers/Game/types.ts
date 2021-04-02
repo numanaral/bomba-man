@@ -21,9 +21,15 @@ type BombType = {
 
 type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
 
+type Square = Player | Tile | PowerUp;
+
+type GameMap = Array<Array<Square>>;
+
 export type {
 	CollisionCoordinates,
 	TileProps,
 	BombType,
 	AddBomb,
+	Square,
+	GameMap,
 };

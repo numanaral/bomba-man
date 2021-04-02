@@ -2,12 +2,14 @@ import usePrevious from 'hooks/usePrevious';
 import config from 'config';
 import styled from 'styled-components';
 import theme from 'theme';
+import { Tile as TileEnum } from 'enums';
 import Cube from './Cube';
 import Tile from './Tile';
+import { GameMap, Square } from './types';
 
 interface Props {
 	size: RangeOf<15>;
-	collisionCoordinates?: CollisionCoordinates;
+	gameMap: GameMap;
 	is3D: boolean;
 	isTopView: boolean;
 	children: React.ReactNode;
@@ -34,71 +36,44 @@ const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
 	}}
 `;
 
-const Map = ({
-	size,
-	collisionCoordinates = {},
-	is3D,
-	isTopView,
-	children,
-}: Props) => {
-	const map = Array(size).fill(Array(size).fill(0));
-
-	const previousCoordinates = usePrevious(
-		JSON.stringify(collisionCoordinates)
-	);
+const Map = ({ size, gameMap, is3D, isTopView, children }: Props) => {
+	const previousCoordinates = usePrevious(JSON.stringify(gameMap));
 
 	// we only need to animate when new collision is set
 	// not when the view changes
-	const shouldAnimate =
-		JSON.stringify(collisionCoordinates) !== previousCoordinates;
+	const shouldAnimate = JSON.stringify(gameMap) !== previousCoordinates;
 
 	let collisionIndex = 1;
 	return (
 		<Wrapper $size={size} $is3D={is3D} $isTopView={isTopView}>
-			{map.map((outer: Array<number>, outerInd) => {
-				return outer.map((_, innerInd) => {
+			{gameMap.map((outer, outerInd) => {
+				return outer.map((square: Square, innerInd) => {
 					const hasCollision =
-						collisionCoordinates[innerInd] === outerInd;
+						square === TileEnum.NonBreaking ||
+						square === TileEnum.Breaking;
+
+					const props: React.ComponentPropsWithRef<typeof Cube> = {
+						key: `${outerInd}_${innerInd}`,
+						size: config.size.tile,
+						top: outerInd * config.size.tile,
+						left: innerInd * config.size.tile,
+						animate: shouldAnimate,
+						...(hasCollision && {
+							color:
+								theme.palette.color[
+									square === TileEnum.NonBreaking
+										? 'secondary'
+										: 'primary'
+								],
+							collisionIndex: collisionIndex++,
+						}),
+					};
+
 					return (
 						(is3D &&
-							((hasCollision && (
-								<Cube
-									key={`${outerInd}_${innerInd}`}
-									size={config.size.tile}
-									top={outerInd * config.size.tile}
-									left={innerInd * config.size.tile}
-									animate={shouldAnimate}
-									{...(hasCollision && {
-										// color: theme.palette.color.secondary,
-										collisionIndex: collisionIndex++,
-									})}
-								/>
-							)) || (
-								<Tile
-									key={`${outerInd}_${innerInd}`}
-									size={config.size.tile}
-									top={outerInd * config.size.tile}
-									left={innerInd * config.size.tile}
-									animate={false}
-									// animate={shouldAnimate}
-									// {...(hasCollision && {
-									// 	color: theme.palette.color.secondary,
-									// 	collisionIndex: collisionIndex++,
-									// })}
-								/>
-							))) || (
-							<Tile
-								key={`${outerInd}_${innerInd}`}
-								size={config.size.tile}
-								top={outerInd * config.size.tile}
-								left={innerInd * config.size.tile}
-								animate={shouldAnimate}
-								{...(hasCollision && {
-									color: theme.palette.color.secondary,
-									collisionIndex: collisionIndex++,
-								})}
-							/>
-						)
+							((hasCollision && <Cube {...props} />) || (
+								<Tile {...props} />
+							))) || <Tile {...props} />
 					);
 				});
 			})}

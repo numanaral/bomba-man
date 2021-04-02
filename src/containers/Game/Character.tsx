@@ -10,7 +10,7 @@ import {
 	handleRotateMove,
 	CUBE_BASE_TRANSFORM,
 } from 'utils/game';
-import { AddBomb } from './types';
+import { AddBomb, GameMap } from './types';
 
 const StyledTempCharacterName = styled.span`
 	color: red;
@@ -58,17 +58,12 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 interface Props {
 	name: string;
 	// skin: Skin;
-	collisionCoordinates?: CollisionCoordinates;
+	gameMap: GameMap;
 	is3D: boolean;
 	addBomb: AddBomb;
 }
 
-const Character = ({
-	name /* skin */,
-	collisionCoordinates,
-	is3D,
-	addBomb,
-}: Props) => {
+const Character = ({ name /* skin */, gameMap, is3D, addBomb }: Props) => {
 	const characterRef = useRef<HTMLDivElement>(null);
 	const timeOutRef = useRef(new Date().getTime());
 	const keyMap = useRef<{
@@ -87,7 +82,7 @@ const Character = ({
 				const newX = characterRef.current.offsetLeft;
 				const newY =
 					characterRef.current.offsetTop - config.size.movement;
-				if (canMove(newX, newY, collisionCoordinates)) {
+				if (canMove(newX, newY, gameMap)) {
 					characterRef.current.style.top = `${newY}px`;
 					handleRotateMove(characterRef, is3D, Direction.UP);
 				}
@@ -96,7 +91,7 @@ const Character = ({
 				const newX =
 					characterRef.current.offsetLeft + config.size.movement;
 				const newY = characterRef.current.offsetTop;
-				if (canMove(newX, newY, collisionCoordinates)) {
+				if (canMove(newX, newY, gameMap)) {
 					characterRef.current.style.left = `${newX}px`;
 					handleRotateMove(characterRef, is3D, Direction.RIGHT);
 				}
@@ -105,7 +100,7 @@ const Character = ({
 				const newX = characterRef.current.offsetLeft;
 				const newY =
 					characterRef.current.offsetTop + config.size.movement;
-				if (canMove(newX, newY, collisionCoordinates)) {
+				if (canMove(newX, newY, gameMap)) {
 					characterRef.current.style.top = `${newY}px`;
 					handleRotateMove(characterRef, is3D, Direction.DOWN);
 				}
@@ -114,7 +109,7 @@ const Character = ({
 				const newX =
 					characterRef.current.offsetLeft - config.size.movement;
 				const newY = characterRef.current.offsetTop;
-				if (canMove(newX, newY, collisionCoordinates)) {
+				if (canMove(newX, newY, gameMap)) {
 					characterRef.current.style.left = `${newX}px`;
 					handleRotateMove(characterRef, is3D, Direction.LEFT);
 				}
@@ -150,7 +145,7 @@ const Character = ({
 			window.removeEventListener('keyup', registerKeys);
 			window.removeEventListener('keydown', registerKeys);
 		};
-	}, [addBomb, collisionCoordinates, is3D]);
+	}, [addBomb, gameMap, is3D]);
 
 	return (
 		(is3D && (
