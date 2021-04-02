@@ -4,8 +4,8 @@ const config = {
 		character: 32, // px
 		tile: 32, // px
 		movement: 32, // px
-		collisionMin: 1,
-		collisionMax: 1,
+		collisionMin: 1, // squares
+		collisionMax: 1, // squares
 	},
 	duration: {
 		movement: 300, // ms
