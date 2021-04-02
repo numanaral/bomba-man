@@ -10,12 +10,10 @@ const theme = {
 		color: {
 			primary: 'var(--primary-color)',
 			secondary: 'var(--secondary-color)',
-			supplementary: [
-				'var(--supplementary-color-1)',
-				'var(--supplementary-color-2)',
-				'var(--supplementary-color-3)',
-				'var(--supplementary-color-4)',
-			],
+			error: 'var(--error-color)',
+			warning: 'var(--warning-color)',
+			success: 'var(--success-color)',
+			info: 'var(--info-color)',
 		},
 	},
 	shape: {
@@ -35,13 +33,13 @@ const GlobalStyles = createGlobalStyle`
 		--primary-background: #13141b;
 		--secondary-background: #1a1d28;
 
-		--primary-color: #86daff;
+		--primary-color: #ec7ebd;
 		--secondary-color: #763ee6;
 
-		--supplementary-color-1: rgb(255, 122, 105);
-		--supplementary-color-2: rgb(241, 168, 23);
-		--supplementary-color-3: rgb(49, 162, 76);
-		--supplementary-color-4: rgb(228, 230, 235);
+		--error-color: rgb(255, 122, 105);
+		--warning-color: rgb(241, 168, 23);
+		--success-color: rgb(49, 162, 76);
+		--info-color: rgb(134, 218, 255);
 
 		/* Utilities */
 		--border-radius: 4px;
