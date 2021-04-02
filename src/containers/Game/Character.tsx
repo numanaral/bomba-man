@@ -13,7 +13,7 @@ import {
 import { AddBomb, GameMap } from './types';
 
 const StyledTempCharacterName = styled.span`
-	color: red;
+	color: ${theme.palette.color.warning};
 `;
 
 const StyledTempCharacterFace = styled.div`
@@ -25,7 +25,7 @@ const StyledTempCharacterMouth = styled.span``;
 const StyledTempCharacter = styled.div<{ $name: string }>`
 	width: ${theme.game.character.size};
 	height: ${theme.game.character.size};
-	background-color: ${theme.palette.color.primary};
+	background-color: ${theme.palette.color.success};
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -155,7 +155,7 @@ const Character = ({ name /* skin */, gameMap, is3D, addBomb }: Props) => {
 				left={0}
 				top={0} /* name={name} */
 				animate
-				color={theme.palette.color.primary}
+				color={theme.palette.color.success}
 				style={{
 					transform: CUBE_BASE_TRANSFORM,
 				}}
