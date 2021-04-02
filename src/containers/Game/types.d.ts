@@ -10,3 +10,11 @@ declare interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	color?: string;
 	collisionIndex?: number;
 }
+
+type BombType = {
+	id: string;
+	top: number;
+	left: number;
+};
+
+type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;

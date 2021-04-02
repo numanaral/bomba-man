@@ -3,6 +3,7 @@ import config from 'config';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { generateRandomCollision } from 'utils/game';
+import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
 
@@ -17,6 +18,7 @@ const Game = () => {
 	);
 	const [is3D, setIs3D] = useState(false);
 	const [isTopView, setIsTopView] = useState(true);
+	const [bombs, setBombs] = useState<Array<BombType>>([]);
 
 	const generateNewCollisionCoordinates = () => {
 		setCollisionCoordinates(generateRandomCollision());
@@ -28,6 +30,10 @@ const Game = () => {
 
 	const toggleView = () => {
 		setIsTopView(v => !v);
+	};
+
+	const addBomb: AddBomb = ({ top, left }) => {
+		setBombs(v => [...v, { id: new Date().toJSON(), top, left }]);
 	};
 
 	return (
@@ -69,7 +75,18 @@ const Game = () => {
 					name="temp"
 					collisionCoordinates={collisionCoordinates}
 					is3D={is3D}
+					addBomb={addBomb}
 				/>
+				{bombs.map(({ id, ...bombProps }) => (
+					<Bomb
+						key={id}
+						{...bombProps}
+						color="red"
+						explosionSize={config.size.explosion}
+						firingDuration={config.duration.bomb.firing}
+						explodingDuration={config.duration.bomb.exploding}
+					/>
+				))}
 			</Map>
 		</CenteredDiv>
 	);

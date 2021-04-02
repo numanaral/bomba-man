@@ -59,9 +59,15 @@ interface Props {
 	// skin: Skin;
 	collisionCoordinates?: CollisionCoordinates;
 	is3D: boolean;
+	addBomb: AddBomb;
 }
 
-const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
+const Character = ({
+	name /* skin */,
+	collisionCoordinates,
+	is3D,
+	addBomb,
+}: Props) => {
 	const characterRef = useRef<HTMLDivElement>(null);
 	const timeOutRef = useRef(new Date().getTime());
 	const keyMap = useRef<{
@@ -126,6 +132,13 @@ const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 					timeOutRef.current = newTime;
 					move();
 				}
+				if (e.code === 'Space') {
+					if (!characterRef.current) return;
+					addBomb({
+						top: characterRef.current.offsetTop,
+						left: characterRef.current.offsetLeft,
+					});
+				}
 			}
 		};
 
@@ -136,7 +149,7 @@ const Character = ({ name /* skin */, collisionCoordinates, is3D }: Props) => {
 			window.removeEventListener('keyup', registerKeys);
 			window.removeEventListener('keydown', registerKeys);
 		};
-	}, [collisionCoordinates, is3D]);
+	}, [addBomb, collisionCoordinates, is3D]);
 
 	return (
 		(is3D && (
