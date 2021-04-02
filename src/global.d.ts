@@ -2,6 +2,22 @@ declare type StyledProps<T, Keys> = {
 	[Property in keyof Pick<T, Keys> as `$${string & Property}`]: T[Property];
 };
 
+/**
+ * Get the keys of the object as a type
+ *
+ * @example
+ * ```ts
+ * const AXIS = {
+ * 	X: 'xVal',
+ * 	Y: 'yVal',
+ * };
+ *
+ * // 'X' | 'Y'
+ * KeysOf<typeof AXIS>
+ * ```
+ */
+declare type KeysOf<T> = keyof T;
+
 declare type BaseColorVariant = 'primary' | 'secondary';
 declare type BaseSize = 'small' | 'medium' | 'large';
 
