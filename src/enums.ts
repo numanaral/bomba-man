@@ -10,4 +10,10 @@ enum Axis {
 	Y = 'Y',
 }
 
-export { Direction, Axis };
+enum ExplosionState {
+	Firing = 'Firing',
+	Exploding = 'Exploding',
+	Exploded = 'Exploded',
+}
+
+export { Direction, Axis, ExplosionState };

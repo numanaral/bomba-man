@@ -102,6 +102,20 @@ const resetRotation = (characterRef: React.RefObject<HTMLDivElement>) => {
 	characterRef!.current!.style.transform = CUBE_BASE_TRANSFORM;
 };
 
+/**
+ * Gets the scale size for an explosion size.
+ * - `explosionSize + 1`: explosion size is exclusive of the current square
+ * - `* 2`: explosion goes both ways
+ * - `- 1`: don't count the root square twice
+ * - `* 2`: revert the padding
+ *
+ * @param explosionSize Size of the explosion.
+ * @returns Scale size.
+ */
+const getExplosionScaleSize = (explosionSize: number) => {
+	return ((explosionSize + 1) * 2 - 1) * 2;
+};
+
 export {
 	generateRandomCollision,
 	canMove,
@@ -109,4 +123,5 @@ export {
 	handleRotateMove,
 	resetRotation,
 	CUBE_BASE_TRANSFORM,
+	getExplosionScaleSize,
 };
