@@ -140,6 +140,49 @@ const getExplosionScaleSize = (explosionSize: number) => {
 	return ((explosionSize + 1) * 2 - 1) * 2;
 };
 
+/**
+ * Breaking tiles are "exploded" and removed from the map.
+ *
+ * @param gameMap Current state of the game map.
+ * @param bombCoordinates TopLeft coordinates of where the bomb is placed.
+ * @param explosionSize Size of the explosion.
+ * @returns New state for the game map with breaking tiles emptied.
+ */
+const handleExplosionOnGameMap = (
+	gameMap: GameMap,
+	bombCoordinates: TopLeftCoordinates,
+	explosionSize: number
+) => {
+	const gameMapCopy = JSON.parse(JSON.stringify(gameMap));
+	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates(
+		bombCoordinates
+	);
+
+	// ensure there are no negatives
+	for (
+		let currentYSquare = Math.max(0, ySquare - explosionSize);
+		currentYSquare <= ySquare + explosionSize;
+		currentYSquare++
+	) {
+		if (gameMapCopy[currentYSquare][xSquare] === Tile.Breaking) {
+			gameMapCopy[currentYSquare][xSquare] = Tile.Empty;
+		}
+	}
+
+	// ensure there are no negatives
+	for (
+		let currentXSquare = Math.max(0, xSquare - explosionSize);
+		currentXSquare <= xSquare + explosionSize;
+		currentXSquare++
+	) {
+		if (gameMapCopy[ySquare][currentXSquare] === Tile.Breaking) {
+			gameMapCopy[ySquare][currentXSquare] = Tile.Empty;
+		}
+	}
+
+	return gameMapCopy;
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -148,4 +191,5 @@ export {
 	resetRotation,
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
+	handleExplosionOnGameMap,
 };

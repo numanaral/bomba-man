@@ -1,12 +1,13 @@
 import Button from 'components/Button';
 import config from 'config';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { wrapPreventFocusLock } from 'utils';
+import { generateRandomGameMap, handleExplosionOnGameMap } from 'utils/game';
 import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
-import { BombType, AddBomb } from './types';
+import { BombType, AddBomb, TopLeftCoordinates } from './types';
 
 const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	text-align: center;
@@ -36,6 +37,20 @@ const Game = () => {
 	const addBomb: AddBomb = ({ top, left }) => {
 		setBombs(v => [...v, { id: new Date().toJSON(), top, left }]);
 	};
+
+	const onExplosion = useCallback(
+		(bombId: string, bombCoordinates: TopLeftCoordinates) => {
+			setBombs(v => v.filter(b => b.id !== bombId));
+			setGameMap(
+				handleExplosionOnGameMap(
+					gameMap,
+					bombCoordinates,
+					config.size.explosion
+				)
+			);
+		},
+		[gameMap]
+	);
 
 	return (
 		<CenteredDiv $is3D={is3D}>
@@ -81,11 +96,13 @@ const Game = () => {
 				{bombs.map(({ id, ...bombProps }) => (
 					<Bomb
 						key={id}
+						id={id}
 						{...bombProps}
 						color="red"
 						explosionSize={config.size.explosion}
 						firingDuration={config.duration.bomb.firing}
 						explodingDuration={config.duration.bomb.exploding}
+						onExplosion={onExplosion}
 					/>
 				))}
 			</Map>

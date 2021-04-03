@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import { sleep } from 'utils';
 import { getExplosionScaleSize } from 'utils/game';
+import { TopLeftCoordinates } from './types';
 
 interface Props {
 	// skin: Skin;
@@ -11,8 +12,10 @@ interface Props {
 	firingDuration: number;
 	explodingDuration: number;
 	explosionSize: number;
+	id: string;
 	top: number;
 	left: number;
+	onExplosion: (bombId: string, bombCoordinates: TopLeftCoordinates) => void;
 }
 
 const incrementalSpeedRotationKeyframes = keyframes`
@@ -83,8 +86,10 @@ const Bomb = ({
 	firingDuration,
 	explodingDuration,
 	explosionSize,
+	id,
 	top,
 	left,
+	onExplosion,
 }: Props) => {
 	const [explosionState, setExplosionState] = useState<ExplosionState>(
 		ExplosionState.Firing
@@ -93,11 +98,21 @@ const Bomb = ({
 		const triggerExplosion = async () => {
 			await sleep(firingDuration * 1000);
 			setExplosionState(ExplosionState.Exploding);
-			await sleep(explodingDuration * 1000);
-			setExplosionState(ExplosionState.Exploded);
+			await sleep((explodingDuration / 2) * 1000);
+			onExplosion(id, { top, left });
+			// await sleep((explodingDuration / 2) * 1000);
+			// setExplosionState(ExplosionState.Exploded);
 		};
 		triggerExplosion();
-	}, [explodingDuration, explosionSize, firingDuration]);
+	}, [
+		explodingDuration,
+		explosionSize,
+		firingDuration,
+		onExplosion,
+		top,
+		left,
+		id,
+	]);
 
 	const bombSize = config.size.bomb;
 	const bombSizePadding = bombSize / 2;
