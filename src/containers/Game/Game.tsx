@@ -22,6 +22,17 @@ const Game = () => {
 	const [is3D, setIs3D] = useState(false);
 	const [isTopView, setIsTopView] = useState(true);
 	const [bombs, setBombs] = useState<Array<BombType>>([]);
+	const [
+		characterCoordinates,
+		setCharacterCoordinates,
+	] = useState<TopLeftCoordinates>({
+		top: 0,
+		left: 0,
+	});
+
+	const onMove = (coordinates: TopLeftCoordinates) => {
+		setCharacterCoordinates(coordinates);
+	};
 
 	const generateNewCollisionCoordinates = () => {
 		setGameMap(generateRandomGameMap(config.size.game));
@@ -91,7 +102,9 @@ const Game = () => {
 				animationCounter={animationCounter}
 			>
 				<Character
-					name="temp"
+					name="Bomber"
+					coordinates={characterCoordinates}
+					onMove={onMove}
 					gameMap={gameMap}
 					is3D={is3D}
 					addBomb={addBomb}

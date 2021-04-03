@@ -10,7 +10,7 @@ import {
 	handleRotateMove,
 	CUBE_BASE_TRANSFORM,
 } from 'utils/game';
-import { AddBomb, GameMap } from './types';
+import { AddBomb, GameMap, TopLeftCoordinates } from './types';
 
 const StyledTempCharacterName = styled.span`
 	color: ${theme.palette.color.warning};
@@ -27,8 +27,8 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 	height: ${theme.game.character.size};
 	background-color: ${theme.palette.color.success};
 	position: absolute;
-	top: 0;
-	left: 0;
+	/* top: 0;
+	left: 0; */
 	border-radius: 50%;
 	display: flex;
 	justify-content: center;
@@ -58,17 +58,28 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 interface Props {
 	name: string;
 	// skin: Skin;
+	coordinates: TopLeftCoordinates;
+	onMove: (coordinates: TopLeftCoordinates) => void;
 	gameMap: GameMap;
 	is3D: boolean;
 	addBomb: AddBomb;
 }
 
-const Character = ({ name /* skin */, gameMap, is3D, addBomb }: Props) => {
+const Character = ({
+	name /* skin */,
+	coordinates,
+	onMove,
+	gameMap,
+	is3D,
+	addBomb,
+}: Props) => {
 	const characterRef = useRef<HTMLDivElement>(null);
 	const timeOutRef = useRef(new Date().getTime());
 	const keyMap = useRef<{
 		[key: string]: boolean;
 	}>({});
+
+	const { top, left } = coordinates;
 
 	useEffect(() => {
 		const move = () => {
@@ -76,42 +87,50 @@ const Character = ({ name /* skin */, gameMap, is3D, addBomb }: Props) => {
 			if (!keyMap.current) return;
 
 			// reset rotation to 0 so the animations are consistent
-			resetRotation(characterRef);
+			if (is3D) resetRotation(characterRef);
 
 			if (keyMap.current.ArrowUp) {
-				const newX = characterRef.current.offsetLeft;
-				const newY =
-					characterRef.current.offsetTop - config.size.movement;
-				if (canMove(newX, newY, gameMap)) {
-					characterRef.current.style.top = `${newY}px`;
-					handleRotateMove(characterRef, is3D, Direction.UP);
+				const newTop = top - config.size.movement;
+				const newLeft = left;
+				if (canMove(newTop, newLeft, gameMap)) {
+					// characterRef.current.style.top = `${left}px`;
+					setTimeout(() => {
+						onMove({ top: newTop, left: newLeft });
+						handleRotateMove(characterRef, is3D, Direction.UP);
+					}, 0);
 				}
 			}
 			if (keyMap.current.ArrowRight) {
-				const newX =
-					characterRef.current.offsetLeft + config.size.movement;
-				const newY = characterRef.current.offsetTop;
-				if (canMove(newX, newY, gameMap)) {
-					characterRef.current.style.left = `${newX}px`;
-					handleRotateMove(characterRef, is3D, Direction.RIGHT);
+				const newTop = top;
+				const newLeft = left + config.size.movement;
+				if (canMove(newTop, newLeft, gameMap)) {
+					// characterRef.current.style.left = `${top}px`;
+					setTimeout(() => {
+						onMove({ top: newTop, left: newLeft });
+						handleRotateMove(characterRef, is3D, Direction.RIGHT);
+					}, 0);
 				}
 			}
 			if (keyMap.current.ArrowDown) {
-				const newX = characterRef.current.offsetLeft;
-				const newY =
-					characterRef.current.offsetTop + config.size.movement;
-				if (canMove(newX, newY, gameMap)) {
-					characterRef.current.style.top = `${newY}px`;
-					handleRotateMove(characterRef, is3D, Direction.DOWN);
+				const newTop = top + config.size.movement;
+				const newLeft = left;
+				if (canMove(newTop, newLeft, gameMap)) {
+					// characterRef.current.style.top = `${left}px`;
+					setTimeout(() => {
+						onMove({ top: newTop, left: newLeft });
+						handleRotateMove(characterRef, is3D, Direction.DOWN);
+					}, 0);
 				}
 			}
 			if (keyMap.current.ArrowLeft) {
-				const newX =
-					characterRef.current.offsetLeft - config.size.movement;
-				const newY = characterRef.current.offsetTop;
-				if (canMove(newX, newY, gameMap)) {
-					characterRef.current.style.left = `${newX}px`;
-					handleRotateMove(characterRef, is3D, Direction.LEFT);
+				const newTop = top;
+				const newLeft = left - config.size.movement;
+				if (canMove(newTop, newLeft, gameMap)) {
+					// characterRef.current.style.left = `${top}px`;
+					setTimeout(() => {
+						onMove({ top: newTop, left: newLeft });
+						handleRotateMove(characterRef, is3D, Direction.LEFT);
+					}, 0);
 				}
 			}
 		};
@@ -131,8 +150,8 @@ const Character = ({ name /* skin */, gameMap, is3D, addBomb }: Props) => {
 				if (e.code === 'Space') {
 					if (!characterRef.current) return;
 					addBomb({
-						top: characterRef.current.offsetTop,
-						left: characterRef.current.offsetLeft,
+						top,
+						left,
 					});
 				}
 			}
@@ -145,23 +164,32 @@ const Character = ({ name /* skin */, gameMap, is3D, addBomb }: Props) => {
 			window.removeEventListener('keyup', registerKeys);
 			window.removeEventListener('keydown', registerKeys);
 		};
-	}, [addBomb, gameMap, is3D]);
+	}, [addBomb, gameMap, is3D, left, top, onMove]);
 
 	return (
 		(is3D && (
 			<Cube
 				ref={characterRef}
 				size={32}
-				left={0}
-				top={0} /* name={name} */
+				left={left}
+				top={top} /* name={name} */
 				animate
 				color={theme.palette.color.success}
 				style={{
 					transform: CUBE_BASE_TRANSFORM,
+					// top,
+					// left,
 				}}
 			/>
 		)) || (
-			<StyledTempCharacter ref={characterRef} $name={name}>
+			<StyledTempCharacter
+				ref={characterRef}
+				$name={name}
+				style={{
+					top,
+					left,
+				}}
+			>
 				<StyledTempCharacterName>{name}</StyledTempCharacterName>
 				<StyledTempCharacterFace>
 					<StyledTempCharacterEyes>o-o</StyledTempCharacterEyes>
