@@ -12,6 +12,7 @@ interface Props {
 	gameMap: GameMap;
 	is3D: boolean;
 	isTopView: boolean;
+	animationCounter: number;
 	children: React.ReactNode;
 }
 
@@ -36,12 +37,18 @@ const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
 	}}
 `;
 
-const Map = ({ size, gameMap, is3D, isTopView, children }: Props) => {
-	const previousCoordinates = usePrevious(JSON.stringify(gameMap));
-
-	// we only need to animate when new collision is set
-	// not when the view changes
-	const shouldAnimate = JSON.stringify(gameMap) !== previousCoordinates;
+const Map = ({
+	size,
+	gameMap,
+	is3D,
+	isTopView,
+	animationCounter,
+	children,
+}: Props) => {
+	// we only need to animate when new collision is set using the button
+	// need to prevent explosion diff from re-animating tiles
+	const previousAnimationCounter = usePrevious(animationCounter);
+	const shouldAnimate = animationCounter !== previousAnimationCounter;
 
 	let collisionIndex = 1;
 	return (

@@ -18,12 +18,14 @@ const Game = () => {
 	const [gameMap, setGameMap] = useState(() =>
 		generateRandomGameMap(config.size.game)
 	);
+	const [animationCounter, setAnimationCounter] = useState(0);
 	const [is3D, setIs3D] = useState(false);
 	const [isTopView, setIsTopView] = useState(true);
 	const [bombs, setBombs] = useState<Array<BombType>>([]);
 
 	const generateNewCollisionCoordinates = () => {
 		setGameMap(generateRandomGameMap(config.size.game));
+		setAnimationCounter(v => v + 1);
 	};
 
 	const toggle3D = () => {
@@ -86,6 +88,7 @@ const Game = () => {
 				gameMap={gameMap}
 				is3D={is3D}
 				isTopView={isTopView}
+				animationCounter={animationCounter}
 			>
 				<Character
 					name="temp"
