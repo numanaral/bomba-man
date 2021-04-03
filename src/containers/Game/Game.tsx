@@ -2,7 +2,7 @@ import Button from 'components/Button';
 import config from 'config';
 import { useState } from 'react';
 import styled from 'styled-components';
-import { generateRandomGameMap } from 'utils/game';
+import { wrapPreventFocusLock } from 'utils';
 import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
@@ -43,14 +43,14 @@ const Game = () => {
 			<Button
 				variant="secondary"
 				size="medium"
-				onClick={generateNewCollisionCoordinates}
+				onClick={wrapPreventFocusLock(generateNewCollisionCoordinates)}
 			>
 				New Collision Coordinates
 			</Button>
 			<Button
 				variant={is3D ? 'primary' : 'secondary'}
 				size="medium"
-				onClick={toggle3D}
+				onClick={wrapPreventFocusLock(toggle3D)}
 			>
 				Toggle 3D (Experimental)
 			</Button>
@@ -58,7 +58,7 @@ const Game = () => {
 			<Button
 				variant={isTopView ? 'secondary' : 'primary'}
 				size="medium"
-				onClick={toggleView}
+				onClick={wrapPreventFocusLock(toggleView)}
 				disabled={!is3D}
 			>
 				Toggle Side View
