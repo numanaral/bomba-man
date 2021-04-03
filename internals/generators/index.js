@@ -1,9 +1,9 @@
 const path = require('path');
 const { execSync } = require('child_process');
-const componentGenerator = require('./templates/component/index.js');
-const containerGenerator = require('./templates/container/index.js');
-const providerGenerator = require('./templates/provider/index.js');
-const hookGenerator = require('./templates/hooks/index.js');
+const componentGenerator = require('./templates/component/index');
+const containerGenerator = require('./templates/container/index');
+const providerGenerator = require('./templates/provider/index');
+const hookGenerator = require('./templates/hooks/index');
 const promptStringToList = require('./prompts/plop-prompt-string-to-list');
 const ifCond = require('./helpers/plop-helper-if-cond');
 

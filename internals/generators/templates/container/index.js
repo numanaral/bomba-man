@@ -100,19 +100,19 @@ module.exports = {
 		/** @type {import('node-plop/types/index').Actions} */
 		const actions = [
 			{
-				outputFileName: '{{properCase name}}.js',
-				templateFileName: 'container.js.hbs',
+				outputFileName: '{{properCase name}}.tsx',
+				templateFileName: 'container.tsx.hbs',
 				...data,
 			},
 			{
-				outputFileName: `index.js`,
+				outputFileName: `index.tsx`,
 			},
 			...conditionalAction(_props, {
-				outputFileName: `types.js`,
+				outputFileName: `types.tsx`,
 				...data,
 			}),
 			...conditionalAction(lazy, {
-				outputFileName: `Lazy.js`,
+				outputFileName: `Lazy.tsx`,
 			}),
 		];
 

@@ -52,71 +52,71 @@ module.exports = {
 		},
 	],
 	actions: data => {
-		// Generate index.js and index.test.js
+		// Generate index.tsx and index.test.tsx
 		const actions = [
 			{
-				path: '../../src/providers/{{properCase name}}.js',
-				templateFileName: `provider.js.hbs`,
+				path: '../../src/providers/{{properCase name}}.tsx',
+				templateFileName: `provider.tsx.hbs`,
 			},
 			{
-				outputFileName: '../../src/providers/index.js',
-				templateFileName: `index.js.hbs`,
+				outputFileName: '../../src/providers/index.tsx',
+				templateFileName: `index.tsx.hbs`,
 			},
 			{
-				path: '../../src/providers/tests/index.test.js',
-				templateFileName: `test.js.hbs`,
+				path: '../../src/providers/tests/index.test.tsx',
+				templateFileName: `test.tsx.hbs`,
 			},
 		];
 
-		// If they want actions and a reducer, generate actions.js, constants.js,
-		// reducer.js and the corresponding tests for actions and the reducer
+		// If they want actions and a reducer, generate actions.tsx, constants.tsx,
+		// reducer.tsx and the corresponding tests for actions and the reducer
 		if (data.wantActionsAndReducer) {
 			// Actions
 			actions.push({
-				outputFileName: '../../src/providers/actions.js',
-				templateFileName: `actions.js.hbs`,
+				outputFileName: '../../src/providers/actions.tsx',
+				templateFileName: `actions.tsx.hbs`,
 			});
 			actions.push({
-				path: '../../src/providers/tests/actions.test.js',
-				templateFileName: `actions.test.js.hbs`,
+				path: '../../src/providers/tests/actions.test.tsx',
+				templateFileName: `actions.test.tsx.hbs`,
 			});
 
 			// Constants
 			actions.push({
-				outputFileName: '../../src/providers/constants.js',
-				templateFileName: `constants.js.hbs`,
+				outputFileName: '../../src/providers/constants.tsx',
+				templateFileName: `constants.tsx.hbs`,
 			});
 
 			// Selectors
 			actions.push({
-				outputFileName: '../../src/providers/selectors.js',
-				templateFileName: `selectors.js.hbs`,
+				outputFileName: '../../src/providers/selectors.tsx',
+				templateFileName: `selectors.tsx.hbs`,
 			});
 			actions.push({
-				path: '../../src/providers/tests/selectors.test.js',
-				templateFileName: `selectors.test.js.hbs`,
+				path: '../../src/providers/tests/selectors.test.tsx',
+				templateFileName: `selectors.test.tsx.hbs`,
 			});
 
 			// Reducer
 			actions.push({
-				outputFileName: '../../src/providers/reducer.js',
-				templateFileName: `reducer.js.hbs`,
+				outputFileName: '../../src/providers/reducer.tsx',
+				templateFileName: `reducer.tsx.hbs`,
 			});
 			actions.push({
-				path: '../../src/providers/tests/reducer.test.js',
-				templateFileName: `reducer.test.js.hbs`,
+				path: '../../src/providers/tests/reducer.test.tsx',
+				templateFileName: `reducer.test.tsx.hbs`,
 			});
 		}
 
 		// Thunks
 		if (data.wantAsync) {
 			actions.push({
-				outputFileName: '../../src/providers/thunks.js',
-				templateFileName: `thunks.js.hbs`,
+				outputFileName: '../../src/providers/thunks.tsx',
+				templateFileName: `thunks.tsx.hbs`,
 			});
 			actions.push({
-				path: '../../src/providers/tests/thunks.test.js',
-				templateFileName: `thunks.test.js.hbs`,
+				path: '../../src/providers/tests/thunks.test.tsx',
+				templateFileName: `thunks.test.tsx.hbs`,
 			});
 		}
 

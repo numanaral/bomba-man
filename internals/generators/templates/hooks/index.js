@@ -98,8 +98,8 @@ module.exports = {
 		/** @type {import('node-plop/types/index').Actions} */
 		const actions = [
 			{
-				outputFileName: '{{name}}.js',
-				templateFileName: '{{type}}.js.hbs',
+				outputFileName: '{{name}}.tsx',
+				templateFileName: '{{type}}.tsx.hbs',
 				...data,
 			},
 		];
