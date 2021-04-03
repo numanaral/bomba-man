@@ -52,7 +52,7 @@ module.exports = {
 		},
 	],
 	actions: data => {
-		// Generate index.tsx and index.test.tsx
+		// Generate index.tsx
 		const actions = [
 			{
 				path: '../../src/providers/{{properCase name}}.tsx',
@@ -62,23 +62,15 @@ module.exports = {
 				outputFileName: '../../src/providers/index.tsx',
 				templateFileName: `index.tsx.hbs`,
 			},
-			{
-				path: '../../src/providers/tests/index.test.tsx',
-				templateFileName: `test.tsx.hbs`,
-			},
 		];
 
 		// If they want actions and a reducer, generate actions.tsx, constants.tsx,
-		// reducer.tsx and the corresponding tests for actions and the reducer
+		// reducer.tsx
 		if (data.wantActionsAndReducer) {
 			// Actions
 			actions.push({
 				outputFileName: '../../src/providers/actions.tsx',
 				templateFileName: `actions.tsx.hbs`,
-			});
-			actions.push({
-				path: '../../src/providers/tests/actions.test.tsx',
-				templateFileName: `actions.test.tsx.hbs`,
 			});
 
 			// Constants
@@ -92,19 +84,11 @@ module.exports = {
 				outputFileName: '../../src/providers/selectors.tsx',
 				templateFileName: `selectors.tsx.hbs`,
 			});
-			actions.push({
-				path: '../../src/providers/tests/selectors.test.tsx',
-				templateFileName: `selectors.test.tsx.hbs`,
-			});
 
 			// Reducer
 			actions.push({
 				outputFileName: '../../src/providers/reducer.tsx',
 				templateFileName: `reducer.tsx.hbs`,
-			});
-			actions.push({
-				path: '../../src/providers/tests/reducer.test.tsx',
-				templateFileName: `reducer.test.tsx.hbs`,
 			});
 		}
 
@@ -113,10 +97,6 @@ module.exports = {
 			actions.push({
 				outputFileName: '../../src/providers/thunks.tsx',
 				templateFileName: `thunks.tsx.hbs`,
-			});
-			actions.push({
-				path: '../../src/providers/tests/thunks.test.tsx',
-				templateFileName: `thunks.test.tsx.hbs`,
 			});
 		}
 

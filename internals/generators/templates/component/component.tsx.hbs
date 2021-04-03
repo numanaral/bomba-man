@@ -7,7 +7,7 @@ import theme from 'theme';
 {{/if}}
 {{#if styled}}
 
-const Container = styled.div`
+const Wrapper = styled.div`
 	background-color: ${theme.palette.background.secondary};
 `;
 {{/if}}
@@ -28,14 +28,12 @@ const {{properCase name}} = (
 		{{/each}}
 	}: Props
 {{/if}}
-) => 
-{{#if propTypes}} 
-{
-	return {{/if}} (
+) => {
+	return (
 	{{#if styled}}
-		<Container>
+		<Wrapper>
 	{{else}}
-		<div>
+		<>
 	{{/if}}
 			<p>{{properCase name}}</p>
 		{{#if propTypes}} 
@@ -44,14 +42,12 @@ const {{properCase name}} = (
 			{{/each}}
 		{{/if}}
 	{{#if styled}}
-		</Container>
+		</Wrapper>
 	{{else}}
-		</div>
+		</>
 	{{/if}}
 	);
-{{#if propTypes}} 
 };
-{{/if}}
 
 {{#if memo}}
 export default memo({{properCase name}});

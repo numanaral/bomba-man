@@ -107,10 +107,6 @@ module.exports = {
 			{
 				outputFileName: `index.tsx`,
 			},
-			...conditionalAction(_props, {
-				outputFileName: `types.tsx`,
-				...data,
-			}),
 			...conditionalAction(lazy, {
 				outputFileName: `Lazy.tsx`,
 			}),
