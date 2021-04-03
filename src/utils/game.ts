@@ -3,19 +3,34 @@ import { GameMap } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
 import { getRandomInt } from './math';
 
-const generateRandomGameMap = (size: number): GameMap => {
+const generateRandomGameMap = (
+	size: number,
+	forbiddenCoordinates = [
+		[0, 0],
+		[0, 1],
+		[1, 0],
+	]
+): GameMap => {
 	const tiles: Array<KeysOf<typeof Tile>> = [
 		...Object.keys(Tile),
 		// we want there to be more of a chance for empty tiles for now
 		...Array(3).fill('Empty'),
 	];
-	return Array(size)
+	const randomMap = Array(size)
 		.fill(0)
 		.map(() =>
 			Array(size)
 				.fill(0)
 				.map(() => Tile[tiles[getRandomInt(tiles.length)]])
 		);
+	// ensure we don't fill the char beginning squares with blocks
+	forbiddenCoordinates.forEach(([y, x]) => {
+		if (randomMap[y][x] !== Tile.Empty) {
+			randomMap[y][x] = Tile.Empty;
+		}
+	});
+
+	return randomMap;
 };
 
 const BOUNDARY_MIN = 0;
