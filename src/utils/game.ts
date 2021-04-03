@@ -1,5 +1,5 @@
 import config from 'config';
-import { GameMap } from 'containers/Game/types';
+import { GameMap, TopLeftCoordinates } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
 import { getRandomInt } from './math';
 
@@ -33,16 +33,34 @@ const generateRandomGameMap = (
 	return randomMap;
 };
 
+/**
+ * Converts from pixel to square.
+ *
+ * @param coordinates Coordinates.
+ * @returns Square version of the coordinates.
+ */
+const topLeftCoordinatesToSquareCoordinates = ({
+	top,
+	left,
+}: TopLeftCoordinates) => {
+	return {
+		ySquare: top / config.size.movement,
+		xSquare: left / config.size.movement,
+	};
+};
+
 const BOUNDARY_MIN = 0;
 const BOUNDARY_MAX = config.size.movement * (config.size.game - 1);
-const canMove = (x: number, y: number, map: GameMap) => {
-	const xSquare = x / config.size.movement;
-	const ySquare = y / config.size.movement;
+const canMove = (top: number, left: number, map: GameMap) => {
+	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates({
+		top,
+		left,
+	});
 	const nextSquare = map[ySquare]?.[xSquare];
 	const isObstacle =
 		nextSquare === Tile.Breaking || nextSquare === Tile.NonBreaking;
-	const isHorizontalEnd = x < BOUNDARY_MIN || x > BOUNDARY_MAX;
-	const isVerticalEnd = y < BOUNDARY_MIN || y > BOUNDARY_MAX;
+	const isHorizontalEnd = left < BOUNDARY_MIN || left > BOUNDARY_MAX;
+	const isVerticalEnd = top < BOUNDARY_MIN || top > BOUNDARY_MAX;
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
 };
 

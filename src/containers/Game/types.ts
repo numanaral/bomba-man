@@ -19,6 +19,11 @@ type BombType = {
 	left: number;
 };
 
+type TopLeftCoordinates = {
+	top: number;
+	left: number;
+};
+
 type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
 
 type Square = Player | Tile | PowerUp;
@@ -29,6 +34,7 @@ export type {
 	CollisionCoordinates,
 	TileProps,
 	BombType,
+	TopLeftCoordinates,
 	AddBomb,
 	Square,
 	GameMap,
