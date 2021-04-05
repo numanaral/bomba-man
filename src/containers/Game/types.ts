@@ -1,3 +1,4 @@
+import * as KeyCode from 'keycode-js';
 import { Player, Tile, PowerUp } from 'enums';
 
 type CollisionCoordinates = {
@@ -9,6 +10,7 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	top: number;
 	left: number;
 	animate: boolean;
+	variant: Square;
 	color?: string;
 	collisionIndex?: number;
 }
@@ -30,6 +32,23 @@ type Square = Player | Tile | PowerUp;
 
 type GameMap = Array<Array<Square>>;
 
+type KeyboardEventCode = ValuesOf<typeof KeyCode>;
+
+type Direction = 'Up' | 'Right' | 'Down' | 'Left';
+
+// TODO: group types into separate folders/files
+
+// #region Character Config Types
+type MovementActions = Record<`Move${Direction}`, KeyboardEventCode>;
+type CharacterActions = {
+	DropBomb: KeyboardEventCode;
+	// Jump: KeyboardEventCode;
+};
+type CharacterKeyboardConfig = MovementActions & CharacterActions;
+
+type PlayerId = `P${RangeOf<2, 1>}`;
+// #endregion
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -38,4 +57,7 @@ export type {
 	AddBomb,
 	Square,
 	GameMap,
+	KeyboardEventCode,
+	CharacterKeyboardConfig,
+	PlayerId,
 };

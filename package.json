@@ -10,6 +10,7 @@
     "@types/node": "^12.20.6",
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.2",
+    "keycode-js": "^3.1.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.3",
@@ -28,8 +29,8 @@
     "lint:f": "npm run eslint:fix && npm run prettier:fix",
     "lint:fp": "npm run prettier:fix",
     "generate": "plop --plopfile internals/generators/index.js",
-	"predeploy": "npm run build",
-	"deploy": "gh-pages -d build"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

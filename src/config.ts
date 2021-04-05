@@ -1,7 +1,11 @@
+import { CharacterKeyboardConfig, PlayerId } from 'containers/Game/types';
+import * as KeyCode from 'keycode-js';
+
 const config = {
 	size: {
 		game: 15 as RangeOf<15>, // squares
 		character: 32, // px
+		// ??!!: Size<title | movement> ?== Size<character>
 		tile: 32, // px
 		movement: 32, // px
 		collisionMin: 1, // squares
@@ -14,6 +18,28 @@ const config = {
 		bomb: {
 			firing: 2, // second
 			exploding: 2, // second
+		},
+	},
+	keyboardConfig: {
+		player: {
+			P1: {
+				MoveUp: KeyCode.CODE_W,
+				MoveRight: KeyCode.CODE_D,
+				MoveDown: KeyCode.CODE_S,
+				MoveLeft: KeyCode.CODE_A,
+				DropBomb: KeyCode.CODE_SPACE,
+			},
+			P2: {
+				MoveUp: KeyCode.CODE_UP,
+				MoveRight: KeyCode.CODE_RIGHT,
+				MoveDown: KeyCode.CODE_DOWN,
+				MoveLeft: KeyCode.CODE_LEFT,
+				DropBomb: KeyCode.CODE_SEMICOLON,
+			},
+		} as {
+			[key in PlayerId]: CharacterKeyboardConfig;
+			// TODO: MultiKeyboard 4-player local game, not needed for online
+			// [PlayerNumber in RangeOf<4, 1>]: CharacterKeyboardConfig;
 		},
 	},
 };
