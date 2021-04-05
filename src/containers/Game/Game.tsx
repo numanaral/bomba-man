@@ -1,13 +1,14 @@
 import Button from 'components/Button';
 import config from 'config';
-import { useCallback, useState } from 'react';
+import usePlayerEvents from 'hooks/usePlayerEvents';
+import { ComponentProps, createRef, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { wrapPreventFocusLock } from 'utils';
 import { generateRandomGameMap, handleExplosionOnGameMap } from 'utils/game';
 import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
-import { BombType, AddBomb, TopLeftCoordinates } from './types';
+import { BombType, AddBomb, TopLeftCoordinates, PlayerId } from './types';
 
 const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	text-align: center;
@@ -37,7 +38,28 @@ const GameButton = ({
 	);
 };
 
+const playerTwo = {
+	P2: {
+		coordinates: {
+			top: (config.size.game - 1) * 32,
+			left: (config.size.game - 1) * 32,
+		},
+		ref: createRef<HTMLDivElement>(),
+	},
+};
+
+type Players = {
+	[key in PlayerId]?: {
+		coordinates: TopLeftCoordinates;
+		ref: React.RefObject<HTMLDivElement>;
+	};
+};
+
+type OnMove = (id: PlayerId, coordinates: TopLeftCoordinates) => void;
+
 const Game = () => {
+	// URGENT: Gotta setup redux
+	//  could use useReducer but w/e
 	const [gameMap, setGameMap] = useState(() =>
 		generateRandomGameMap(config.size.game)
 	);
@@ -45,16 +67,25 @@ const Game = () => {
 	const [is3D, setIs3D] = useState(false);
 	const [isTopView, setIsTopView] = useState(true);
 	const [bombs, setBombs] = useState<Array<BombType>>([]);
-	const [
-		characterCoordinates,
-		setCharacterCoordinates,
-	] = useState<TopLeftCoordinates>({
-		top: 0,
-		left: 0,
+	const [players, setPlayers] = useState<Players>({
+		P1: {
+			coordinates: {
+				top: 0,
+				left: 0,
+			},
+			ref: createRef<HTMLDivElement>(),
+		},
+		...playerTwo,
 	});
 
-	const onMove = (coordinates: TopLeftCoordinates) => {
-		setCharacterCoordinates(coordinates);
+	const onMove: OnMove = (id, coordinates) => {
+		setPlayers(v => ({
+			...v,
+			[id]: {
+				...v[id],
+				coordinates,
+			},
+		}));
 	};
 
 	const generateNewCollisionCoordinates = () => {
@@ -68,6 +99,14 @@ const Game = () => {
 
 	const toggleView = () => {
 		setIsTopView(v => !v);
+	};
+
+	const toggleTwoPlayer = () => {
+		setPlayers(({ P1, P2 }) => ({
+			// Player 1 will always exist
+			...P1,
+			...(!P2 && playerTwo),
+		}));
 	};
 
 	const addBomb: AddBomb = ({ top, left }) => {
@@ -88,6 +127,8 @@ const Game = () => {
 		[gameMap]
 	);
 
+	usePlayerEvents(players, onMove, gameMap, is3D, addBomb);
+
 	return (
 		<CenteredDiv $is3D={is3D}>
 			<h1>Bomberman - Work In Progress</h1>
@@ -104,6 +145,10 @@ const Game = () => {
 			>
 				Toggle Side View
 			</GameButton>
+			<br />
+			<GameButton active={!!players.P2} onClick={toggleTwoPlayer}>
+				Toggle Two-Player Mode
+			</GameButton>
 
 			<br />
 			<br />
@@ -114,14 +159,24 @@ const Game = () => {
 				isTopView={isTopView}
 				animationCounter={animationCounter}
 			>
-				<Character
-					name="Bomber"
-					coordinates={characterCoordinates}
-					onMove={onMove}
-					gameMap={gameMap}
-					is3D={is3D}
-					addBomb={addBomb}
-				/>
+				{(Object.entries(players) as [
+					[
+						PlayerId,
+						{
+							coordinates: TopLeftCoordinates;
+							ref: React.RefObject<HTMLDivElement>;
+						}
+					]
+				]).map(([id, { coordinates, ref }]) => (
+					<Character
+						id={id}
+						key={id}
+						name="Bomber"
+						coordinates={coordinates!}
+						is3D={is3D}
+						ref={ref}
+					/>
+				))}
 				{bombs.map(({ id, ...bombProps }) => (
 					<Bomb
 						key={id}
@@ -139,4 +194,5 @@ const Game = () => {
 	);
 };
 
+export type { Players, OnMove };
 export default Game;
