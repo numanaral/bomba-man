@@ -101,7 +101,14 @@ module.exports = {
 		'react/jsx-uses-react': OFF,
 		'react/react-in-jsx-scope': OFF,
 		'no-unused-vars': OFF,
-		'@typescript-eslint/no-unused-vars': ERROR,
+		'@typescript-eslint/no-unused-vars': [
+			ERROR,
+			{
+				varsIgnorePattern: '^_',
+				argsIgnorePattern: '^_',
+				ignoreRestSiblings: true,
+			},
+		],
 		'jest/no-disabled-tests': WARN,
 		'jest/no-focused-tests': ERROR,
 		'jest/no-identical-title': ERROR,
