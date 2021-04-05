@@ -9,6 +9,9 @@ To create a customizable/extendable bomberman game where any mechanic and style 
 - [ ] add sprites for the character and the map
 - [ ] clean up, decouple `APP_SETTINGS`, allow pure generation via JSON
 - [ ] work on dumb NPCs
+- [ ] multiplayer
+	- [x] local
+	- [ ] online
 - [ ] ...?
 
 # NOT SO IMPORTANT THINGS
