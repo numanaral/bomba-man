@@ -40,6 +40,7 @@ const GlobalStyles = createGlobalStyle`
 		--warning-color: rgb(241, 168, 23);
 		--success-color: rgb(49, 162, 76);
 		--info-color: rgb(134, 218, 255);
+		--default-color: rgb(228, 230, 235);
 
 		/* Utilities */
 		--border-radius: 4px;

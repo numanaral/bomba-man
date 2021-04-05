@@ -18,7 +18,15 @@ declare type StyledProps<T, Keys> = {
  */
 declare type KeysOf<T> = keyof T;
 
+
 declare type BaseColorVariant = 'primary' | 'secondary';
+declare type AlertColorVariant = 'error' | 'success' | 'warning' | 'info';
+declare type DefaultColorVariant = 'default';
+declare type ColorVariants =
+	| BaseColorVariant
+	| AlertColorVariant
+	| DefaultColorVariant;
+
 declare type BaseSize = 'small' | 'medium' | 'large';
 
 /** @see https://github.com/microsoft/TypeScript/issues/26223#issuecomment-674514787 */

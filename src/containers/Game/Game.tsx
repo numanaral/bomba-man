@@ -14,6 +14,29 @@ const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	${({ $is3D }) => ($is3D && 'perspective: 1000') || ''}
 `;
 
+interface GameButtonProps extends Partial<ComponentProps<typeof Button>> {
+	active?: boolean;
+	onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+}
+
+const GameButton = ({
+	active = false,
+	onClick,
+	children,
+	...rest
+}: GameButtonProps) => {
+	return (
+		<Button
+			variant={active ? 'success' : 'warning'}
+			size="medium"
+			onClick={wrapPreventFocusLock(onClick)}
+			{...rest}
+		>
+			{children}
+		</Button>
+	);
+};
+
 const Game = () => {
 	const [gameMap, setGameMap] = useState(() =>
 		generateRandomGameMap(config.size.game)
@@ -68,29 +91,19 @@ const Game = () => {
 	return (
 		<CenteredDiv $is3D={is3D}>
 			<h1>Bomberman - Work In Progress</h1>
-			<Button
-				variant="secondary"
-				size="medium"
-				onClick={wrapPreventFocusLock(generateNewCollisionCoordinates)}
-			>
+			<GameButton onClick={generateNewCollisionCoordinates}>
 				New Collision Coordinates
-			</Button>
-			<Button
-				variant={is3D ? 'primary' : 'secondary'}
-				size="medium"
-				onClick={wrapPreventFocusLock(toggle3D)}
-			>
+			</GameButton>
+			<GameButton active={is3D} onClick={toggle3D}>
 				Toggle 3D (Experimental)
-			</Button>
-
-			<Button
-				variant={isTopView ? 'secondary' : 'primary'}
-				size="medium"
-				onClick={wrapPreventFocusLock(toggleView)}
+			</GameButton>
+			<GameButton
+				active={!isTopView}
+				onClick={toggleView}
 				disabled={!is3D}
 			>
 				Toggle Side View
-			</Button>
+			</GameButton>
 
 			<br />
 			<br />

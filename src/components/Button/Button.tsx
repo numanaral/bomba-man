@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import theme from 'theme';
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-	variant: BaseColorVariant;
+	variant: ColorVariants;
 	size: BaseSize;
 }
 
