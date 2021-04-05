@@ -129,12 +129,18 @@ declare type Matrix<Rows extends number, Columns extends number> = TupleOf<
 >;
 
 /**
+ * Gives range of numbers as type. Recursive combination of the following two.
  * @see https://github.com/microsoft/TypeScript/issues/15480#issuecomment-754770670
+ * @see https://github.com/microsoft/TypeScript/issues/15480#issuecomment-754795473
  *
  * @example
  * ```ts
- * // '0 | 1 | ... | 32'
- * type clzResult = RangeOf<32>
+ * // 0 | 1 | 2 | 3
+ * RangeFromTo<3>
+ * // 1 | 2 | 3
+ * RangeFromTo<3, 1>
  * ```
  */
-declare type RangeOf<N extends number> = Partial<Vector<N>>['length'];
+declare type RangeOf<To extends number, From = 0> = From extends 0
+	? Partial<Vector<To>>['length']
+	: Exclude<RangeOf<To>, RangeOf<From>> | From;
