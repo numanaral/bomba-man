@@ -3,13 +3,31 @@ import { GameMap, TopLeftCoordinates } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
 import { getRandomInt } from './math';
 
+const MIN_GAME_SIZE = 0;
+const MAX_GAME_SIZE = config.size.game - 1;
+const FORBIDDEN_COORDINATES = [
+	// TOP-LEFT
+	[MIN_GAME_SIZE, MIN_GAME_SIZE],
+	[MIN_GAME_SIZE, MIN_GAME_SIZE + 1],
+	[MIN_GAME_SIZE + 1, MIN_GAME_SIZE],
+	// TOP-RIGHT
+	[MIN_GAME_SIZE, MAX_GAME_SIZE],
+	[MIN_GAME_SIZE, MAX_GAME_SIZE - 1],
+	[MIN_GAME_SIZE + 1, MAX_GAME_SIZE],
+	// BOTTOM-RIGHT
+	[MAX_GAME_SIZE, MAX_GAME_SIZE],
+	[MAX_GAME_SIZE, MAX_GAME_SIZE - 1],
+	[MAX_GAME_SIZE - 1, MAX_GAME_SIZE],
+	// BOTTOM-LEFT
+	[MAX_GAME_SIZE, MIN_GAME_SIZE],
+	[MAX_GAME_SIZE, MIN_GAME_SIZE + 1],
+	[MAX_GAME_SIZE - 1, MIN_GAME_SIZE],
+];
+
 const generateRandomGameMap = (
 	size: number,
-	forbiddenCoordinates = [
-		[0, 0],
-		[0, 1],
-		[1, 0],
-	]
+	// TODO: characterCoordinates,
+	forbiddenCoordinates = FORBIDDEN_COORDINATES
 ): GameMap => {
 	const tiles: Array<KeysOf<typeof Tile>> = [
 		...Object.keys(Tile),
