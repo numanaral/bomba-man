@@ -17,8 +17,8 @@ enum ExplosionState {
 }
 
 enum Player {
-	Player1 = 'P1',
-	Player2 = 'P2',
+	P1 = 'P1',
+	P2 = 'P2',
 	Npc1 = 'P3',
 	Npc2 = 'P4',
 	Npc3 = 'P5',

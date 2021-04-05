@@ -14,6 +14,7 @@ const theme = {
 			warning: 'var(--warning-color)',
 			success: 'var(--success-color)',
 			info: 'var(--info-color)',
+			default: 'var(--default-color)',
 		},
 	},
 	shape: {
@@ -50,6 +51,12 @@ const GlobalStyles = createGlobalStyle`
 		--character-size: ${config.size.character}px;
 		--tile-size: ${config.size.tile};
 		--game-size: ${config.size.game};
+		
+		/* Animations */
+		/* @see https://easings.net/#easeInOutBack */
+		--ease-in-out-back: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+		--incremental-animation-delay: 0.03s;
+		--block-animation-duration: 0.5s;
 	}
 `;
 

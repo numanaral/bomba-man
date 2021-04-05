@@ -76,8 +76,7 @@ const explosionKeyframes = ({
 const Explosion = styled.div<ExplosionProps>`
 	${({ $explosionAxis, $explosionSize }) => css`
 		animation: ${explosionKeyframes({ $explosionAxis, $explosionSize })}
-			/** @see https://easings.net/#easeInOutBack */
-			cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards;
+			var(--ease-in-out-back) forwards;
 	`}
 `;
 

@@ -9,6 +9,7 @@ const Cube = forwardRef<HTMLDivElement, TileProps>(
 			top,
 			left,
 			animate,
+			variant,
 			color: backgroundColor,
 			collisionIndex,
 			style,
@@ -23,7 +24,7 @@ const Cube = forwardRef<HTMLDivElement, TileProps>(
 					(className && `${className} `) || ''
 				}cuboid bouncy-block-${
 					(!animate && 'no-animation') || collisionIndex || 0
-				}`}
+				} ${variant}`}
 				style={{ ...style, top, left, width: size, height: size }}
 				ref={ref}
 				{...rest}

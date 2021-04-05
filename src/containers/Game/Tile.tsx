@@ -38,8 +38,13 @@ const Wrapper = styled.div.attrs<WrapperProps>(
 				css`
 					transform: scale(0, 0);
 					z-index: 9999;
-					animation: ${bounceAnimation} 0.5s ease
-						${($collisionIndex as number) * 0.1}s forwards;
+					animation: ${bounceAnimation}
+						var(--block-animation-duration) ease
+						calc(
+							${$collisionIndex as number} *
+								var(--incremental-animation-delay)
+						)
+						forwards;
 				`) ||
 			''
 		);

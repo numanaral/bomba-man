@@ -23,7 +23,7 @@ const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
 	background-color: ${theme.palette.background.secondary};
 	position: relative;
 	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 6px 6px rgba(0, 0, 0, 0.6);
-	transition: transform 0.5s;
+	transition: transform var(--block-animation-duration);
 
 	${({ $is3D, $isTopView }) => {
 		let style = '';
@@ -65,6 +65,7 @@ const Map = ({
 						top: outerInd * config.size.tile,
 						left: innerInd * config.size.tile,
 						animate: shouldAnimate,
+						variant: square,
 						...(hasCollision && {
 							color:
 								theme.palette.color[
