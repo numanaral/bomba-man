@@ -1,6 +1,7 @@
 import config from 'config';
-import { GameMap, TopLeftCoordinates } from 'containers/Game/types';
+import { GameMap, PlayerId, TopLeftCoordinates } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
+import { createRef } from 'react';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -201,6 +202,18 @@ const handleExplosionOnGameMap = (
 	return gameMapCopy;
 };
 
+const playerGenerator = (playerId: PlayerId, topLeftSquare: number) => {
+	return {
+		[playerId]: {
+			coordinates: {
+				top: topLeftSquare * 32,
+				left: topLeftSquare * 32,
+			},
+			ref: createRef<HTMLDivElement>(),
+		},
+	};
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -210,4 +223,5 @@ export {
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
 	handleExplosionOnGameMap,
+	playerGenerator,
 };

@@ -1,10 +1,14 @@
 import Button from 'components/Button';
 import config from 'config';
 import usePlayerEvents from 'hooks/usePlayerEvents';
-import { ComponentProps, createRef, useCallback, useState } from 'react';
+import { ComponentProps, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { wrapPreventFocusLock } from 'utils';
-import { generateRandomGameMap, handleExplosionOnGameMap } from 'utils/game';
+import {
+	generateRandomGameMap,
+	handleExplosionOnGameMap,
+	playerGenerator,
+} from 'utils/game';
 import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
@@ -38,15 +42,8 @@ const GameButton = ({
 	);
 };
 
-const playerTwo = {
-	P2: {
-		coordinates: {
-			top: (config.size.game - 1) * 32,
-			left: (config.size.game - 1) * 32,
-		},
-		ref: createRef<HTMLDivElement>(),
-	},
-};
+const player1 = playerGenerator('P1', 0);
+const player2 = playerGenerator('P2', config.size.game - 1);
 
 type Players = {
 	[key in PlayerId]?: {
@@ -68,14 +65,9 @@ const Game = () => {
 	const [isTopView, setIsTopView] = useState(true);
 	const [bombs, setBombs] = useState<Array<BombType>>([]);
 	const [players, setPlayers] = useState<Players>({
-		P1: {
-			coordinates: {
-				top: 0,
-				left: 0,
-			},
-			ref: createRef<HTMLDivElement>(),
-		},
-		...playerTwo,
+		...player1,
+		// enable for two-player mode by default
+		// ...playerTwo,
 	});
 
 	const onMove: OnMove = (id, coordinates) => {
@@ -102,12 +94,14 @@ const Game = () => {
 	};
 
 	const toggleTwoPlayer = () => {
-		setPlayers(({ P1, P2 }) => ({
+		setPlayers(({ P2, ...rest }) => ({
 			// Player 1 will always exist
-			...P1,
-			...(!P2 && playerTwo),
+			...rest,
+			...(!P2 && player2),
 		}));
 	};
+
+	console.log(players);
 
 	const addBomb: AddBomb = ({ top, left }) => {
 		setBombs(v => [...v, { id: new Date().toJSON(), top, left }]);
