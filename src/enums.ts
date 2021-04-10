@@ -19,9 +19,11 @@ enum ExplosionState {
 enum Player {
 	P1 = 'P1',
 	P2 = 'P2',
-	Npc1 = 'P3',
-	Npc2 = 'P4',
-	Npc3 = 'P5',
+	P3 = 'P3',
+	P4 = 'P4',
+	// Npc1 = 'P3',
+	// Npc2 = 'P4',
+	// Npc3 = 'P5',
 }
 
 enum Tile {

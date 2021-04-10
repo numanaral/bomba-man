@@ -11,6 +11,7 @@ import config from 'config';
 import { useRef, useEffect } from 'react';
 import { resetRotation, canMove, handleRotateMove } from 'utils/game';
 import { OnMove, Players } from 'containers/Game/Game';
+import useInterval from './useInterval';
 
 type ActionBaseProps = [
 	coordinates: TopLeftCoordinates,
@@ -26,22 +27,31 @@ type MoveAction = (
 
 type BombAction = (...args: ActionBaseProps) => void;
 
+type NPCAction = (players: Players) => void;
+
 const usePlayerEvents = (
 	players: Players,
 	onMove: OnMove,
 	gameMap: GameMap,
 	is3D: boolean,
-	addBomb: AddBomb
+	addBomb: AddBomb,
+	handleNpcActions?: NPCAction
 ) => {
 	const timeOutRef = useRef<{ [key in PlayerId]?: number }>({
 		P1: new Date().getTime(),
 		P2: new Date().getTime(),
+		P3: new Date().getTime(),
+		P4: new Date().getTime(),
 	});
 	const keyMap = useRef<
 		{
 			[key in KeyboardEventCode]?: boolean;
 		}
 	>({});
+
+	useInterval(() => {
+		handleNpcActions?.(players);
+	}, config.duration.movement);
 
 	useEffect(() => {
 		const move: MoveAction = (
@@ -112,6 +122,9 @@ const usePlayerEvents = (
 		const handleActions = () => {
 			if (!keyMap.current) return;
 
+			// TODO: Do not account for NPCs here
+			// Instead of Array<PlayerId> it will be Array<PlayerConfig> ??
+			// This will include player type, player options etc.
 			(Object.keys(players) as Array<PlayerId>).forEach(id => {
 				const { coordinates } = players[id]!;
 				const { [id]: keys } = config.keyboardConfig.player;

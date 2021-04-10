@@ -1,12 +1,13 @@
 import Button from 'components/Button';
 import config from 'config';
 import usePlayerEvents from 'hooks/usePlayerEvents';
-import { ComponentProps, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { wrapPreventFocusLock } from 'utils';
 import {
 	generateRandomGameMap,
 	handleExplosionOnGameMap,
+	npcAction,
 	playerGenerator,
 } from 'utils/game';
 import Bomb from './Bomb';
@@ -19,7 +20,7 @@ const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	${({ $is3D }) => ($is3D && 'perspective: 1000') || ''}
 `;
 
-interface GameButtonProps extends Partial<ComponentProps<typeof Button>> {
+interface GameButtonProps extends Partial<React.ComponentProps<typeof Button>> {
 	active?: boolean;
 	onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
@@ -42,8 +43,11 @@ const GameButton = ({
 	);
 };
 
-const player1 = playerGenerator('P1', 0);
-const player2 = playerGenerator('P2', config.size.game - 1);
+const BOUNDARY_MIN = 0;
+const BOUNDARY_MAX = config.size.game - 1;
+const player1 = playerGenerator('P1', BOUNDARY_MIN, BOUNDARY_MIN);
+const player2 = playerGenerator('P2', BOUNDARY_MIN, BOUNDARY_MAX);
+const npc1 = playerGenerator('P3', BOUNDARY_MAX, BOUNDARY_MIN);
 
 type Players = {
 	[key in PlayerId]?: {
@@ -101,7 +105,13 @@ const Game = () => {
 		}));
 	};
 
-	console.log(players);
+	const toggleNPC = () => {
+		setPlayers(({ P3, ...rest }) => ({
+			// Player 1 will always exist
+			...rest,
+			...(!P3 && npc1),
+		}));
+	};
 
 	const addBomb: AddBomb = ({ top, left }) => {
 		setBombs(v => [...v, { id: new Date().toJSON(), top, left }]);
@@ -121,7 +131,14 @@ const Game = () => {
 		[gameMap]
 	);
 
-	usePlayerEvents(players, onMove, gameMap, is3D, addBomb);
+	usePlayerEvents(
+		players,
+		onMove,
+		gameMap,
+		is3D,
+		addBomb,
+		...((!!players.P3 && [npcAction]) || [])
+	);
 
 	return (
 		<CenteredDiv $is3D={is3D}>
@@ -142,6 +159,9 @@ const Game = () => {
 			<br />
 			<GameButton active={!!players.P2} onClick={toggleTwoPlayer}>
 				Toggle Two-Player Mode
+			</GameButton>
+			<GameButton active={!!players.P3} onClick={toggleNPC}>
+				Toggle NPC
 			</GameButton>
 
 			<br />
