@@ -9,7 +9,12 @@ import {
 import { Direction } from 'enums';
 import config from 'config';
 import { useRef, useEffect } from 'react';
-import { resetRotation, canMove, handleRotateMove } from 'utils/game';
+import {
+	resetRotation,
+	canMove,
+	handleRotateMove,
+	NPCAction,
+} from 'utils/game';
 import { OnMove, Players } from 'containers/Game/Game';
 import useInterval from './useInterval';
 
@@ -26,8 +31,6 @@ type MoveAction = (
 ) => void;
 
 type BombAction = (...args: ActionBaseProps) => void;
-
-type NPCAction = (players: Players) => void;
 
 const usePlayerEvents = (
 	players: Players,
@@ -50,7 +53,7 @@ const usePlayerEvents = (
 	>({});
 
 	useInterval(() => {
-		handleNpcActions?.(players);
+		handleNpcActions?.(players, gameMap);
 	}, config.duration.movement);
 
 	useEffect(() => {

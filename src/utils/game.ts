@@ -215,10 +215,14 @@ const playerGenerator = (playerId: PlayerId, top: number, left: number) => {
 	};
 };
 
-const npcAction = (players: Players) => {
-	console.log(players);
+type NPCAction = (players: Players, gameMap: GameMap) => void;
+const npcAction: NPCAction = (players, gameMap) => {
+	console.log('players', players);
+	console.log('gameMap', gameMap);
 	// TODO;
 };
+
+export type { NPCAction };
 
 export {
 	generateRandomGameMap,
