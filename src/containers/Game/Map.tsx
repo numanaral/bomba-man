@@ -13,7 +13,6 @@ interface Props {
 	is3D: boolean;
 	isTopView: boolean;
 	animationCounter: number;
-	children: React.ReactNode;
 }
 
 const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
@@ -37,14 +36,14 @@ const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
 	}}
 `;
 
-const Map = ({
+const Map: React.FC<Props> = ({
 	size,
 	gameMap,
 	is3D,
 	isTopView,
 	animationCounter,
 	children,
-}: Props) => {
+}) => {
 	// we only need to animate when new collision is set using the button
 	// need to prevent explosion diff from re-animating tiles
 	const previousAnimationCounter = usePrevious(animationCounter);

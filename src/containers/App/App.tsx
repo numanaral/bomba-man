@@ -8,6 +8,7 @@ const App = () => {
 			<Container>
 				<Game />
 			</Container>
+			<div id="created-by-numan" />
 			<GlobalStyles />
 		</>
 	);

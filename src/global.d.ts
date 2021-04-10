@@ -1,3 +1,14 @@
+/**
+ * Remap required props to their $values for styled-components
+ *
+ * @example
+ * ```
+ * // {
+ * // 	$variant: typeof variant;
+ * // 	$size: typeof size
+ * // }
+ * StyledProps<Props, 'variant' | 'size'>
+ */
 declare type StyledProps<T, Keys> = {
 	[Property in keyof Pick<T, Keys> as `$${string & Property}`]: T[Property];
 };
