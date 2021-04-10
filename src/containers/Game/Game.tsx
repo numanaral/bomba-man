@@ -33,6 +33,7 @@ const GameButton = ({
 }: GameButtonProps) => {
 	return (
 		<Button
+			style={{ width: '100%', wordWrap: 'break-word', marginBottom: 10 }}
 			variant={active ? 'success' : 'warning'}
 			size="medium"
 			onClick={wrapPreventFocusLock(onClick)}
@@ -57,6 +58,25 @@ type Players = {
 };
 
 type OnMove = (id: PlayerId, coordinates: TopLeftCoordinates) => void;
+
+const GameContainer = styled.div`
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+
+	& > :first-child {
+		margin-right: 50px;
+		width: 15%;
+		@media only screen and (max-width: 600px) {
+			width: 100%;
+			margin: 50px auto;
+			order: 2;
+			& button {
+				width: 80% !important;
+			}
+		}
+	}
+`;
 
 const Game = () => {
 	// URGENT: Gotta setup redux
@@ -143,67 +163,71 @@ const Game = () => {
 	return (
 		<CenteredDiv $is3D={is3D}>
 			<h1>Bomberman - Work In Progress</h1>
-			<GameButton onClick={generateNewCollisionCoordinates}>
-				New Collision Coordinates
-			</GameButton>
-			<GameButton active={is3D} onClick={toggle3D}>
-				Toggle 3D (Experimental)
-			</GameButton>
-			<GameButton
-				active={!isTopView}
-				onClick={toggleView}
-				disabled={!is3D}
-			>
-				Toggle Side View
-			</GameButton>
-			<br />
-			<GameButton active={!!players.P2} onClick={toggleTwoPlayer}>
-				Toggle Two-Player Mode
-			</GameButton>
-			<GameButton active={!!players.P3} onClick={toggleNPC}>
-				Toggle NPC
-			</GameButton>
+			<GameContainer>
+				<div>
+					<GameButton onClick={generateNewCollisionCoordinates}>
+						New Collision Coordinates
+					</GameButton>
+					<GameButton active={is3D} onClick={toggle3D}>
+						Toggle 3D (Experimental)
+					</GameButton>
+					<GameButton
+						active={!isTopView}
+						onClick={toggleView}
+						disabled={!is3D}
+					>
+						Toggle Side View
+					</GameButton>
+					<br />
+					<GameButton active={!!players.P2} onClick={toggleTwoPlayer}>
+						Toggle Two-Player Mode
+					</GameButton>
+					<GameButton active={!!players.P3} onClick={toggleNPC}>
+						Toggle NPC
+					</GameButton>
 
-			<br />
-			<br />
-			<Map
-				size={config.size.game}
-				gameMap={gameMap}
-				is3D={is3D}
-				isTopView={isTopView}
-				animationCounter={animationCounter}
-			>
-				{(Object.entries(players) as [
-					[
-						PlayerId,
-						{
-							coordinates: TopLeftCoordinates;
-							ref: React.RefObject<HTMLDivElement>;
-						}
-					]
-				]).map(([id, { coordinates, ref }]) => (
-					<Character
-						id={id}
-						key={id}
-						name="Bomber"
-						coordinates={coordinates!}
-						is3D={is3D}
-						ref={ref}
-					/>
-				))}
-				{bombs.map(({ id, ...bombProps }) => (
-					<Bomb
-						key={id}
-						id={id}
-						{...bombProps}
-						color="red"
-						explosionSize={config.size.explosion}
-						firingDuration={config.duration.bomb.firing}
-						explodingDuration={config.duration.bomb.exploding}
-						onExplosion={onExplosion}
-					/>
-				))}
-			</Map>
+					<br />
+					<br />
+				</div>
+				<Map
+					size={config.size.game}
+					gameMap={gameMap}
+					is3D={is3D}
+					isTopView={isTopView}
+					animationCounter={animationCounter}
+				>
+					{(Object.entries(players) as [
+						[
+							PlayerId,
+							{
+								coordinates: TopLeftCoordinates;
+								ref: React.RefObject<HTMLDivElement>;
+							}
+						]
+					]).map(([id, { coordinates, ref }]) => (
+						<Character
+							id={id}
+							key={id}
+							name="Bomber"
+							coordinates={coordinates!}
+							is3D={is3D}
+							ref={ref}
+						/>
+					))}
+					{bombs.map(({ id, ...bombProps }) => (
+						<Bomb
+							key={id}
+							id={id}
+							{...bombProps}
+							color="red"
+							explosionSize={config.size.explosion}
+							firingDuration={config.duration.bomb.firing}
+							explodingDuration={config.duration.bomb.exploding}
+							onExplosion={onExplosion}
+						/>
+					))}
+				</Map>
+			</GameContainer>
 		</CenteredDiv>
 	);
 };
