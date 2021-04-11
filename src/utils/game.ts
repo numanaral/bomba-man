@@ -1,4 +1,5 @@
 import config from 'config';
+import { Players } from 'containers/Game/Game';
 import { GameMap, PlayerId, TopLeftCoordinates } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
 import { createRef } from 'react';
@@ -202,17 +203,26 @@ const handleExplosionOnGameMap = (
 	return gameMapCopy;
 };
 
-const playerGenerator = (playerId: PlayerId, topLeftSquare: number) => {
+const playerGenerator = (playerId: PlayerId, top: number, left: number) => {
 	return {
 		[playerId]: {
 			coordinates: {
-				top: topLeftSquare * 32,
-				left: topLeftSquare * 32,
+				top: top * 32,
+				left: left * 32,
 			},
 			ref: createRef<HTMLDivElement>(),
 		},
 	};
 };
+
+type NPCAction = (players: Players, gameMap: GameMap) => void;
+const npcAction: NPCAction = (players, gameMap) => {
+	console.log('players', players);
+	console.log('gameMap', gameMap);
+	// TODO;
+};
+
+export type { NPCAction };
 
 export {
 	generateRandomGameMap,
@@ -224,4 +234,5 @@ export {
 	getExplosionScaleSize,
 	handleExplosionOnGameMap,
 	playerGenerator,
+	npcAction,
 };

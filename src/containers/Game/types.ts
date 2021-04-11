@@ -46,7 +46,7 @@ type CharacterActions = {
 };
 type CharacterKeyboardConfig = MovementActions & CharacterActions;
 
-type PlayerId = `P${RangeOf<2, 1>}`;
+type PlayerId = `P${RangeOf<4, 1>}`;
 // #endregion
 
 export type {
