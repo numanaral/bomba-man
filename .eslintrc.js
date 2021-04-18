@@ -63,7 +63,6 @@ module.exports = {
 		'import/no-named-as-default': OFF,
 		'import/no-unresolved': [ERROR, { caseSensitive: false }],
 		'import/prefer-default-export': OFF,
-		'linebreak-style': [ERROR, 'windows'],
 		'max-len': [
 			ERROR,
 			{
