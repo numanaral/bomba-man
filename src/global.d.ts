@@ -54,6 +54,10 @@ declare type KeysOf<T> = keyof T;
  */
 declare type ValuesOf<T> = Exclude<T[KeysOf<T>], Function>;
 
+declare interface DynamicObject {
+	[key: string]: any;
+}
+
 declare type BaseColorVariant = 'primary' | 'secondary';
 declare type AlertColorVariant = 'error' | 'success' | 'warning' | 'info';
 declare type DefaultColorVariant = 'default';
