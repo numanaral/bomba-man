@@ -203,7 +203,11 @@ const handleExplosionOnGameMap = (
 	return gameMapCopy;
 };
 
-const playerGenerator = (playerId: PlayerId, top: number, left: number) => {
+const playerGenerator = (
+	playerId: PlayerId,
+	top: number,
+	left: number
+): Players => {
 	return {
 		[playerId]: {
 			coordinates: {
