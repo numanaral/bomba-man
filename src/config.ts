@@ -2,6 +2,7 @@ import { CharacterKeyboardConfig, PlayerId } from 'containers/Game/types';
 import * as KeyCode from 'keycode-js';
 
 const config = {
+	title: 'Bomberman - Work In Progress',
 	size: {
 		game: 15 as RangeOf<15>, // squares
 		character: 32, // px

@@ -58,6 +58,36 @@ declare interface DynamicObject {
 	[key: string]: any;
 }
 
+declare type EmptyFunction = () => void;
+
+/**
+ * Allows you to extend to whatever else the function will take. Saves you the
+ * trouble of creating a wrapper method.
+ *
+ * @example
+ * ```ts
+ * // SomeType does not extend ReactOnClick but it's not optional so we want
+ * // to be able call it with whatever args as the args are ignored.
+ * const doSomething = (val?: SomeType) => {
+ * 	// do some work without using val
+ * }
+ *
+ * // no need for this
+ * // const triggerAction = (e: ReactOnClick) => {
+ * // 	doSomething();
+ * // }
+ *
+ * // no need for this
+ * // <Button onClick={triggerAction}>
+ * <Button onClick={doSomething}>
+ * 	Action Button
+ * </Button>
+ * ```
+ */
+declare type ReactOnClick<Extends = void> = (
+	e: React.MouseEvent<HTMLButtonElement, MouseEvent> & Extends
+) => void;
+
 declare type BaseColorVariant = 'primary' | 'secondary';
 declare type AlertColorVariant = 'error' | 'success' | 'warning' | 'info';
 declare type DefaultColorVariant = 'default';
