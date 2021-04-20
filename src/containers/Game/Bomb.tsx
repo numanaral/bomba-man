@@ -1,10 +1,10 @@
 import config from 'config';
 import { Axis, ExplosionState } from 'enums';
 import { useEffect, useState } from 'react';
+import { OnExplosion } from 'store/redux/reducers/game/types';
 import styled, { css, keyframes } from 'styled-components';
 import { sleep } from 'utils';
 import { getExplosionScaleSize } from 'utils/game';
-import { TopLeftCoordinates } from './types';
 
 interface Props {
 	// skin: Skin;
@@ -15,7 +15,7 @@ interface Props {
 	id: string;
 	top: number;
 	left: number;
-	onExplosion: (bombId: string, bombCoordinates: TopLeftCoordinates) => void;
+	onExplosion: OnExplosion;
 }
 
 const incrementalSpeedRotationKeyframes = keyframes`
@@ -98,7 +98,7 @@ const Bomb = ({
 			await sleep(firingDuration * 1000);
 			setExplosionState(ExplosionState.Exploding);
 			await sleep((explodingDuration / 2) * 1000);
-			onExplosion(id, { top, left });
+			onExplosion({ bombId: id, bombCoordinates: { top, left } });
 			// await sleep((explodingDuration / 2) * 1000);
 			// setExplosionState(ExplosionState.Exploded);
 		};

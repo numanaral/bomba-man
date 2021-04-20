@@ -1,6 +1,11 @@
 import config from 'config';
 import { Players } from 'containers/Game/Game';
-import { GameMap, PlayerId, TopLeftCoordinates } from 'containers/Game/types';
+import {
+	GameMap,
+	PlayerConfig,
+	PlayerId,
+	TopLeftCoordinates,
+} from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
 import { createRef } from 'react';
 import { getRandomInt } from './math';
@@ -207,15 +212,16 @@ const playerGenerator = (
 	playerId: PlayerId,
 	top: number,
 	left: number
-): Players => {
+): PlayerConfig => {
 	return {
-		[playerId]: {
-			coordinates: {
-				top: top * 32,
-				left: left * 32,
-			},
-			ref: createRef<HTMLDivElement>(),
+		id: playerId,
+		coordinates: {
+			top: top * 32,
+			left: left * 32,
 		},
+		// eslint-disable-next-line max-len
+		ref: createRef<HTMLDivElement>(),
+		// ref: createRef<HTMLDivElement>() as RefObject<HTMLDivElement>,
 	};
 };
 

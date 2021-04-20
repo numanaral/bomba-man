@@ -15,7 +15,8 @@ import {
 	handleRotateMove,
 	NPCAction,
 } from 'utils/game';
-import { OnMove, Players } from 'containers/Game/Game';
+import { Players } from 'containers/Game/Game';
+import { OnMove } from 'store/redux/reducers/game/types';
 import useInterval from './useInterval';
 
 type ActionBaseProps = [
@@ -71,7 +72,10 @@ const usePlayerEvents = (
 				const newLeft = left;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove(id, { top: newTop, left: newLeft });
+						onMove({
+							playerId: id,
+							newCoordinates: { top: newTop, left: newLeft },
+						});
 						handleRotateMove(ref, is3D, Direction.UP);
 					}, 0);
 				}
@@ -81,7 +85,10 @@ const usePlayerEvents = (
 				const newLeft = left + config.size.movement;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove(id, { top: newTop, left: newLeft });
+						onMove({
+							playerId: id,
+							newCoordinates: { top: newTop, left: newLeft },
+						});
 						handleRotateMove(ref, is3D, Direction.RIGHT);
 					}, 0);
 				}
@@ -91,7 +98,10 @@ const usePlayerEvents = (
 				const newLeft = left;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove(id, { top: newTop, left: newLeft });
+						onMove({
+							playerId: id,
+							newCoordinates: { top: newTop, left: newLeft },
+						});
 						handleRotateMove(ref, is3D, Direction.DOWN);
 					}, 0);
 				}
@@ -101,7 +111,10 @@ const usePlayerEvents = (
 				const newLeft = left - config.size.movement;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove(id, { top: newTop, left: newLeft });
+						onMove({
+							playerId: id,
+							newCoordinates: { top: newTop, left: newLeft },
+						});
 						handleRotateMove(ref, is3D, Direction.LEFT);
 					}, 0);
 				}
@@ -132,6 +145,9 @@ const usePlayerEvents = (
 				const { coordinates } = players[id]!;
 				const { [id]: keys } = config.keyboardConfig.player;
 				const { ref } = players[id]!;
+
+				console.log(ref);
+				console.log(players);
 
 				if (ref.current) {
 					const newTime = new Date().getTime();

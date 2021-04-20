@@ -1,5 +1,6 @@
 import * as KeyCode from 'keycode-js';
 import { Player, Tile, PowerUp } from 'enums';
+// import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
 	[key: number]: number;
@@ -30,6 +31,7 @@ type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
 
 type Square = Player | Tile | PowerUp;
 
+// type GameMap = Immutable<Array<Array<Square>>>;
 type GameMap = Array<Array<Square>>;
 
 type KeyboardEventCode = ValuesOf<typeof KeyCode>;
@@ -49,6 +51,16 @@ type CharacterKeyboardConfig = MovementActions & CharacterActions;
 type PlayerId = `P${RangeOf<4, 1>}`;
 // #endregion
 
+type Players = {
+	[key in PlayerId]?: PlayerConfig;
+};
+
+type PlayerConfig = {
+	id: PlayerId;
+	coordinates: TopLeftCoordinates;
+	ref: React.RefObject<HTMLDivElement>;
+};
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -60,4 +72,6 @@ export type {
 	KeyboardEventCode,
 	CharacterKeyboardConfig,
 	PlayerId,
+	Players,
+	PlayerConfig,
 };

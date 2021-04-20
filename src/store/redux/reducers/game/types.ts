@@ -1,19 +1,81 @@
+// import { Immutable } from 'immer';
 import { Players } from 'containers/Game/Game';
-import { GameMap } from 'containers/Game/types';
+import { GameMap, PlayerId, TopLeftCoordinates } from 'containers/Game/types';
 import * as constants from './constants';
 
-const { KEY, DEFAULT_VALUES, ...actionTypes } = constants;
+const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
 
+/**
+ * Change in this index triggers animation. This is needed in order to prevent
+ * animations when switching perspective (i.e. 2D -> 3D).
+ */
+type AnimationCounter = number;
+
+type Bomb = {
+	id: string;
+	playerId?: PlayerId;
+} & TopLeftCoordinates;
+
+// type GameState = Immutable<{
 type GameState = {
 	players: Players;
 	gameMap: GameMap;
+	is3D: boolean;
+	isSideView: boolean;
+	size: RangeOf<15>;
+	animationCounter: AnimationCounter;
+	bombs: Array<Bomb>;
 };
+// }>;
+
+type AnimatableGameMap = {
+	gameMap: GameMap;
+	animate?: boolean;
+};
+
+type GamePayload =
+	| GameState
+	| ValuesOf<GameState>
+	| OnExplosionProps
+	| BombId
+	| AnimatableGameMap;
 
 type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
-	payload?: GameState;
+	payload?: GamePayload;
 };
 
-type GameActionFn = (payload?: GameState) => GameAction;
+type OnExplosionProps = {
+	bombId: string;
+	bombCoordinates: TopLeftCoordinates;
+};
 
-export type { GameState, GameAction, GameActionFn };
+type OnExplosion = (props: OnExplosionProps) => void;
+
+type BombId = string;
+
+type OnExplosionComplete = (bombId: BombId) => void;
+
+type GameActionFn = (payload?: GamePayload) => void;
+
+type OnMoveProps = {
+	playerId: PlayerId;
+	newCoordinates: TopLeftCoordinates;
+};
+
+type OnMove = (props: OnMoveProps) => void;
+
+export type {
+	Bomb,
+	GameState,
+	GamePayload,
+	GameAction,
+	GameActionFn,
+	OnExplosionProps,
+	OnExplosion,
+	OnMoveProps,
+	OnMove,
+	BombId,
+	OnExplosionComplete,
+	AnimatableGameMap,
+};
