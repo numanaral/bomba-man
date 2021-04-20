@@ -13,8 +13,13 @@ import {
 	setPlayerRefInGame,
 	dropBombInGame,
 	onExplosionComplete,
+	triggerMoveInGame,
 } from 'store/redux/reducers/game/actions';
-import { GameState } from 'store/redux/reducers/game/types';
+import {
+	GameState,
+	OnMoveProps,
+	OnPrepareMoveProps,
+} from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
 import { makeSelectGameSize } from 'store/redux/reducers/game/selectors';
 import { GameMap } from 'containers/Game/types';
@@ -45,9 +50,21 @@ const useGameProvider = () => {
 	);
 
 	// #region GAME ACTIONS
-	const makeMove = useCallback(props => dispatch(makeMoveInGame(props)), [
-		dispatch,
-	]);
+	const makeMove = useCallback(
+		(props: OnMoveProps) => dispatch(makeMoveInGame(props)),
+		[dispatch]
+	);
+
+	const triggerMove = useCallback(
+		(props: Omit<OnPrepareMoveProps, 'onComplete'>) =>
+			dispatch(
+				triggerMoveInGame({
+					...props,
+					onComplete: makeMove,
+				})
+			),
+		[dispatch, makeMove]
+	);
 
 	const dropBomb = useCallback(props => dispatch(dropBombInGame(props)), [
 		dispatch,
@@ -94,6 +111,7 @@ const useGameProvider = () => {
 		setPlayerRef,
 		// GAME ACTIONS
 		makeMove,
+		triggerMove,
 		dropBomb,
 		removeBomb,
 		onExplosion,

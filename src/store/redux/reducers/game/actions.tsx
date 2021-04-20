@@ -11,6 +11,7 @@ import {
 	TOGGLE_GAME_PERSPECTIVE,
 	TOGGLE_GAME_TWO_PLAYER,
 	TRIGGER_GAME_ANIMATION,
+	TRIGGER_MOVE,
 } from './constants';
 import { GameActionFn } from './types';
 
@@ -32,6 +33,11 @@ const setPlayerRefInGame: GameActionFn = payload => ({
 // #region GAME ACTIONS
 const makeMoveInGame: GameActionFn = payload => ({
 	type: MAKE_MOVE,
+	payload,
+});
+
+const triggerMoveInGame: GameActionFn = payload => ({
+	type: TRIGGER_MOVE,
 	payload,
 });
 
@@ -79,6 +85,7 @@ export {
 	setPlayerRefInGame,
 	// GAME ACTIONS
 	makeMoveInGame,
+	triggerMoveInGame,
 	dropBombInGame,
 	removeBombFromGame,
 	onExplosionComplete,

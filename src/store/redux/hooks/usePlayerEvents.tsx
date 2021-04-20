@@ -1,19 +1,13 @@
 import {
 	CharacterKeyboardConfig,
 	KeyboardEventCode,
+	KeyMap,
 	PlayerId,
-	PlayerRef,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Direction } from 'enums';
 import config from 'config';
 import { useRef, useEffect } from 'react';
-import {
-	resetRotation,
-	canMove,
-	handleRotateMove,
-	npcAction,
-} from 'utils/game';
+import { getMoveDirectionFromKeyMap, npcAction } from 'utils/game';
 import { useSelector } from 'react-redux';
 import useInterval from '../../../hooks/useInterval';
 import useGameProvider from './useGameProvider';
@@ -28,17 +22,12 @@ type ActionBaseProps = [
 	keys: CharacterKeyboardConfig
 ];
 
-type MoveAction = (
-	...args: [
-		...ActionBaseProps,
-		...[id: PlayerId, ref: NonNullable<PlayerRef>]
-	]
-) => void;
+type MoveAction = (keys: CharacterKeyboardConfig, id: PlayerId) => void;
 
 type BombAction = (...args: ActionBaseProps) => void;
 
 const usePlayerEvents = () => {
-	const { dropBomb, makeMove } = useGameProvider();
+	const { dropBomb, triggerMove } = useGameProvider();
 	const gameMap = useSelector(makeSelectGameMap());
 	const is3D = useSelector(makeSelectGameIs3D());
 	const players = useSelector(makeSelectGamePlayers());
@@ -49,11 +38,7 @@ const usePlayerEvents = () => {
 		P3: new Date().getTime(),
 		P4: new Date().getTime(),
 	});
-	const keyMap = useRef<
-		{
-			[key in KeyboardEventCode]?: boolean;
-		}
-	>({});
+	const keyMap = useRef<KeyMap>({});
 
 	useInterval(() => {
 		if (!players.P3) return;
@@ -61,67 +46,16 @@ const usePlayerEvents = () => {
 	}, config.duration.movement);
 
 	useEffect(() => {
-		const move: MoveAction = (
-			{ top, left },
-			{ MoveUp, MoveRight, MoveDown, MoveLeft },
-			id,
-			ref
-		) => {
+		const move: MoveAction = (characterKeyboardConfig, id) => {
 			// reset rotation to 0 so the animations are consistent
-			if (is3D) resetRotation(ref);
+			// if (is3D) resetRotation(ref);
+			const direction = getMoveDirectionFromKeyMap(
+				keyMap,
+				characterKeyboardConfig
+			);
+			if (!direction) return;
 
-			if (keyMap.current[MoveUp]) {
-				const newTop = top - config.size.movement;
-				const newLeft = left;
-				if (canMove(newTop, newLeft, gameMap)) {
-					setTimeout(() => {
-						makeMove({
-							playerId: id,
-							newCoordinates: { top: newTop, left: newLeft },
-						});
-						handleRotateMove(ref, is3D, Direction.UP);
-					}, 0);
-				}
-			}
-			if (keyMap.current[MoveRight]) {
-				const newTop = top;
-				const newLeft = left + config.size.movement;
-				if (canMove(newTop, newLeft, gameMap)) {
-					setTimeout(() => {
-						makeMove({
-							playerId: id,
-							newCoordinates: { top: newTop, left: newLeft },
-						});
-						handleRotateMove(ref, is3D, Direction.RIGHT);
-					}, 0);
-				}
-			}
-			if (keyMap.current[MoveDown]) {
-				const newTop = top + config.size.movement;
-				const newLeft = left;
-				if (canMove(newTop, newLeft, gameMap)) {
-					setTimeout(() => {
-						makeMove({
-							playerId: id,
-							newCoordinates: { top: newTop, left: newLeft },
-						});
-						handleRotateMove(ref, is3D, Direction.DOWN);
-					}, 0);
-				}
-			}
-			if (keyMap.current[MoveLeft]) {
-				const newTop = top;
-				const newLeft = left - config.size.movement;
-				if (canMove(newTop, newLeft, gameMap)) {
-					setTimeout(() => {
-						makeMove({
-							playerId: id,
-							newCoordinates: { top: newTop, left: newLeft },
-						});
-						handleRotateMove(ref, is3D, Direction.LEFT);
-					}, 0);
-				}
-			}
+			triggerMove({ playerId: id, direction });
 		};
 
 		const bomb: BombAction = ({ top, left }, { DropBomb }) => {
@@ -156,7 +90,7 @@ const usePlayerEvents = () => {
 						config.duration.movement
 					) {
 						timeOutRef.current[id] = newTime;
-						move(coordinates, keys, id, ref);
+						move(keys, id);
 					}
 				}
 				bomb(coordinates, keys);
@@ -181,7 +115,7 @@ const usePlayerEvents = () => {
 			window.removeEventListener('keyup', handleKeyEvent);
 			window.removeEventListener('keydown', handleKeyEvent);
 		};
-	}, [dropBomb, gameMap, is3D, makeMove, players]);
+	}, [dropBomb, gameMap, is3D, players, triggerMove]);
 
 	return {};
 };

@@ -1,8 +1,8 @@
 enum Direction {
-	UP = 'UP',
-	RIGHT = 'RIGHT',
-	DOWN = 'DOWN',
-	LEFT = 'LEFT',
+	UP = 'Up',
+	RIGHT = 'Right',
+	DOWN = 'Down',
+	LEFT = 'Left',
 }
 
 enum Axis {

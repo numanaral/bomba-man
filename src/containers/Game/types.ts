@@ -1,5 +1,5 @@
 import * as KeyCode from 'keycode-js';
-import { Player, Tile, PowerUp } from 'enums';
+import { Direction, Player, Tile, PowerUp } from 'enums';
 // import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
@@ -36,8 +36,6 @@ type GameMap = Array<Array<Square>>;
 
 type KeyboardEventCode = ValuesOf<typeof KeyCode>;
 
-type Direction = 'Up' | 'Right' | 'Down' | 'Left';
-
 // TODO: group types into separate folders/files
 
 // #region Character Config Types
@@ -63,6 +61,23 @@ type PlayerConfig = {
 	ref: PlayerRef;
 };
 
+type NonNullablePlayerRef = NonNullable<PlayerRef>;
+
+type NonNullablePlayer = NonNullable<PlayerConfig> & {
+	ref: NonNullablePlayerRef;
+};
+
+type NextMoveProps = {
+	playerConfig: NonNullablePlayer;
+	direction: Direction;
+	is3D: boolean;
+	gameMap: GameMap;
+};
+
+type KeyMap = {
+	[key in KeyboardEventCode]?: boolean;
+};
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -77,4 +92,8 @@ export type {
 	Players,
 	PlayerRef,
 	PlayerConfig,
+	NonNullablePlayerRef,
+	NonNullablePlayer,
+	NextMoveProps,
+	KeyMap,
 };

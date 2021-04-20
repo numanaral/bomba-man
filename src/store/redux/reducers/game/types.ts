@@ -6,6 +6,7 @@ import {
 	Players,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
+import { Direction } from 'enums';
 import * as constants from './constants';
 
 const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
@@ -44,7 +45,9 @@ type GamePayload =
 	| OnExplosionProps
 	| BombId
 	| AnimatableGameMap
-	| PlayerWithNewRef;
+	| PlayerWithNewRef
+	| OnMoveProps
+	| OnPrepareMoveProps;
 
 type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
@@ -64,6 +67,14 @@ type OnExplosionComplete = (bombId: BombId) => void;
 
 type GameActionFn = (payload?: GamePayload) => void;
 
+/** Triggers a move */
+type OnPrepareMoveProps = {
+	playerId: PlayerId;
+	direction: Direction;
+	onComplete: OnMove;
+};
+
+/** Makes the actual move */
 type OnMoveProps = {
 	playerId: PlayerId;
 	newCoordinates: TopLeftCoordinates;
@@ -84,6 +95,7 @@ export type {
 	GameActionFn,
 	OnExplosionProps,
 	OnExplosion,
+	OnPrepareMoveProps,
 	OnMoveProps,
 	OnMove,
 	BombId,

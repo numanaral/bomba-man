@@ -1,6 +1,10 @@
 import config from 'config';
 import {
+	CharacterKeyboardConfig,
 	GameMap,
+	KeyMap,
+	NextMoveProps,
+	NonNullablePlayerRef,
 	PlayerConfig,
 	PlayerId,
 	PlayerRef,
@@ -8,6 +12,7 @@ import {
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
+import { OnMove } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -89,6 +94,24 @@ const canMove = (top: number, left: number, map: GameMap) => {
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
 };
 
+const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg)`;
+/**
+ * Since we are moving a flat plane and not a cube, the logical sense of
+ * rotating a cube doesn't work. Different type of rotations do no always
+ * help. One solution is resetting the rotation to 0 so the rotation
+ * movement is smooth on each rotation without worrying about boundaries.
+ *
+ * NOTE: We need to be aware of the animation cancelling
+ *
+ * @param characterRef ref object
+ */
+const resetRotation = (characterRef: NonNullable<PlayerRef>) => {
+	// disable animation
+	characterRef.style.transition = '0ms';
+	// reset
+	characterRef.style.transform = CUBE_BASE_TRANSFORM;
+};
+
 const ROTATION_REGEX = {
 	[Axis.X]: {
 		REPLACE: /rotateX\(-?\d+deg\)/g,
@@ -117,11 +140,9 @@ const rotateMove = (originalTransform: string, direction: Direction) => {
 };
 
 const handleRotateMove = (
-	characterRef: NonNullable<PlayerRef>,
-	is3D: boolean,
+	characterRef: NonNullablePlayerRef,
 	direction: Direction
 ) => {
-	if (!is3D) return;
 	/* eslint-disable no-param-reassign */
 	// enable animation
 	characterRef.style.transition = `${config.duration.movement}ms`;
@@ -133,22 +154,53 @@ const handleRotateMove = (
 	/* eslint-enable no-param-reassign */
 };
 
-const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg)`;
-/**
- * Since we are moving a flat plane and not a cube, the logical sense of
- * rotating a cube doesn't work. Different type of rotations do no always
- * help. One solution is resetting the rotation to 0 so the rotation
- * movement is smooth on each rotation without worrying about boundaries.
- *
- * NOTE: We need to be aware of the animation cancelling
- *
- * @param characterRef ref object
- */
-const resetRotation = (characterRef: NonNullable<PlayerRef>) => {
-	// disable animation
-	characterRef.style.transition = '0ms';
-	// reset
-	characterRef.style.transform = CUBE_BASE_TRANSFORM;
+const handleMove = (
+	{
+		playerConfig: {
+			id: playerId,
+			coordinates: { top, left },
+			ref,
+		},
+		direction,
+		is3D,
+		gameMap,
+	}: NextMoveProps,
+	onComplete: OnMove
+) => {
+	let newTop = top;
+	let newLeft = left;
+	switch (direction) {
+		case Direction.UP:
+			newTop = top - config.size.movement;
+			break;
+		case Direction.RIGHT:
+			newLeft = left + config.size.movement;
+			break;
+		case Direction.DOWN:
+			newTop = top + config.size.movement;
+			break;
+		case Direction.LEFT:
+			newLeft = left - config.size.movement;
+			break;
+		default:
+			// do nothing
+			break;
+	}
+
+	if (!canMove(newTop, newLeft, gameMap)) return;
+
+	if (is3D) resetRotation(ref);
+	// TODO: Do a write-up on this
+	// this complexity is required for a smooth 3d rotate move
+	// since we are resetting rotation css, we need an async
+	// event so that the animation can display smoothly
+	setTimeout(() => {
+		if (is3D) handleRotateMove(ref, direction);
+		onComplete({
+			playerId,
+			newCoordinates: { top: newTop, left: newLeft },
+		});
+	}, 0);
 };
 
 /**
@@ -223,6 +275,24 @@ const playerGenerator = (
 	};
 };
 
+const getMoveDirectionFromKeyMap = (
+	keyMap: React.MutableRefObject<KeyMap>,
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: CharacterKeyboardConfig
+) => {
+	switch (true) {
+		case keyMap.current[MoveUp]:
+			return Direction.UP;
+		case keyMap.current[MoveRight]:
+			return Direction.RIGHT;
+		case keyMap.current[MoveDown]:
+			return Direction.DOWN;
+		case keyMap.current[MoveLeft]:
+			return Direction.LEFT;
+		default:
+			return null;
+	}
+};
+
 type NPCAction = (players: Players, gameMap: GameMap) => void;
 const npcAction: NPCAction = (players, gameMap) => {
 	console.log('players', players);
@@ -237,10 +307,12 @@ export {
 	canMove,
 	rotateMove,
 	handleRotateMove,
+	handleMove,
 	resetRotation,
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
 	handleExplosionOnGameMap,
 	playerGenerator,
+	getMoveDirectionFromKeyMap,
 	npcAction,
 };

@@ -1,8 +1,8 @@
-import { TopLeftCoordinates } from 'containers/Game/types';
+import { NonNullablePlayer, TopLeftCoordinates } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import config from 'config';
 import { Reducer } from 'redux';
-import { handleExplosionOnGameMap } from 'utils/game';
+import { handleExplosionOnGameMap, handleMove } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
 import {
 	DEFAULT_VALUES,
@@ -20,6 +20,7 @@ import {
 	REMOVE_BOMB,
 	SET_PLAYER_REF,
 	ON_EXPLOSION_COMPLETE,
+	TRIGGER_MOVE,
 } from './constants';
 import {
 	AnimatableGameMap,
@@ -28,6 +29,7 @@ import {
 	GameState,
 	OnExplosionProps,
 	OnMoveProps,
+	OnPrepareMoveProps,
 	PlayerWithNewRef,
 } from './types';
 
@@ -58,6 +60,25 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const { playerId, newRef } = action.payload as PlayerWithNewRef;
 				if (!newRef) break;
 				draft.players[playerId]!.ref = castDraft(newRef);
+				break;
+			}
+			case TRIGGER_MOVE: {
+				const {
+					playerId,
+					direction,
+					onComplete,
+				} = action.payload as OnPrepareMoveProps;
+				const { is3D, players, gameMap } = state;
+				const playerConfig = players[playerId] as NonNullablePlayer;
+				handleMove(
+					{
+						playerConfig,
+						direction,
+						is3D,
+						gameMap,
+					},
+					onComplete
+				);
 				break;
 			}
 			case MAKE_MOVE: {
