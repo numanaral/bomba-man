@@ -1,7 +1,5 @@
 import {
-	AddBomb,
 	CharacterKeyboardConfig,
-	GameMap,
 	KeyboardEventCode,
 	PlayerId,
 	TopLeftCoordinates,
@@ -13,11 +11,16 @@ import {
 	resetRotation,
 	canMove,
 	handleRotateMove,
-	NPCAction,
+	npcAction,
 } from 'utils/game';
-import { Players } from 'containers/Game/Game';
-import { OnMove } from 'store/redux/reducers/game/types';
-import useInterval from './useInterval';
+import { useSelector } from 'react-redux';
+import useInterval from '../../../hooks/useInterval';
+import useGameProvider from './useGameProvider';
+import {
+	makeSelectGameMap,
+	makeSelectGameIs3D,
+	makeSelectGamePlayers,
+} from '../reducers/game/selectors';
 
 type ActionBaseProps = [
 	coordinates: TopLeftCoordinates,
@@ -33,14 +36,12 @@ type MoveAction = (
 
 type BombAction = (...args: ActionBaseProps) => void;
 
-const usePlayerEvents = (
-	players: Players,
-	onMove: OnMove,
-	gameMap: GameMap,
-	is3D: boolean,
-	addBomb: AddBomb,
-	handleNpcActions?: NPCAction
-) => {
+const usePlayerEvents = () => {
+	const { dropBomb, makeMove } = useGameProvider();
+	const gameMap = useSelector(makeSelectGameMap());
+	const is3D = useSelector(makeSelectGameIs3D());
+	const players = useSelector(makeSelectGamePlayers());
+
 	const timeOutRef = useRef<{ [key in PlayerId]?: number }>({
 		P1: new Date().getTime(),
 		P2: new Date().getTime(),
@@ -54,7 +55,8 @@ const usePlayerEvents = (
 	>({});
 
 	useInterval(() => {
-		handleNpcActions?.(players, gameMap);
+		if (!players.P3) return;
+		npcAction(players, gameMap);
 	}, config.duration.movement);
 
 	useEffect(() => {
@@ -72,7 +74,7 @@ const usePlayerEvents = (
 				const newLeft = left;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove({
+						makeMove({
 							playerId: id,
 							newCoordinates: { top: newTop, left: newLeft },
 						});
@@ -85,7 +87,7 @@ const usePlayerEvents = (
 				const newLeft = left + config.size.movement;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove({
+						makeMove({
 							playerId: id,
 							newCoordinates: { top: newTop, left: newLeft },
 						});
@@ -98,7 +100,7 @@ const usePlayerEvents = (
 				const newLeft = left;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove({
+						makeMove({
 							playerId: id,
 							newCoordinates: { top: newTop, left: newLeft },
 						});
@@ -111,7 +113,7 @@ const usePlayerEvents = (
 				const newLeft = left - config.size.movement;
 				if (canMove(newTop, newLeft, gameMap)) {
 					setTimeout(() => {
-						onMove({
+						makeMove({
 							playerId: id,
 							newCoordinates: { top: newTop, left: newLeft },
 						});
@@ -123,7 +125,7 @@ const usePlayerEvents = (
 
 		const bomb: BombAction = ({ top, left }, { DropBomb }) => {
 			if (keyMap.current[DropBomb]) {
-				addBomb({
+				dropBomb({
 					top,
 					left,
 				});
@@ -181,7 +183,7 @@ const usePlayerEvents = (
 			window.removeEventListener('keyup', handleKeyEvent);
 			window.removeEventListener('keydown', handleKeyEvent);
 		};
-	}, [addBomb, gameMap, is3D, onMove, players]);
+	}, [dropBomb, gameMap, is3D, makeMove, players]);
 
 	return {};
 };

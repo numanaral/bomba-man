@@ -1,15 +1,12 @@
 import config from 'config';
-import usePlayerEvents from 'hooks/usePlayerEvents';
-import { npcAction } from 'utils/game';
+import usePlayerEvents from 'store/redux/hooks/usePlayerEvents';
 import {
 	makeSelectGameAnimationCounter,
 	makeSelectGameIs3D,
 	makeSelectGameIsSideView,
 	makeSelectGameMap,
-	makeSelectGamePlayers,
 } from 'store/redux/reducers/game/selectors';
 import { useSelector } from 'react-redux';
-import useGameProvider from 'store/redux/hooks/useGameProvider';
 import GameContainer from './GameContainer';
 import Map from './Map';
 import { Players } from './types';
@@ -17,21 +14,12 @@ import Settings from './Settings';
 import GameContent from './GameContent';
 
 const Game = () => {
-	const { dropBomb, makeMove } = useGameProvider();
 	const gameMap = useSelector(makeSelectGameMap());
 	const is3D = useSelector(makeSelectGameIs3D());
-	const players = useSelector(makeSelectGamePlayers());
 	const isTopView = !useSelector(makeSelectGameIsSideView());
 	const animationCounter = useSelector(makeSelectGameAnimationCounter());
 
-	usePlayerEvents(
-		players,
-		makeMove,
-		gameMap,
-		is3D,
-		dropBomb,
-		...((!!players.P3 && [npcAction]) || [])
-	);
+	usePlayerEvents();
 
 	return (
 		<GameContainer>
