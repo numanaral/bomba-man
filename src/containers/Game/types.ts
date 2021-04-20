@@ -55,10 +55,12 @@ type Players = {
 	[key in PlayerId]?: PlayerConfig;
 };
 
+type PlayerRef = HTMLDivElement | null;
+
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
-	ref: React.RefObject<HTMLDivElement>;
+	ref: PlayerRef;
 };
 
 export type {
@@ -73,5 +75,6 @@ export type {
 	CharacterKeyboardConfig,
 	PlayerId,
 	Players,
+	PlayerRef,
 	PlayerConfig,
 };

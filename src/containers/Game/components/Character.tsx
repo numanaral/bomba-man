@@ -5,7 +5,7 @@ import { forwardRef } from 'react';
 import styled from 'styled-components';
 import theme from 'theme';
 import { CUBE_BASE_TRANSFORM } from 'utils/game';
-import { PlayerId, TopLeftCoordinates } from '../types';
+import { PlayerId, PlayerRef, TopLeftCoordinates } from '../types';
 
 const StyledTempCharacterName = styled.span`
 	color: ${theme.palette.color.warning};
@@ -58,7 +58,7 @@ interface Props {
 	is3D: boolean;
 }
 
-const Character = forwardRef<HTMLDivElement, Props>(
+const Character = forwardRef<PlayerRef, Props>(
 	(
 		{
 			/* skin */

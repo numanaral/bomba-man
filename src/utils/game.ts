@@ -3,11 +3,11 @@ import {
 	GameMap,
 	PlayerConfig,
 	PlayerId,
+	PlayerRef,
 	Players,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
-import { createRef } from 'react';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -117,17 +117,17 @@ const rotateMove = (originalTransform: string, direction: Direction) => {
 };
 
 const handleRotateMove = (
-	characterRef: React.RefObject<HTMLDivElement>,
+	characterRef: NonNullable<PlayerRef>,
 	is3D: boolean,
 	direction: Direction
 ) => {
 	if (!is3D) return;
 	/* eslint-disable no-param-reassign */
 	// enable animation
-	characterRef!.current!.style.transition = `${config.duration.movement}ms`;
+	characterRef.style.transition = `${config.duration.movement}ms`;
 	// move
-	characterRef!.current!.style.transform = rotateMove(
-		characterRef!.current!.style.transform,
+	characterRef.style.transform = rotateMove(
+		characterRef.style.transform,
 		direction
 	);
 	/* eslint-enable no-param-reassign */
@@ -144,11 +144,11 @@ const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotate
  *
  * @param characterRef ref object
  */
-const resetRotation = (characterRef: React.RefObject<HTMLDivElement>) => {
+const resetRotation = (characterRef: NonNullable<PlayerRef>) => {
 	// disable animation
-	characterRef!.current!.style.transition = '0ms';
+	characterRef.style.transition = '0ms';
 	// reset
-	characterRef!.current!.style.transform = CUBE_BASE_TRANSFORM;
+	characterRef.style.transform = CUBE_BASE_TRANSFORM;
 };
 
 /**
@@ -219,9 +219,7 @@ const playerGenerator = (
 			top: top * 32,
 			left: left * 32,
 		},
-		// eslint-disable-next-line max-len
-		ref: createRef<HTMLDivElement>(),
-		// ref: createRef<HTMLDivElement>() as RefObject<HTMLDivElement>,
+		ref: null,
 	};
 };
 

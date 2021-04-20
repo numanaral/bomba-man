@@ -57,7 +57,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			case SET_PLAYER_REF: {
 				const { playerId, newRef } = action.payload as PlayerWithNewRef;
 				if (!newRef) break;
-				draft.players[playerId]!.ref.current = castDraft(newRef);
+				draft.players[playerId]!.ref = castDraft(newRef);
 				break;
 			}
 			case MAKE_MOVE: {

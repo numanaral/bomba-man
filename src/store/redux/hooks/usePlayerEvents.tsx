@@ -2,6 +2,7 @@ import {
 	CharacterKeyboardConfig,
 	KeyboardEventCode,
 	PlayerId,
+	PlayerRef,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Direction } from 'enums';
@@ -30,7 +31,7 @@ type ActionBaseProps = [
 type MoveAction = (
 	...args: [
 		...ActionBaseProps,
-		...[id: PlayerId, ref: React.RefObject<HTMLDivElement>]
+		...[id: PlayerId, ref: NonNullable<PlayerRef>]
 	]
 ) => void;
 
@@ -148,7 +149,7 @@ const usePlayerEvents = () => {
 				const { [id]: keys } = config.keyboardConfig.player;
 				const { ref } = players[id]!;
 
-				if (ref.current) {
+				if (ref) {
 					const newTime = new Date().getTime();
 					if (
 						newTime - timeOutRef.current[id]! >

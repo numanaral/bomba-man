@@ -2,6 +2,7 @@
 import {
 	GameMap,
 	PlayerId,
+	PlayerRef,
 	Players,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
@@ -72,7 +73,7 @@ type OnMove = (props: OnMoveProps) => void;
 
 type PlayerWithNewRef = {
 	playerId: PlayerId;
-	newRef: HTMLDivElement;
+	newRef: NonNullable<PlayerRef>;
 };
 
 export type {

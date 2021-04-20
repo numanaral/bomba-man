@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
 import './Cube.scss';
-import { TileProps } from '../types';
+import { PlayerRef, TileProps } from '../types';
 
-const Cube = forwardRef<HTMLDivElement, TileProps>(
+const Cube = forwardRef<PlayerRef, TileProps>(
 	(
 		{
 			size,

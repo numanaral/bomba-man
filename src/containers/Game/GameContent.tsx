@@ -21,7 +21,6 @@ const GameContent = () => {
 	const { onExplosion } = useGameProvider();
 
 	const refFunc = ({ id: playerId }: PlayerConfig) => (newRef: any) => {
-		// if (ref?.current) return;
 		setPlayerRef({
 			playerId,
 			newRef,
@@ -40,7 +39,6 @@ const GameContent = () => {
 							coordinates={playerConfig.coordinates!}
 							is3D={is3D}
 							ref={refFunc(playerConfig)}
-							// ref={playerConfig.ref}
 						/>
 					);
 				}
