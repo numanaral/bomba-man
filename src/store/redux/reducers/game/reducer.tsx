@@ -28,6 +28,7 @@ import {
 	GameState,
 	OnExplosionProps,
 	OnMoveProps,
+	PlayerWithNewRef,
 } from './types';
 
 const gameReducer: Reducer<GameState, GameAction> = (
@@ -53,20 +54,13 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				break;
 			}
 			// GAME ACTIONS
-			case SET_PLAYER_REF:
-				console.log('setPlayerRefInGame');
-				console.log(action);
-				// const {} = action.payload as G
-				// @ts-ignore
-				// eslint-disable-next-line max-len, prettier/prettier
-				if(!action.payload.newRef) break;
-				// @ts-ignore
-				// eslint-disable-next-line max-len, prettier/prettier
-				draft.players[action.payload.id].ref.current = action.payload.newRef;
-				// draft.players[action.payload.id].ref = action.payload.ref;
+			case SET_PLAYER_REF: {
+				const { playerId, newRef } = action.payload as PlayerWithNewRef;
+				if (!newRef) break;
+				draft.players[playerId]!.ref.current = castDraft(newRef);
 				break;
+			}
 			case MAKE_MOVE: {
-				console.log(action);
 				const {
 					playerId,
 					newCoordinates,

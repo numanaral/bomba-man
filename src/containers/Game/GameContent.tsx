@@ -20,10 +20,10 @@ const GameContent = () => {
 
 	const { onExplosion } = useGameProvider();
 
-	const refFunc = ({ id }: PlayerConfig) => (newRef: any) => {
+	const refFunc = ({ id: playerId }: PlayerConfig) => (newRef: any) => {
 		// if (ref?.current) return;
 		setPlayerRef({
-			id,
+			playerId,
 			newRef,
 		});
 	};

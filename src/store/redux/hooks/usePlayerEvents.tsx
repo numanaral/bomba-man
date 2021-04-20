@@ -148,9 +148,6 @@ const usePlayerEvents = () => {
 				const { [id]: keys } = config.keyboardConfig.player;
 				const { ref } = players[id]!;
 
-				console.log(ref);
-				console.log(players);
-
 				if (ref.current) {
 					const newTime = new Date().getTime();
 					if (

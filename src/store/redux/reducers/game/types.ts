@@ -42,7 +42,8 @@ type GamePayload =
 	| ValuesOf<GameState>
 	| OnExplosionProps
 	| BombId
-	| AnimatableGameMap;
+	| AnimatableGameMap
+	| PlayerWithNewRef;
 
 type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
@@ -69,6 +70,11 @@ type OnMoveProps = {
 
 type OnMove = (props: OnMoveProps) => void;
 
+type PlayerWithNewRef = {
+	playerId: PlayerId;
+	newRef: HTMLDivElement;
+};
+
 export type {
 	Bomb,
 	GameState,
@@ -82,4 +88,5 @@ export type {
 	BombId,
 	OnExplosionComplete,
 	AnimatableGameMap,
+	PlayerWithNewRef,
 };
