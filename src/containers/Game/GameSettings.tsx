@@ -20,31 +20,37 @@ const Settings = () => {
 	const isSideView = useSelector(makeSelectGameIsSideView());
 	const { P2, P3: NPC } = useSelector(makeSelectGamePlayers());
 
+	const buttons = [
+		{
+			label: 'New Collision Coordinates',
+			onClick: generateNewCollisionCoordinates,
+		},
+		{
+			label: 'Toggle 3D (Experimental)',
+			onClick: toggleDimension,
+			active: is3D,
+		},
+		{
+			label: 'Toggle Side View',
+			onClick: togglePerspective,
+			active: isSideView,
+			disabled: !is3D,
+		},
+		{
+			label: 'Toggle Two-Player Mode',
+			onClick: toggleTwoPlayer,
+			active: !!P2,
+		},
+		{ label: 'Toggle NPC', onClick: toggleNPC, active: !!NPC },
+	];
+
 	return (
 		<div>
-			<GameButton onClick={generateNewCollisionCoordinates}>
-				New Collision Coordinates
-			</GameButton>
-			<GameButton active={is3D} onClick={toggleDimension}>
-				Toggle 3D (Experimental)
-			</GameButton>
-			<GameButton
-				active={isSideView}
-				onClick={togglePerspective}
-				disabled={!is3D}
-			>
-				Toggle Side View
-			</GameButton>
-			<br />
-			<GameButton active={!!P2} onClick={toggleTwoPlayer}>
-				Toggle Two-Player Mode
-			</GameButton>
-			<GameButton active={!!NPC} onClick={toggleNPC}>
-				Toggle NPC
-			</GameButton>
-
-			<br />
-			<br />
+			{buttons.map(({ label, ...rest }) => (
+				<GameButton key={label} {...rest}>
+					{label}
+				</GameButton>
+			))}
 		</div>
 	);
 };
