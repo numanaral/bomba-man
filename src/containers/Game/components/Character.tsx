@@ -1,11 +1,11 @@
 import config from 'config';
-import Cube from 'containers/Game/Cube';
+import Cube from 'containers/Game/components/Cube';
 import { Player } from 'enums';
 import { forwardRef } from 'react';
 import styled from 'styled-components';
 import theme from 'theme';
 import { CUBE_BASE_TRANSFORM } from 'utils/game';
-import { PlayerId, TopLeftCoordinates } from './types';
+import { PlayerId, TopLeftCoordinates } from '../types';
 
 const StyledTempCharacterName = styled.span`
 	color: ${theme.palette.color.warning};

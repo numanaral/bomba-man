@@ -6,8 +6,8 @@ import {
 	makeSelectGamePlayers,
 } from 'store/redux/reducers/game/selectors';
 import useGameProvider from 'store/redux/hooks/useGameProvider';
-import Bomb from './Bomb';
-import Character from './Character';
+import Bomb from './components/Bomb';
+import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;

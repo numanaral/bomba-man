@@ -1,6 +1,10 @@
 // import { Immutable } from 'immer';
-import { Players } from 'containers/Game/Game';
-import { GameMap, PlayerId, TopLeftCoordinates } from 'containers/Game/types';
+import {
+	GameMap,
+	PlayerId,
+	Players,
+	TopLeftCoordinates,
+} from 'containers/Game/types';
 import * as constants from './constants';
 
 const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;

@@ -5,7 +5,7 @@ import theme from 'theme';
 import { Tile as TileEnum } from 'enums';
 import Cube from './Cube';
 import Tile from './Tile';
-import { GameMap, Square } from './types';
+import { GameMap, Square } from '../types';
 
 interface Props {
 	size: RangeOf<15>;

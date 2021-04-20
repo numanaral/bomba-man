@@ -1,9 +1,9 @@
 import config from 'config';
-import { Players } from 'containers/Game/Game';
 import {
 	GameMap,
 	PlayerConfig,
 	PlayerId,
+	Players,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
