@@ -1,6 +1,7 @@
 import {
 	DROP_BOMB,
 	MAKE_MOVE,
+	ON_EXPLOSION_COMPLETE,
 	REMOVE_BOMB,
 	SET_GAME_MAP,
 	SET_GAME_STATE,
@@ -43,6 +44,11 @@ const removeBombFromGame: GameActionFn = payload => ({
 	type: REMOVE_BOMB,
 	payload,
 });
+
+const onExplosionComplete: GameActionFn = payload => ({
+	type: ON_EXPLOSION_COMPLETE,
+	payload,
+});
 // #endregion
 
 // #region GAME SETTINGS
@@ -75,6 +81,7 @@ export {
 	makeMoveInGame,
 	dropBombInGame,
 	removeBombFromGame,
+	onExplosionComplete,
 	// GAME SETTINGS
 	triggerGameAnimation,
 	toggleGameDimension,

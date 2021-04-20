@@ -1,6 +1,8 @@
 import { TopLeftCoordinates } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
+import config from 'config';
 import { Reducer } from 'redux';
+import { handleExplosionOnGameMap } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
 import {
 	DEFAULT_VALUES,
@@ -17,12 +19,14 @@ import {
 	DROP_BOMB,
 	REMOVE_BOMB,
 	SET_PLAYER_REF,
+	ON_EXPLOSION_COMPLETE,
 } from './constants';
 import {
 	AnimatableGameMap,
 	Bomb,
 	GameAction,
 	GameState,
+	OnExplosionProps,
 	OnMoveProps,
 } from './types';
 
@@ -82,6 +86,21 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			case REMOVE_BOMB: {
 				const bombId = action.payload as string;
 				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
+				break;
+			}
+			case ON_EXPLOSION_COMPLETE: {
+				const {
+					bombId,
+					bombCoordinates,
+				} = action.payload as OnExplosionProps;
+				// remove bomb
+				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
+				const newMap = handleExplosionOnGameMap(
+					state.gameMap,
+					bombCoordinates,
+					config.size.explosion
+				);
+				draft.gameMap = newMap;
 				break;
 			}
 			// GAME SETTINGS
