@@ -48,7 +48,10 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 `;
 
 const CircleCharacter = forwardRef<PlayerRef, CharacterProps>(
-	({ id, name, coordinates: { top, left }, ...rest }, ref) => {
+	(
+		{ id, name, coordinates: { top, left }, keyboardConfig: _, ...rest },
+		ref
+	) => {
 		return (
 			<StyledTempCharacter
 				$name={`${name} ${id}`}

@@ -7,6 +7,7 @@ import { CUBE_BASE_TRANSFORM } from 'utils/game';
 import {
 	CharacterProps,
 	PlayerId,
+	PlayerKeyboardConfig,
 	PlayerRef,
 	TopLeftCoordinates,
 } from '../types';
@@ -17,6 +18,7 @@ interface Props {
 	name: string;
 	// skin: Skin;
 	coordinates: TopLeftCoordinates;
+	keyboardConfig: PlayerKeyboardConfig;
 	is3D: boolean;
 }
 
@@ -27,6 +29,7 @@ const Character = forwardRef<PlayerRef, Props>(
 			id,
 			name,
 			coordinates: { top, left },
+			keyboardConfig,
 			is3D,
 			...rest
 		},
@@ -45,6 +48,7 @@ const Character = forwardRef<PlayerRef, Props>(
 				top: _top,
 				left: _left,
 			},
+			keyboardConfig,
 			ref,
 			...rest,
 		};

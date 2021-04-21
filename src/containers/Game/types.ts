@@ -82,6 +82,7 @@ type CharacterProps = {
 	id: PlayerId;
 	name: string;
 	coordinates: TopLeftCoordinates;
+	keyboardConfig: PlayerKeyboardConfig;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export type {

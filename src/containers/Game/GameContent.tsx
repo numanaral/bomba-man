@@ -31,12 +31,17 @@ const GameContent = () => {
 		<>
 			{(Object.entries(players) as PlayerEntry).map(
 				([playerId, playerConfig]) => {
+					// TODO: Put this in the store
+					const {
+						[playerId]: keyboardConfig,
+					} = config.keyboardConfig.player;
 					return (
 						<Character
 							id={playerId}
 							key={playerId}
 							name="Bomber"
 							coordinates={playerConfig.coordinates!}
+							keyboardConfig={keyboardConfig}
 							is3D={is3D}
 							ref={refFunc(playerConfig)}
 						/>
