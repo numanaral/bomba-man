@@ -304,6 +304,24 @@ const playerGenerator = (
 	};
 };
 
+const getMoveDirectionFromKeyboardCode = (
+	keyCode: string,
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
+) => {
+	switch (true) {
+		case keyCode === MoveUp:
+			return Direction.UP;
+		case keyCode === MoveRight:
+			return Direction.RIGHT;
+		case keyCode === MoveDown:
+			return Direction.DOWN;
+		case keyCode === MoveLeft:
+			return Direction.LEFT;
+		default:
+			return null;
+	}
+};
+
 const getMoveDirectionFromKeyMap = (
 	keyMap: React.MutableRefObject<KeyMap>,
 	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
@@ -343,6 +361,7 @@ export {
 	getExplosionCoordinates,
 	handleExplosionOnGameMap,
 	playerGenerator,
+	getMoveDirectionFromKeyboardCode,
 	getMoveDirectionFromKeyMap,
 	npcAction,
 };
