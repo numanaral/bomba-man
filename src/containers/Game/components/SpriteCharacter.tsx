@@ -42,12 +42,14 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 					clearCurrentKey();
 					return;
 				}
-				updateDirection(newDirection);
 				setCurrentKeyDirection(newDirection);
+				updateDirection(newDirection);
 			};
 
 			const handleKeyUp = () => {
-				clearCurrentKey();
+				setTimeout(() => {
+					clearCurrentKey();
+				}, 300);
 			};
 
 			document.addEventListener('keydown', handleKeyDown);
