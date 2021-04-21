@@ -78,6 +78,12 @@ type KeyMap = {
 	[key in KeyboardEventCode]?: boolean;
 };
 
+type CharacterProps = {
+	id: PlayerId;
+	name: string;
+	coordinates: TopLeftCoordinates;
+} & React.HTMLAttributes<HTMLDivElement>;
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -96,4 +102,5 @@ export type {
 	NonNullablePlayer,
 	NextMoveProps,
 	KeyMap,
+	CharacterProps,
 };

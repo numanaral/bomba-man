@@ -2,53 +2,15 @@ import config from 'config';
 import Cube from 'containers/Game/components/Cube';
 import { Player } from 'enums';
 import { forwardRef } from 'react';
-import styled from 'styled-components';
 import theme from 'theme';
 import { CUBE_BASE_TRANSFORM } from 'utils/game';
-import { PlayerId, PlayerRef, TopLeftCoordinates } from '../types';
-
-const StyledTempCharacterName = styled.span`
-	color: ${theme.palette.color.warning};
-`;
-
-const StyledTempCharacterFace = styled.div`
-	color: #000;
-`;
-const StyledTempCharacterEyes = styled.span``;
-const StyledTempCharacterMouth = styled.span``;
-
-const StyledTempCharacter = styled.div<{ $name: string }>`
-	width: ${theme.game.character.size};
-	height: ${theme.game.character.size};
-	background-color: ${theme.palette.color.success};
-	position: absolute;
-	/* top: 0;
-	left: 0; */
-	border-radius: 50%;
-	display: flex;
-	justify-content: center;
-
-	transition: top ${config.duration.movement}ms,
-		left ${config.duration.movement}ms;
-
-	& > ${StyledTempCharacterName} {
-		z-index: 9999;
-		position: absolute;
-		top: calc((${theme.game.character.size} + 2px) * -1);
-		font-size: calc(${theme.game.character.size} / 3);
-	}
-
-	& > ${StyledTempCharacterFace} {
-		position: absolute;
-		top: calc(${theme.game.character.size} / 8);
-		font-size: calc(${theme.game.character.size} / 4);
-
-		/* & > ${StyledTempCharacterEyes} {
-		}
-		& > ${StyledTempCharacterMouth} {
-		} */
-	}
-`;
+import {
+	CharacterProps,
+	PlayerId,
+	PlayerRef,
+	TopLeftCoordinates,
+} from '../types';
+import CircleCharacter from './CircleCharacter';
 
 interface Props {
 	id: PlayerId;
@@ -76,6 +38,17 @@ const Character = forwardRef<PlayerRef, Props>(
 		const _top = padding + top;
 		const _left = padding + left;
 
+		const props: CharacterProps & { ref: React.ForwardedRef<PlayerRef> } = {
+			id,
+			name: `${name} ${id}`,
+			coordinates: {
+				top: _top,
+				left: _left,
+			},
+			ref,
+			...rest,
+		};
+
 		return (
 			(is3D && (
 				<Cube
@@ -93,24 +66,7 @@ const Character = forwardRef<PlayerRef, Props>(
 					ref={ref}
 					{...rest}
 				/>
-			)) || (
-				<StyledTempCharacter
-					$name={`${name} ${id}`}
-					style={{
-						top: _top,
-						left: _left,
-					}}
-					ref={ref}
-					{...rest}
-				>
-					<StyledTempCharacterName>{`${name} ${id}`}</StyledTempCharacterName>
-					<StyledTempCharacterFace>
-						<StyledTempCharacterEyes>o-o</StyledTempCharacterEyes>
-						<br />
-						<StyledTempCharacterMouth>===</StyledTempCharacterMouth>
-					</StyledTempCharacterFace>
-				</StyledTempCharacter>
-			)
+			)) || <CircleCharacter {...props} />
 		);
 	}
 );
