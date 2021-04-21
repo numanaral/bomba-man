@@ -45,6 +45,11 @@
 		background-size: 100%;
 	}
 
+	// more "realistic" shadow
+	&[data-walking='true'] .shadow {
+		animation: shadowAnimation 0.3s infinite;
+	}
+
 	& .spritesheet-wrapper {
 		overflow: hidden;
 		position: absolute;
@@ -86,5 +91,15 @@
 	}
 	to {
 		transform: translate3d(-100%, 0%, 0);
+	}
+}
+
+@keyframes shadowAnimation {
+	from,
+	to {
+		transform: scale(1) translateY(0px);
+	}
+	50% {
+		transform: scale(0.8) translateY(4px);
 	}
 }
