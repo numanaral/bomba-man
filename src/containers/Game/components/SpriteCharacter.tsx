@@ -69,7 +69,9 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 			>
 				{/* <div className="name">{name}</div> */}
 				<div className="shadow pixel-art" />
-				<div className="spritesheet pixel-art" />
+				<div className="spritesheet-wrapper">
+					<div className="spritesheet pixel-art" />
+				</div>
 			</div>
 		);
 	}

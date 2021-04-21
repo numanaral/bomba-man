@@ -5,6 +5,9 @@
 :root {
 	--pixel-size: 2px;
 	--grid-cell: calc(var(--pixel-size) * 16);
+	--spacing-x: 8px;
+	--spacing-y: 20px;
+	--shadow-size-multiplier: 1.5;
 }
 
 .pixel-art {
@@ -15,7 +18,6 @@
 	width: var(--character-size);
 	height: var(--character-size);
 	position: absolute;
-	overflow: hidden;
 	transition-duration: 0.3s;
 
 	& .name {
@@ -27,36 +29,51 @@
 	}
 
 	& .shadow {
-		width: var(--character-size);
-		height: var(--character-size);
 		position: absolute;
-		left: 0;
-		top: 0;
-		background: url('https://assets.codepen.io/21542/DemoRpgCharacterShadow.png')
-			no-repeat no-repeat;
+		// bigger shadow
+		// better come up with a sizing algorithm
+		// width: calc(var(--character-size) * 2);
+		// height: calc(var(--character-size) * 2);
+		// left: calc(var(--character-size) * -0.5);
+		// top: calc(var(--character-size) * -1.2);
+		width: calc(var(--character-size) * 1.5);
+		height: calc(var(--character-size) * 1.5);
+		left: calc(var(--character-size) * -0.25);
+		top: calc(var(--character-size) * -0.75);
+		// background: url('https://assets.codepen.io/21542/DemoRpgCharacterShadow.png')
+		background: url('./character-shadow.png') no-repeat no-repeat;
 		background-size: 100%;
 	}
 
-	& .spritesheet {
+	& .spritesheet-wrapper {
+		overflow: hidden;
 		position: absolute;
-		background: url('https://assets.codepen.io/21542/DemoRpgCharacter.png')
-			no-repeat no-repeat;
-		background-size: 100%;
-		width: calc(var(--grid-cell) * 6);
-		height: calc(var(--grid-cell) * 6);
+		width: calc(var(--character-size) * 2);
+		height: calc(var(--character-size) * 2);
+		top: calc(var(--spacing-y) * -2);
+		left: calc(var(--spacing-x) * -2);
 
-		// Down / Default
-		background-position: -7px -16px;
+		& .spritesheet {
+			position: absolute;
+			background: url('https://assets.codepen.io/21542/DemoRpgCharacter.png')
+				no-repeat no-repeat;
+			background-size: 100%;
+			width: calc(var(--grid-cell) * 8);
+			height: calc(var(--grid-cell) * 8);
+
+			// Down / Default
+			// background-position: -7px -16px;
+		}
 	}
 
-	&[data-facing='Up'] .spritesheet {
-		background-position-y: calc(var(--pixel-size) * -56);
-	}
 	&[data-facing='Right'] .spritesheet {
 		background-position-y: calc(var(--pixel-size) * -32);
 	}
+	&[data-facing='Up'] .spritesheet {
+		background-position-y: calc(var(--pixel-size) * -64);
+	}
 	&[data-facing='Left'] .spritesheet {
-		background-position-y: calc(var(--pixel-size) * -80);
+		background-position-y: calc(var(--pixel-size) * -96);
 	}
 	&[data-walking='true'] .spritesheet {
 		animation: walkAnimation 0.6s steps(4) infinite;
