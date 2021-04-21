@@ -6,7 +6,8 @@ To create a customizable/extendable bomberman game where any mechanic and style 
 # TODO:  
 - [x] create a temp map, basic components, simple collision and movement
 - [x] work on a basic bomb and explosion, create different collision units
-- [ ] add sprites for the character and the map
+- [x] add sprites for the character and the map
+- [x] move onto redux, create util hooks
 - [ ] clean up, decouple `APP_SETTINGS`, allow pure generation via JSON
 - [ ] work on dumb NPCs
 - [ ] multiplayer
@@ -19,8 +20,8 @@ To create a customizable/extendable bomberman game where any mechanic and style 
 	- [x] perspective
 	- [x] character
 		- [x] 3d move
-	- [ ] bomb
-		- [ ] explosion
+	- [x] bomb
+		- [x] explosion
 - [ ] Theme/Customization
 	- [ ] 3D Perspective
 	- [ ] colors
