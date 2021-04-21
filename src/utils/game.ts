@@ -235,10 +235,11 @@ const handleExplosionOnGameMap = (
 		bombCoordinates
 	);
 
-	// ensure there are no negatives
+	// ensure that we are checking within the boundaries
 	for (
 		let currentYSquare = Math.max(0, ySquare - explosionSize);
-		currentYSquare <= ySquare + explosionSize;
+		currentYSquare <=
+		Math.min(config.size.game - 1, ySquare + explosionSize);
 		currentYSquare++
 	) {
 		if (gameMapCopy[currentYSquare][xSquare] === Tile.Breaking) {
@@ -246,10 +247,11 @@ const handleExplosionOnGameMap = (
 		}
 	}
 
-	// ensure there are no negatives
+	// ensure that we are checking within the boundaries
 	for (
 		let currentXSquare = Math.max(0, xSquare - explosionSize);
-		currentXSquare <= xSquare + explosionSize;
+		currentXSquare <=
+		Math.min(config.size.game - 1, xSquare + explosionSize);
 		currentXSquare++
 	) {
 		if (gameMapCopy[ySquare][currentXSquare] === Tile.Breaking) {
