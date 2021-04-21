@@ -3,6 +3,7 @@ import { Axis, ExplosionState, Bomb as BombEnum } from 'enums';
 import { useEffect, useState } from 'react';
 import { OnExplosion } from 'store/redux/reducers/game/types';
 import styled, { css, keyframes } from 'styled-components';
+import theme from 'theme';
 import { sleep } from 'utils';
 import { getExplosionCoordinates } from 'utils/game';
 import Cube from './Cube';
@@ -206,7 +207,7 @@ const Bomb = ({
 					left={left}
 					// animate
 					variant={BombEnum.Basic}
-					color="red"
+					color={theme.palette.color.error}
 					collisionIndex={1}
 					style={bombStyleProps}
 					$explosionAxis={Axis.X}
@@ -218,7 +219,7 @@ const Bomb = ({
 					left={left}
 					// animate
 					variant={BombEnum.Basic}
-					color="red"
+					color={theme.palette.color.error}
 					collisionIndex={1}
 					style={bombStyleProps}
 					$explosionAxis={Axis.Y}
@@ -239,7 +240,7 @@ const Bomb = ({
 				left={Number(bombStyleProps.left)}
 				animate={false}
 				variant={BombEnum.Basic}
-				color="red"
+				color={theme.palette.color.error}
 				collisionIndex={1}
 				style={style}
 			/>

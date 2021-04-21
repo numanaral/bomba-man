@@ -6,6 +6,7 @@ import {
 	makeSelectGamePlayers,
 } from 'store/redux/reducers/game/selectors';
 import useGameProvider from 'store/redux/hooks/useGameProvider';
+import theme from 'theme';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
@@ -53,7 +54,7 @@ const GameContent = () => {
 					key={id}
 					id={id}
 					{...bombProps}
-					color="red"
+					color={theme.palette.color.error}
 					explosionSize={config.size.explosion}
 					firingDuration={config.duration.bomb.firing}
 					explodingDuration={config.duration.bomb.exploding}
