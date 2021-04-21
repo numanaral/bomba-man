@@ -20,6 +20,7 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 		const [direction, setDirection] = useState<Direction>(Direction.DOWN);
 		/** Direction key being held */
 		const [currentKeyDirection, setCurrentKeyDirection] = useState('');
+		// const lastMovementTime = useRef(new Date().getTime());
 
 		const isWalking = !!currentKeyDirection;
 
@@ -42,12 +43,14 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 					clearCurrentKey();
 					return;
 				}
-				updateDirection(newDirection);
 				setCurrentKeyDirection(newDirection);
+				updateDirection(newDirection);
 			};
 
 			const handleKeyUp = () => {
-				clearCurrentKey();
+				setTimeout(() => {
+					clearCurrentKey();
+				}, 300);
 			};
 
 			document.addEventListener('keydown', handleKeyDown);
