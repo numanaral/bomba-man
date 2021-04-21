@@ -34,14 +34,14 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 	& > ${StyledTempCharacterName} {
 		z-index: 9999;
 		position: absolute;
-		top: -27px;
-		font-size: 10px;
+		top: calc((${theme.game.character.size} + 2px) * -1);
+		font-size: calc(${theme.game.character.size} / 3);
 	}
 
 	& > ${StyledTempCharacterFace} {
 		position: absolute;
-		top: 7px;
-		font-size: 8px;
+		top: calc(${theme.game.character.size} / 8);
+		font-size: calc(${theme.game.character.size} / 4);
 
 		/* & > ${StyledTempCharacterEyes} {
 		}
@@ -70,12 +70,18 @@ const Character = forwardRef<PlayerRef, Props>(
 		},
 		ref
 	) => {
+		const { tile, character } = config.size;
+		const padding = (tile - character) / 2;
+
+		const _top = padding + top;
+		const _left = padding + left;
+
 		return (
 			(is3D && (
 				<Cube
-					size={32}
-					left={left}
-					top={top} /* name={name} */
+					size={config.size.character}
+					top={_top}
+					left={_left}
 					animate
 					color={theme.palette.color.success}
 					style={{
@@ -91,8 +97,8 @@ const Character = forwardRef<PlayerRef, Props>(
 				<StyledTempCharacter
 					$name={`${name} ${id}`}
 					style={{
-						top,
-						left,
+						top: _top,
+						left: _left,
 					}}
 					ref={ref}
 					{...rest}

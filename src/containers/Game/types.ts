@@ -10,7 +10,7 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	size: number;
 	top: number;
 	left: number;
-	animate: boolean;
+	animate?: boolean;
 	variant: Square;
 	color?: string;
 	collisionIndex?: number;

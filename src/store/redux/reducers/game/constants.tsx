@@ -6,9 +6,10 @@ import { GameState } from './types';
 const BOUNDARY_MIN = 0;
 const BOUNDARY_MAX = config.size.game - 1;
 const P1 = playerGenerator('P1', BOUNDARY_MIN, BOUNDARY_MIN);
+// const P1 = playerGenerator('P1', BOUNDARY_MAX, 7);
 const P2 = playerGenerator('P2', BOUNDARY_MIN, BOUNDARY_MAX);
-const P3 = playerGenerator('P3', BOUNDARY_MAX, BOUNDARY_MIN);
-const P4 = playerGenerator('P3', BOUNDARY_MAX, BOUNDARY_MIN);
+const P3 = playerGenerator('P3', BOUNDARY_MAX, BOUNDARY_MAX);
+const P4 = playerGenerator('P4', BOUNDARY_MAX, BOUNDARY_MIN);
 
 // Defaults
 const KEY = 'Game';

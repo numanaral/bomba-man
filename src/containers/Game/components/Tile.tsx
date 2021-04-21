@@ -55,7 +55,7 @@ const Tile = ({
 	size,
 	top,
 	left,
-	animate,
+	animate = false,
 	color,
 	collisionIndex,
 }: TileProps) => {

@@ -5,7 +5,7 @@ const config = {
 	title: 'Bomberman - Work In Progress',
 	size: {
 		game: 15 as RangeOf<15>, // squares
-		character: 32, // px
+		character: 24, // px
 		// ??!!: Size<title | movement> ?== Size<character>
 		tile: 32, // px
 		movement: 32, // px

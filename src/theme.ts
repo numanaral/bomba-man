@@ -25,6 +25,9 @@ const theme = {
 		character: {
 			size: 'var(--character-size)',
 		},
+		tile: {
+			size: 'var(--tile-size)',
+		},
 	},
 };
 
@@ -49,8 +52,8 @@ const GlobalStyles = createGlobalStyle`
 
 		/* Game */
 		--character-size: ${config.size.character}px;
-		--tile-size: ${config.size.tile};
-		--game-size: ${config.size.game};
+		--tile-size: ${config.size.tile}px;
+		--game-size: ${config.size.game}px;
 		
 		/* Animations */
 		/* @see https://easings.net/#easeInOutBack */
