@@ -1,9 +1,10 @@
 import { Direction } from 'enums';
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { getMoveDirectionFromKeyboardCode } from 'utils/game';
 import { PlayerRef, CharacterProps } from '../types';
 import './SpriteCharacter.scss';
 
+const ANIMATION_STOP_THROTTLE_DURATION = 200;
 const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 	(
 		{
@@ -20,6 +21,7 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 		const [direction, setDirection] = useState<Direction>(Direction.DOWN);
 		/** Direction key being held */
 		const [currentKeyDirection, setCurrentKeyDirection] = useState('');
+		const lastMovementTime = useRef(new Date().getTime());
 
 		const isWalking = !!currentKeyDirection;
 
@@ -42,14 +44,24 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 					clearCurrentKey();
 					return;
 				}
+				lastMovementTime.current = new Date().getTime();
 				setCurrentKeyDirection(newDirection);
 				updateDirection(newDirection);
 			};
 
 			const handleKeyUp = () => {
+				// keypress-move: keydown + keyup, i.e. D, D, D (not hold D)
+				// Only stop the moving animation after the player goes idle
+				// for some duration. This allows us to use keypress to move
+				// and still have a move animation (instead of keydown).
+				// This is needed because otherwise keypress-move wont trigger
+				// animations.
 				setTimeout(() => {
+					const delayedCurrentTime =
+						new Date().getTime() - ANIMATION_STOP_THROTTLE_DURATION;
+					if (lastMovementTime.current >= delayedCurrentTime) return;
 					clearCurrentKey();
-				}, 300);
+				}, ANIMATION_STOP_THROTTLE_DURATION);
 			};
 
 			document.addEventListener('keydown', handleKeyDown);
