@@ -79,21 +79,24 @@ const usePlayerEvents = () => {
 			// Instead of Array<PlayerId> it will be Array<PlayerConfig> ??
 			// This will include player type, player options etc.
 			(Object.keys(players) as Array<PlayerId>).forEach(id => {
-				const { coordinates } = players[id]!;
 				const { [id]: keys } = config.keyboardConfig.player;
-				const { ref } = players[id]!;
+				// we only want to take this action for non-NPC players
+				if (keys) {
+					const { coordinates } = players[id]!;
+					const { ref } = players[id]!;
 
-				if (ref) {
-					const newTime = new Date().getTime();
-					if (
-						newTime - timeOutRef.current[id]! >
-						config.duration.movement
-					) {
-						timeOutRef.current[id] = newTime;
-						move(keys, id);
+					if (ref) {
+						const newTime = new Date().getTime();
+						if (
+							newTime - timeOutRef.current[id]! >
+							config.duration.movement
+						) {
+							timeOutRef.current[id] = newTime;
+							move(keys, id);
+						}
 					}
+					bomb(coordinates, keys);
 				}
-				bomb(coordinates, keys);
 			});
 		};
 
