@@ -11,7 +11,8 @@ import {
 	PlayerRef,
 	TopLeftCoordinates,
 } from '../types';
-import CircleCharacter from './CircleCharacter';
+// import CircleCharacter from './CircleCharacter';
+import SpriteCharacter from './SpriteCharacter';
 
 interface Props {
 	id: PlayerId;
@@ -70,7 +71,7 @@ const Character = forwardRef<PlayerRef, Props>(
 					ref={ref}
 					{...rest}
 				/>
-			)) || <CircleCharacter {...props} />
+			)) || <SpriteCharacter {...props} />
 		);
 	}
 );
