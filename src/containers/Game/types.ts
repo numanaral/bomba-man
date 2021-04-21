@@ -1,5 +1,5 @@
 import * as KeyCode from 'keycode-js';
-import { Direction, Player, Tile, PowerUp } from 'enums';
+import { Direction, Player, Tile, PowerUp, Bomb } from 'enums';
 // import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
@@ -29,7 +29,7 @@ type TopLeftCoordinates = {
 
 type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
 
-type Square = Player | Tile | PowerUp;
+type Square = Player | Tile | PowerUp | Bomb;
 
 // type GameMap = Immutable<Array<Array<Square>>>;
 type GameMap = Array<Array<Square>>;

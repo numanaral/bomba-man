@@ -17,6 +17,7 @@ const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
  */
 type AnimationCounter = number;
 
+// TODO: rename this to prevent clash with the enum
 type Bomb = {
 	id: string;
 	playerId?: PlayerId;

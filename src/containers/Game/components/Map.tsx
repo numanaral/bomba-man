@@ -16,8 +16,8 @@ interface Props {
 }
 
 const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
-	width: ${({ $size }) => `calc(${theme.game.character.size} * ${$size})`};
-	height: ${({ $size }) => `calc(${theme.game.character.size} * ${$size})`};
+	width: ${({ $size }) => `calc(${theme.game.tile.size} * ${$size})`};
+	height: ${({ $size }) => `calc(${theme.game.tile.size} * ${$size})`};
 	border-radius: ${theme.shape.borderRadius};
 	background-color: ${theme.palette.background.secondary};
 	position: relative;

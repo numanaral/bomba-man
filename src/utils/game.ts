@@ -1,4 +1,5 @@
 import config from 'config';
+import { ExplosionProps } from 'containers/Game/components/Bomb';
 import {
 	CharacterKeyboardConfig,
 	GameMap,
@@ -44,7 +45,7 @@ const generateRandomGameMap = (
 	const tiles: Array<KeysOf<typeof Tile>> = [
 		...Object.keys(Tile),
 		// we want there to be more of a chance for empty tiles for now
-		...Array(3).fill('Empty'),
+		...Array(10).fill('Empty'),
 	];
 	const randomMap = Array(size)
 		.fill(0)
@@ -94,7 +95,7 @@ const canMove = (top: number, left: number, map: GameMap) => {
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
 };
 
-const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg)`;
+const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) scale(1, 1)`;
 /**
  * Since we are moving a flat plane and not a cube, the logical sense of
  * rotating a cube doesn't work. Different type of rotations do no always
@@ -217,6 +218,32 @@ const getExplosionScaleSize = (explosionSize: number) => {
 	return ((explosionSize + 1) * 2 - 1) * 2;
 };
 
+const getExplosionCoordinates = (
+	{ explosionAxis, explosionSize }: ExplosionProps,
+	is3D = false
+) => {
+	let overflowLimit = 0.5;
+	let baseSize = 2;
+	let explosionScaleSize = getExplosionScaleSize(explosionSize);
+	if (is3D) {
+		overflowLimit = 0;
+		baseSize = 1;
+		explosionScaleSize /= 2;
+	}
+
+	let x = baseSize;
+	let y = baseSize;
+
+	if (explosionAxis === Axis.X) x = explosionScaleSize;
+	else y = explosionScaleSize;
+
+	// prevent overflow
+	x -= overflowLimit;
+	y -= overflowLimit;
+
+	return { x, y };
+};
+
 /**
  * Breaking tiles are "exploded" and removed from the map.
  *
@@ -313,6 +340,7 @@ export {
 	resetRotation,
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
+	getExplosionCoordinates,
 	handleExplosionOnGameMap,
 	playerGenerator,
 	getMoveDirectionFromKeyMap,

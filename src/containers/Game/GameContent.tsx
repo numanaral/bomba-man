@@ -53,6 +53,7 @@ const GameContent = () => {
 					firingDuration={config.duration.bomb.firing}
 					explodingDuration={config.duration.bomb.exploding}
 					onExplosion={onExplosion}
+					is3D={is3D}
 				/>
 			))}
 		</>
