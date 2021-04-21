@@ -1,7 +1,7 @@
 import config from 'config';
 import { ExplosionProps } from 'containers/Game/components/Bomb';
 import {
-	CharacterKeyboardConfig,
+	PlayerKeyboardConfig,
 	GameMap,
 	KeyMap,
 	NextMoveProps,
@@ -306,7 +306,7 @@ const playerGenerator = (
 
 const getMoveDirectionFromKeyMap = (
 	keyMap: React.MutableRefObject<KeyMap>,
-	{ MoveUp, MoveRight, MoveDown, MoveLeft }: CharacterKeyboardConfig
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
 ) => {
 	switch (true) {
 		case keyMap.current[MoveUp]:

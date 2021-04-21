@@ -44,7 +44,7 @@ type CharacterActions = {
 	DropBomb: KeyboardEventCode;
 	// Jump: KeyboardEventCode;
 };
-type CharacterKeyboardConfig = MovementActions & CharacterActions;
+type PlayerKeyboardConfig = MovementActions & CharacterActions;
 
 type PlayerId = `P${RangeOf<4, 1>}`;
 // #endregion
@@ -93,7 +93,7 @@ export type {
 	Square,
 	GameMap,
 	KeyboardEventCode,
-	CharacterKeyboardConfig,
+	PlayerKeyboardConfig,
 	PlayerId,
 	Players,
 	PlayerRef,

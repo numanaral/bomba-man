@@ -1,5 +1,5 @@
 import {
-	CharacterKeyboardConfig,
+	PlayerKeyboardConfig,
 	KeyboardEventCode,
 	KeyMap,
 	PlayerId,
@@ -19,10 +19,10 @@ import {
 
 type ActionBaseProps = [
 	coordinates: TopLeftCoordinates,
-	keys: CharacterKeyboardConfig
+	keys: PlayerKeyboardConfig
 ];
 
-type MoveAction = (keys: CharacterKeyboardConfig, id: PlayerId) => void;
+type MoveAction = (keys: PlayerKeyboardConfig, id: PlayerId) => void;
 
 type BombAction = (...args: ActionBaseProps) => void;
 
@@ -46,12 +46,12 @@ const usePlayerEvents = () => {
 	}, config.duration.movement);
 
 	useEffect(() => {
-		const move: MoveAction = (characterKeyboardConfig, id) => {
+		const move: MoveAction = (playerKeyboardConfig, id) => {
 			// reset rotation to 0 so the animations are consistent
 			// if (is3D) resetRotation(ref);
 			const direction = getMoveDirectionFromKeyMap(
 				keyMap,
-				characterKeyboardConfig
+				playerKeyboardConfig
 			);
 			if (!direction) return;
 
