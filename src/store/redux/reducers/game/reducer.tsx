@@ -136,12 +136,12 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				draft.players.P2 = castDraft(PLAYERS.P2);
 				break;
 			case TOGGLE_GAME_NPC:
-				if (draft.players.P3) {
-					delete draft.players.P3;
+				if (draft.players.P4) {
+					delete draft.players.P4;
 					break;
 				}
-				// draft.players = { ...draft.players, ...PLAYERS.P3 };
-				draft.players.P3 = castDraft(PLAYERS.P3);
+				// draft.players = { ...draft.players, ...PLAYERS.P4 };
+				draft.players.P4 = castDraft(PLAYERS.P4);
 				break;
 			default:
 				// No default

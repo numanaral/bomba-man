@@ -18,7 +18,7 @@ const Settings = () => {
 
 	const is3D = useSelector(makeSelectGameIs3D());
 	const isSideView = useSelector(makeSelectGameIsSideView());
-	const { P2, P3: NPC } = useSelector(makeSelectGamePlayers());
+	const { P2, P4: NPC } = useSelector(makeSelectGamePlayers());
 
 	const buttons = [
 		{

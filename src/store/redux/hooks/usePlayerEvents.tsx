@@ -41,7 +41,7 @@ const usePlayerEvents = () => {
 	const keyMap = useRef<KeyMap>({});
 
 	useInterval(() => {
-		if (!players.P3) return;
+		if (!players.P4) return;
 		npcAction(players, gameMap);
 	}, config.duration.movement);
 
