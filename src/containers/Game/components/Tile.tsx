@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import theme from 'theme';
-import { TileProps } from './types';
+import { TileProps } from '../types';
 
 type WrapperProps = StyledProps<
 	TileProps,
@@ -55,7 +55,7 @@ const Tile = ({
 	size,
 	top,
 	left,
-	animate,
+	animate = false,
 	color,
 	collisionIndex,
 }: TileProps) => {

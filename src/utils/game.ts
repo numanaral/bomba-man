@@ -1,14 +1,21 @@
 import config from 'config';
-import { OnMove, Players } from 'containers/Game/Game';
+import { ExplosionProps } from 'containers/Game/components/Bomb';
 import {
 	AddBomb,
 	GameMap,
+	KeyMap,
 	MovementNode,
+	NextMoveProps,
+	NonNullablePlayerRef,
+	PlayerConfig,
 	PlayerId,
+	PlayerKeyboardConfig,
+	PlayerRef,
+	Players,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Axis, Direction, Player, Tile } from 'enums';
-import { createRef } from 'react';
+import { OnMove } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -39,8 +46,8 @@ const generateRandomGameMap = (
 ): GameMap => {
 	const tiles: Array<KeysOf<typeof Tile>> = [
 		...Object.keys(Tile),
-		// we want there to be more of a chance for empty tiles for now
-		...Array(3).fill('Empty'),
+		// reverse block density, we want that many Emptys
+		...Array(11 - config.game.blockDensity).fill('Empty'),
 	];
 	const randomMap = Array(size)
 		.fill(0)
@@ -90,6 +97,24 @@ const canMove = (top: number, left: number, map: GameMap) => {
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
 };
 
+const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) scale(1, 1)`;
+/**
+ * Since we are moving a flat plane and not a cube, the logical sense of
+ * rotating a cube doesn't work. Different type of rotations do no always
+ * help. One solution is resetting the rotation to 0 so the rotation
+ * movement is smooth on each rotation without worrying about boundaries.
+ *
+ * NOTE: We need to be aware of the animation cancelling
+ *
+ * @param characterRef ref object
+ */
+const resetRotation = (characterRef: NonNullable<PlayerRef>) => {
+	// disable animation
+	characterRef.style.transition = '0ms';
+	// reset
+	characterRef.style.transform = CUBE_BASE_TRANSFORM;
+};
+
 const ROTATION_REGEX = {
 	[Axis.X]: {
 		REPLACE: /rotateX\(-?\d+deg\)/g,
@@ -118,38 +143,67 @@ const rotateMove = (originalTransform: string, direction: Direction) => {
 };
 
 const handleRotateMove = (
-	characterRef: React.RefObject<HTMLDivElement>,
-	is3D: boolean,
+	characterRef: NonNullablePlayerRef,
 	direction: Direction
 ) => {
-	if (!is3D) return;
 	/* eslint-disable no-param-reassign */
 	// enable animation
-	characterRef!.current!.style.transition = `${config.duration.movement}ms`;
+	characterRef.style.transition = `${config.duration.movement}ms`;
 	// move
-	characterRef!.current!.style.transform = rotateMove(
-		characterRef!.current!.style.transform,
+	characterRef.style.transform = rotateMove(
+		characterRef.style.transform,
 		direction
 	);
 	/* eslint-enable no-param-reassign */
 };
 
-const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg)`;
-/**
- * Since we are moving a flat plane and not a cube, the logical sense of
- * rotating a cube doesn't work. Different type of rotations do no always
- * help. One solution is resetting the rotation to 0 so the rotation
- * movement is smooth on each rotation without worrying about boundaries.
- *
- * NOTE: We need to be aware of the animation cancelling
- *
- * @param characterRef ref object
- */
-const resetRotation = (characterRef: React.RefObject<HTMLDivElement>) => {
-	// disable animation
-	characterRef!.current!.style.transition = '0ms';
-	// reset
-	characterRef!.current!.style.transform = CUBE_BASE_TRANSFORM;
+const handleMove = (
+	{
+		playerConfig: {
+			id: playerId,
+			coordinates: { top, left },
+			ref,
+		},
+		direction,
+		is3D,
+		gameMap,
+	}: NextMoveProps,
+	onComplete: OnMove
+) => {
+	let newTop = top;
+	let newLeft = left;
+	switch (direction) {
+		case Direction.UP:
+			newTop = top - config.size.movement;
+			break;
+		case Direction.RIGHT:
+			newLeft = left + config.size.movement;
+			break;
+		case Direction.DOWN:
+			newTop = top + config.size.movement;
+			break;
+		case Direction.LEFT:
+			newLeft = left - config.size.movement;
+			break;
+		default:
+			// do nothing
+			break;
+	}
+
+	if (!canMove(newTop, newLeft, gameMap)) return;
+
+	if (is3D) resetRotation(ref);
+	// TODO: Do a write-up on this
+	// this complexity is required for a smooth 3d rotate move
+	// since we are resetting rotation css, we need an async
+	// event so that the animation can display smoothly
+	setTimeout(() => {
+		if (is3D) handleRotateMove(ref, direction);
+		onComplete({
+			playerId,
+			newCoordinates: { top: newTop, left: newLeft },
+		});
+	}, 0);
 };
 
 /**
@@ -164,6 +218,32 @@ const resetRotation = (characterRef: React.RefObject<HTMLDivElement>) => {
  */
 const getExplosionScaleSize = (explosionSize: number) => {
 	return ((explosionSize + 1) * 2 - 1) * 2;
+};
+
+const getExplosionCoordinates = (
+	{ explosionAxis, explosionSize }: ExplosionProps,
+	is3D = false
+) => {
+	let overflowLimit = 0.5;
+	let baseSize = 2;
+	let explosionScaleSize = getExplosionScaleSize(explosionSize);
+	if (is3D) {
+		overflowLimit = 0;
+		baseSize = 1;
+		explosionScaleSize /= 2;
+	}
+
+	let x = baseSize;
+	let y = baseSize;
+
+	if (explosionAxis === Axis.X) x = explosionScaleSize;
+	else y = explosionScaleSize;
+
+	// prevent overflow
+	x -= overflowLimit;
+	y -= overflowLimit;
+
+	return { x, y };
 };
 
 /**
@@ -184,10 +264,11 @@ const handleExplosionOnGameMap = (
 		bombCoordinates
 	);
 
-	// ensure there are no negatives
+	// ensure that we are checking within the boundaries
 	for (
 		let currentYSquare = Math.max(0, ySquare - explosionSize);
-		currentYSquare <= ySquare + explosionSize;
+		currentYSquare <=
+		Math.min(config.size.game - 1, ySquare + explosionSize);
 		currentYSquare++
 	) {
 		if (gameMapCopy[currentYSquare][xSquare] === Tile.Breaking) {
@@ -195,10 +276,11 @@ const handleExplosionOnGameMap = (
 		}
 	}
 
-	// ensure there are no negatives
+	// ensure that we are checking within the boundaries
 	for (
 		let currentXSquare = Math.max(0, xSquare - explosionSize);
-		currentXSquare <= xSquare + explosionSize;
+		currentXSquare <=
+		Math.min(config.size.game - 1, xSquare + explosionSize);
 		currentXSquare++
 	) {
 		if (gameMapCopy[ySquare][currentXSquare] === Tile.Breaking) {
@@ -209,15 +291,18 @@ const handleExplosionOnGameMap = (
 	return gameMapCopy;
 };
 
-const playerGenerator = (playerId: PlayerId, top: number, left: number) => {
+const playerGenerator = (
+	playerId: PlayerId,
+	top: number,
+	left: number
+): PlayerConfig => {
 	return {
-		[playerId]: {
-			coordinates: {
-				top: top * 32,
-				left: left * 32,
-			},
-			ref: createRef<HTMLDivElement>(),
+		id: playerId,
+		coordinates: {
+			top: top * 32,
+			left: left * 32,
 		},
+		ref: null,
 	};
 };
 
@@ -254,6 +339,36 @@ const generateScore = (
 
 	return 0;
 };
+const getMoveDirectionFromKeyboardCode = (
+	keyCode: string,
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
+) => {
+	switch (true) {
+		case keyCode === MoveUp:
+			return Direction.UP;
+		case keyCode === MoveRight:
+			return Direction.RIGHT;
+		case keyCode === MoveDown:
+			return Direction.DOWN;
+		case keyCode === MoveLeft:
+			return Direction.LEFT;
+		default:
+			return null;
+	}
+};
+
+const getMoveDirectionFromKeyMap = (
+	keyMap: React.MutableRefObject<KeyMap>,
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
+) => {
+	return [
+		keyMap.current[MoveUp] && Direction.UP,
+		keyMap.current[MoveRight] && Direction.RIGHT,
+		keyMap.current[MoveDown] && Direction.DOWN,
+		keyMap.current[MoveLeft] && Direction.LEFT,
+	].filter(Boolean) as Array<Direction>;
+};
+
 const generateMovementTree = (
 	topCoordinate: number,
 	leftCoordinate: number,
@@ -413,10 +528,14 @@ export {
 	canMove,
 	rotateMove,
 	handleRotateMove,
+	handleMove,
 	resetRotation,
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
+	getExplosionCoordinates,
 	handleExplosionOnGameMap,
 	playerGenerator,
+	getMoveDirectionFromKeyboardCode,
+	getMoveDirectionFromKeyMap,
 	npcAction,
 };

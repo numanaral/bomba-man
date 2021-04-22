@@ -1,8 +1,8 @@
 enum Direction {
-	UP = 'UP',
-	RIGHT = 'RIGHT',
-	DOWN = 'DOWN',
-	LEFT = 'LEFT',
+	UP = 'Up',
+	RIGHT = 'Right',
+	DOWN = 'Down',
+	LEFT = 'Left',
 }
 
 enum Axis {
@@ -38,4 +38,8 @@ enum PowerUp {
 	Invincibility = 'PU3',
 }
 
-export { Direction, Axis, ExplosionState, Player, Tile, PowerUp };
+enum Bomb {
+	Basic = 'B1',
+}
+
+export { Direction, Axis, ExplosionState, Player, Tile, PowerUp, Bomb };

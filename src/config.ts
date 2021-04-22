@@ -1,7 +1,11 @@
-import { CharacterKeyboardConfig, PlayerId } from 'containers/Game/types';
+import { PlayerKeyboardConfig, PlayerId } from 'containers/Game/types';
 import * as KeyCode from 'keycode-js';
 
 const config = {
+	title: 'Bomberman - Work In Progress',
+	game: {
+		blockDensity: 6 as RangeOf<10, 1>,
+	},
 	size: {
 		game: 15 as RangeOf<15>, // squares
 		character: 32, // px
@@ -14,7 +18,7 @@ const config = {
 		explosion: 1, // square
 	},
 	duration: {
-		movement: 300, // ms
+		movement: 200, // ms
 		bomb: {
 			firing: 2, // second
 			exploding: 2, // second
@@ -37,9 +41,9 @@ const config = {
 				DropBomb: KeyCode.CODE_SEMICOLON,
 			},
 		} as {
-			[key in PlayerId]: CharacterKeyboardConfig;
+			[key in PlayerId]: PlayerKeyboardConfig;
 			// TODO: MultiKeyboard 4-player local game, not needed for online
-			// [PlayerNumber in RangeOf<4, 1>]: CharacterKeyboardConfig;
+			// [PlayerNumber in RangeOf<4, 1>]: PlayerKeyboardConfig;
 		},
 	},
 };

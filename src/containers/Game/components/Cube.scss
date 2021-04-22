@@ -1,0 +1,71 @@
+// below doesn't work..
+// $gameSize: var(--game-size, 15);
+// global
+$gameSize: 15;
+
+@mixin bouncy-block($i) {
+	animation: bouncy var(--block-animation-duration) ease
+		calc(#{$i} * var(--incremental-animation-delay)) forwards;
+}
+
+@mixin transition-color($i, $type) {
+	animation: transition-color-#{$type} calc(
+			var(--block-animation-duration) + #{$i} * var(--incremental-animation-delay)
+		) var(--ease-in-out-back) forwards;
+}
+
+@for $i from 1 through $gameSize * $gameSize {
+	.bouncy-block-#{$i} {
+		@include bouncy-block($i);
+
+		&.T2 {
+			& > div {
+				// background-color: var(--secondary-background);
+				@include transition-color($i, 'T2');
+			}
+		}
+
+		&.T3 {
+			& > div {
+				// background-color: var(--secondary-background);
+				@include transition-color($i, 'T3');
+			}
+		}
+	}
+}
+
+// T2 => breaking, T3 => non-breaking, ...
+@for $i from 2 through 3 {
+	@keyframes transition-color-T#{$i} {
+		0%,
+		40% {
+			background-color: var(--secondary-background);
+		}
+		100% {
+			@if $i == 2 {
+				background-color: var(--primary-color);
+			} @else if $i == 3 {
+				background-color: var(--secondary-color);
+			}
+		}
+	}
+}
+
+@keyframes bouncy {
+	0% {
+		transform: scale(1, 1) translateZ(calc(var(--tile-size) / 2 * -1px));
+	}
+	55% {
+		transform: scale(0.7, 1.3) translateZ(calc(var(--tile-size) / 2 * -1px));
+	}
+	65% {
+		transform: scale(1.3, 0.7) translateZ(calc(var(--tile-size) / 2 * 0px));
+	}
+	75% {
+		transform: scale(0.95, 1.05)
+			translateZ(calc(var(--tile-size) / 2 * 0px));
+	}
+	100% {
+		transform: scale(1, 1) translateZ(calc(var(--tile-size) / 2 * 1px));
+	}
+}

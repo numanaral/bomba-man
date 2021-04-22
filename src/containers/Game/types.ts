@@ -1,5 +1,6 @@
-import { Player, PowerUp, Tile } from 'enums';
+import { Bomb, Direction, Player, PowerUp, Tile } from 'enums';
 import * as KeyCode from 'keycode-js';
+// import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
 	[key: number]: number;
@@ -9,7 +10,7 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	size: number;
 	top: number;
 	left: number;
-	animate: boolean;
+	animate?: boolean;
 	variant: Square;
 	color?: string;
 	collisionIndex?: number;
@@ -28,13 +29,12 @@ type TopLeftCoordinates = {
 
 type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
 
-type Square = Player | Tile | PowerUp;
+type Square = Player | Tile | PowerUp | Bomb;
 
+// type GameMap = Immutable<Array<Array<Square>>>;
 type GameMap = Array<Array<Square>>;
 
 type KeyboardEventCode = ValuesOf<typeof KeyCode>;
-
-type Direction = 'Up' | 'Right' | 'Down' | 'Left';
 
 // TODO: group types into separate folders/files
 
@@ -44,7 +44,7 @@ type CharacterActions = {
 	DropBomb: KeyboardEventCode;
 	// Jump: KeyboardEventCode;
 };
-type CharacterKeyboardConfig = MovementActions & CharacterActions;
+type PlayerKeyboardConfig = MovementActions & CharacterActions;
 
 type PlayerId = `P${RangeOf<4, 1>}`;
 
@@ -56,6 +56,42 @@ type MovementNode = {
 };
 // #endregion
 
+type Players = {
+	[key in PlayerId]?: PlayerConfig;
+};
+
+type PlayerRef = HTMLDivElement | null;
+
+type PlayerConfig = {
+	id: PlayerId;
+	coordinates: TopLeftCoordinates;
+	ref: PlayerRef;
+};
+
+type NonNullablePlayerRef = NonNullable<PlayerRef>;
+
+type NonNullablePlayer = NonNullable<PlayerConfig> & {
+	ref: NonNullablePlayerRef;
+};
+
+type NextMoveProps = {
+	playerConfig: NonNullablePlayer;
+	direction: Direction;
+	is3D: boolean;
+	gameMap: GameMap;
+};
+
+type KeyMap = {
+	[key in KeyboardEventCode]?: boolean;
+};
+
+type CharacterProps = {
+	id: PlayerId;
+	name: string;
+	coordinates: TopLeftCoordinates;
+	keyboardConfig: PlayerKeyboardConfig;
+} & React.HTMLAttributes<HTMLDivElement>;
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -65,7 +101,15 @@ export type {
 	Square,
 	GameMap,
 	KeyboardEventCode,
-	CharacterKeyboardConfig,
+	PlayerKeyboardConfig,
 	PlayerId,
+	Players,
+	PlayerRef,
+	PlayerConfig,
+	NonNullablePlayerRef,
+	NonNullablePlayer,
+	NextMoveProps,
+	KeyMap,
+	CharacterProps,
 	MovementNode,
 };
