@@ -26,8 +26,11 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 		const isWalking = !!currentKeyDirection;
 
 		useEffect(() => {
+			// ignore the npc action
 			const getDirection = (e: KeyboardEvent) => {
-				return getMoveDirectionFromKeyboardCode(e.code, keyboardConfig);
+				return keyboardConfig
+					? getMoveDirectionFromKeyboardCode(e.code, keyboardConfig)
+					: null;
 			};
 
 			const updateDirection = (newDirection: Direction) => {
