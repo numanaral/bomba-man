@@ -1,5 +1,5 @@
+import { Bomb, Direction, Player, PowerUp, Tile } from 'enums';
 import * as KeyCode from 'keycode-js';
-import { Direction, Player, Tile, PowerUp, Bomb } from 'enums';
 // import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
@@ -47,6 +47,13 @@ type CharacterActions = {
 type PlayerKeyboardConfig = MovementActions & CharacterActions;
 
 type PlayerId = `P${RangeOf<4, 1>}`;
+
+type MovementNode = {
+	topCoordinate: number;
+	leftCoordinate: number;
+	score: number | undefined;
+	child?: { [key: string]: MovementNode };
+};
 // #endregion
 
 type Players = {
@@ -104,4 +111,5 @@ export type {
 	NextMoveProps,
 	KeyMap,
 	CharacterProps,
+	MovementNode,
 };
