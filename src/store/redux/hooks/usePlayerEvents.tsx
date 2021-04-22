@@ -49,13 +49,15 @@ const usePlayerEvents = () => {
 		const move: MoveAction = (playerKeyboardConfig, id) => {
 			// reset rotation to 0 so the animations are consistent
 			// if (is3D) resetRotation(ref);
-			const direction = getMoveDirectionFromKeyMap(
+			const directions = getMoveDirectionFromKeyMap(
 				keyMap,
 				playerKeyboardConfig
 			);
-			if (!direction) return;
+			if (!directions.length) return;
 
-			triggerMove({ playerId: id, direction });
+			directions.forEach(direction => {
+				triggerMove({ playerId: id, direction });
+			});
 		};
 
 		const bomb: BombAction = ({ top, left }, { DropBomb }) => {

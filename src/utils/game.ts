@@ -326,18 +326,12 @@ const getMoveDirectionFromKeyMap = (
 	keyMap: React.MutableRefObject<KeyMap>,
 	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
 ) => {
-	switch (true) {
-		case keyMap.current[MoveUp]:
-			return Direction.UP;
-		case keyMap.current[MoveRight]:
-			return Direction.RIGHT;
-		case keyMap.current[MoveDown]:
-			return Direction.DOWN;
-		case keyMap.current[MoveLeft]:
-			return Direction.LEFT;
-		default:
-			return null;
-	}
+	return [
+		keyMap.current[MoveUp] && Direction.UP,
+		keyMap.current[MoveRight] && Direction.RIGHT,
+		keyMap.current[MoveDown] && Direction.DOWN,
+		keyMap.current[MoveLeft] && Direction.LEFT,
+	].filter(Boolean) as Array<Direction>;
 };
 
 type NPCAction = (players: Players, gameMap: GameMap) => void;
