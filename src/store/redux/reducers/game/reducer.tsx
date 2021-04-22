@@ -1,8 +1,8 @@
-import { NonNullablePlayer, TopLeftCoordinates } from 'containers/Game/types';
+import { NonNullablePlayer, PlayerId } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import config from 'config';
 import { Reducer } from 'redux';
-import { handleExplosionOnGameMap, handleMove } from 'utils/game';
+import { generateBomb, handleExplosionOnGameMap, handleMove } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
 import {
 	DEFAULT_VALUES,
@@ -24,7 +24,6 @@ import {
 } from './constants';
 import {
 	AnimatableGameMap,
-	Bomb,
 	GameAction,
 	GameState,
 	OnExplosionProps,
@@ -90,11 +89,8 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				break;
 			}
 			case DROP_BOMB: {
-				const topLeft = action.payload as TopLeftCoordinates;
-				const bomb: Bomb = {
-					...topLeft,
-					id: new Date().toJSON(),
-				};
+				const playerId = action.payload as PlayerId;
+				const bomb = generateBomb(state.players[playerId]!);
 				draft.bombs.push(bomb);
 				break;
 			}

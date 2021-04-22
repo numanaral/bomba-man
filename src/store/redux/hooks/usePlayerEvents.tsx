@@ -4,7 +4,6 @@ import {
 	KeyMap,
 	PlayerId,
 	PlayerKeyboardConfig,
-	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
@@ -18,14 +17,7 @@ import {
 } from '../reducers/game/selectors';
 import useGameProvider from './useGameProvider';
 
-type ActionBaseProps = [
-	coordinates: TopLeftCoordinates,
-	keys: PlayerKeyboardConfig
-];
-
-type MoveAction = (keys: PlayerKeyboardConfig, id: PlayerId) => void;
-
-type BombAction = (...args: ActionBaseProps) => void;
+type KeyDownAction = (id: PlayerId, keys: PlayerKeyboardConfig) => void;
 
 const usePlayerEvents = () => {
 	const { dropBomb, triggerMove } = useGameProvider();
@@ -47,7 +39,7 @@ const usePlayerEvents = () => {
 	}, config.duration.movement);
 
 	useEffect(() => {
-		const move: MoveAction = (playerKeyboardConfig, id) => {
+		const move: KeyDownAction = (id, playerKeyboardConfig) => {
 			// reset rotation to 0 so the animations are consistent
 			// if (is3D) resetRotation(ref);
 			const directions = getMoveDirectionFromKeyMap(
@@ -61,12 +53,9 @@ const usePlayerEvents = () => {
 			});
 		};
 
-		const bomb: BombAction = ({ top, left }, { DropBomb }) => {
+		const bomb: KeyDownAction = (id, { DropBomb }) => {
 			if (keyMap.current[DropBomb]) {
-				dropBomb({
-					top,
-					left,
-				});
+				dropBomb(id);
 			}
 		};
 
@@ -85,7 +74,6 @@ const usePlayerEvents = () => {
 				const { [id]: keys } = config.keyboardConfig.player;
 				// we only want to take this action for non-NPC players
 				if (keys) {
-					const { coordinates } = players[id]!;
 					const { ref } = players[id]!;
 
 					if (ref) {
@@ -95,10 +83,10 @@ const usePlayerEvents = () => {
 							config.duration.movement
 						) {
 							timeOutRef.current[id] = newTime;
-							move(keys, id);
+							move(id, keys);
 						}
 					}
-					bomb(coordinates, keys);
+					bomb(id, keys);
 				}
 			});
 		};

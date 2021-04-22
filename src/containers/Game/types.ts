@@ -28,7 +28,7 @@ type TopLeftCoordinates = {
 	left: number;
 };
 
-type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
+type AddBomb = (playerId: PlayerId) => void;
 
 type Square = Player | Tile | PowerUp | Bomb;
 

@@ -12,8 +12,8 @@ import {
 	Players,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, Tile } from 'enums';
-import { OnMove } from 'store/redux/reducers/game/types';
+import { Axis, Direction, PowerUp, Tile } from 'enums';
+import { OnMove, Bomb } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -332,6 +332,25 @@ const handleExplosionOnGameMap = (
 	return { newGameMap, playersToKill };
 };
 
+const generateBomb = ({
+	id: playerId,
+	coordinates: { top, left },
+	state: {
+		bombSize,
+		powerUps: { [PowerUp.BombSize]: powerUpBombSize },
+	},
+}: PlayerConfig) => {
+	const explosionSize = bombSize + powerUpBombSize;
+	const bomb: Bomb = {
+		id: new Date().toJSON(),
+		explosionSize,
+		top,
+		left,
+		playerId,
+	};
+	return bomb;
+};
+
 const getMoveDirectionFromKeyboardCode = (
 	keyCode: string,
 	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
@@ -388,6 +407,7 @@ export {
 	getExplosionScaleSize,
 	getExplosionCoordinates,
 	handleExplosionOnGameMap,
+	generateBomb,
 	playerGenerator,
 	getMoveDirectionFromKeyboardCode,
 	getMoveDirectionFromKeyMap,

@@ -22,7 +22,7 @@ import {
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
 import { makeSelectGameSize } from 'store/redux/reducers/game/selectors';
-import { GameMap } from 'containers/Game/types';
+import { GameMap, PlayerId } from 'containers/Game/types';
 
 const useGameProvider = () => {
 	const dispatch = useDispatch();
@@ -66,9 +66,10 @@ const useGameProvider = () => {
 		[dispatch, makeMove]
 	);
 
-	const dropBomb = useCallback(props => dispatch(dropBombInGame(props)), [
-		dispatch,
-	]);
+	const dropBomb = useCallback(
+		(playerId: PlayerId) => dispatch(dropBombInGame(playerId)),
+		[dispatch]
+	);
 
 	const removeBomb = useCallback(
 		bombId => dispatch(removeBombFromGame(bombId)),
