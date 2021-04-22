@@ -260,8 +260,8 @@ type OnHandlePlayerKill = (
 
 const handleTileBreaking: OnHandleTileBreaking = (
 	newGameMap,
-	xSquare,
-	ySquare
+	ySquare,
+	xSquare
 ) => {
 	if (newGameMap[ySquare][xSquare] === Tile.Breaking) {
 		// eslint-disable-next-line no-param-reassign
