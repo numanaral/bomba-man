@@ -30,6 +30,11 @@ type TopLeftCoordinates = {
 
 type OnDropBomb = (playerId: PlayerId) => void;
 
+type SquareCoordinates = {
+	xSquare: number;
+	ySquare: number;
+};
+
 type Square = Player | Tile | PowerUp | Bomb;
 
 // type GameMap = Immutable<Array<Array<Square>>>;
@@ -57,10 +62,21 @@ type Players = {
 
 type PlayerRef = HTMLDivElement | null;
 
+type PowerUps = Record<PowerUp, number>;
+
+type PlayerState = {
+	lives: number;
+	bombSize: number;
+	movementSpeed: number;
+	/** How many power-ups have been collected */
+	powerUps: PowerUps;
+};
+
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
 	ref: PlayerRef;
+	state: PlayerState;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
@@ -99,6 +115,7 @@ export type {
 	TileProps,
 	BombType,
 	TopLeftCoordinates,
+	SquareCoordinates,
 	OnDropBomb,
 	Square,
 	GameMap,
@@ -107,7 +124,9 @@ export type {
 	PlayerId,
 	Players,
 	PlayerRef,
+	PlayerState,
 	PlayerConfig,
+	PowerUps,
 	NonNullablePlayerRef,
 	NonNullablePlayer,
 	NextMoveProps,

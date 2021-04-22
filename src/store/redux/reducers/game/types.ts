@@ -4,12 +4,15 @@ import {
 	PlayerId,
 	PlayerRef,
 	Players,
+	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Direction } from 'enums';
 import * as constants from './constants';
 
 const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
+
+// TODO: merge types?
 
 /**
  * Change in this index triggers animation. This is needed in order to prevent
@@ -21,7 +24,11 @@ type AnimationCounter = number;
 type Bomb = {
 	id: string;
 	playerId?: PlayerId;
+	explosionSize: number;
 } & TopLeftCoordinates;
+
+/** Square coordinates that can break tiles and kill players. */
+type BombExplosionSquareCoordinates = Array<SquareCoordinates>;
 
 // type GameState = Immutable<{
 type GameState = {
@@ -92,6 +99,7 @@ type PlayerWithNewRef = {
 
 export type {
 	Bomb,
+	BombExplosionSquareCoordinates,
 	GameState,
 	GamePayload,
 	GameAction,
