@@ -15,7 +15,7 @@ import {
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Axis, Direction, Player, Tile } from 'enums';
-import { OnMove } from 'store/redux/reducers/game/types';
+import { OnMove, OnTriggerMove } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -466,6 +466,7 @@ const findBestMove = (
 	console.log(movementTree);
 
 	let bestMovementNode: MovementNode | null = null;
+	let bestMovementDirection: Direction | null;
 	let bestScore: number | null = null;
 
 	Object.entries(movementTree).forEach(
@@ -477,6 +478,7 @@ const findBestMove = (
 			if (!bestScore || (branchScore && bestScore < branchScore)) {
 				bestScore = branchScore;
 				bestMovementNode = movementNodeValue;
+				bestMovementDirection = Direction[movementNodeKey];
 			}
 		}
 	);
@@ -494,11 +496,11 @@ const findBestMove = (
 type NPCActionProps = {
 	players: Players;
 	gameMap: GameMap;
-	onMove: OnMove;
+	triggerMove: OnTriggerMove;
 	addBomb: AddBomb;
 };
 type NPCAction = (props: NPCActionProps) => void;
-const npcAction: NPCAction = ({ players, gameMap, onMove }) => {
+const npcAction: NPCAction = ({ players, gameMap, triggerMove }) => {
 	const currentPlayerId = Player.P3;
 	const currentPlayer = players[currentPlayerId];
 
@@ -517,9 +519,9 @@ const npcAction: NPCAction = ({ players, gameMap, onMove }) => {
 		gameMap
 	);
 
-	onMove(currentPlayerId, bestMoveCoordinates);
+	triggerMove({});
 
-	// Move to another file later
+	// TODO: Move to another file later
 };
 
 export type { NPCAction };
