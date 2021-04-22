@@ -1,21 +1,22 @@
+import config from 'config';
 import {
-	PlayerKeyboardConfig,
 	KeyboardEventCode,
 	KeyMap,
 	PlayerId,
+	PlayerKeyboardConfig,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import config from 'config';
-import { useRef, useEffect } from 'react';
-import { getMoveDirectionFromKeyMap, npcAction } from 'utils/game';
+import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
+import { getMoveDirectionFromKeyMap } from 'utils/game';
+import { npcAction } from 'utils/npc';
 import useInterval from '../../../hooks/useInterval';
-import useGameProvider from './useGameProvider';
 import {
-	makeSelectGameMap,
 	makeSelectGameIs3D,
+	makeSelectGameMap,
 	makeSelectGamePlayers,
 } from '../reducers/game/selectors';
+import useGameProvider from './useGameProvider';
 
 type ActionBaseProps = [
 	coordinates: TopLeftCoordinates,
@@ -42,7 +43,7 @@ const usePlayerEvents = () => {
 
 	useInterval(() => {
 		if (!players.P4) return;
-		npcAction(players, gameMap);
+		npcAction({ players, gameMap, triggerMove, dropBomb });
 	}, config.duration.movement);
 
 	useEffect(() => {

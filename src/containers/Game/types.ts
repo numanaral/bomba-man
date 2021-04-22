@@ -1,5 +1,6 @@
 import { Bomb, Direction, Player, PowerUp, Tile } from 'enums';
 import * as KeyCode from 'keycode-js';
+import { OnTriggerMove } from 'store/redux/reducers/game/types';
 // import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
@@ -48,12 +49,6 @@ type PlayerKeyboardConfig = MovementActions & CharacterActions;
 
 type PlayerId = `P${RangeOf<4, 1>}`;
 
-type MovementNode = {
-	topCoordinate: number;
-	leftCoordinate: number;
-	score: number | undefined;
-	child?: { [key: string]: MovementNode };
-};
 // #endregion
 
 type Players = {
@@ -92,6 +87,13 @@ type CharacterProps = {
 	keyboardConfig: PlayerKeyboardConfig;
 } & React.HTMLAttributes<HTMLDivElement>;
 
+type NPCActionProps = {
+	players: Players;
+	gameMap: GameMap;
+	triggerMove: OnTriggerMove;
+	dropBomb: AddBomb;
+};
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -111,5 +113,5 @@ export type {
 	NextMoveProps,
 	KeyMap,
 	CharacterProps,
-	MovementNode,
+	NPCActionProps,
 };
