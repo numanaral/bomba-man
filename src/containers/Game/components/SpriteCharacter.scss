@@ -40,7 +40,6 @@
 		height: calc(var(--character-size) * 1.5);
 		left: calc(var(--character-size) * -0.25);
 		top: calc(var(--character-size) * -0.75);
-		// background: url('https://assets.codepen.io/21542/DemoRpgCharacterShadow.png')
 		background: url('./character-shadow.png') no-repeat no-repeat;
 		background-size: 100%;
 	}
@@ -60,14 +59,10 @@
 
 		& .spritesheet {
 			position: absolute;
-			background: url('https://assets.codepen.io/21542/DemoRpgCharacter.png')
-				no-repeat no-repeat;
+			background: url(./character-skin-default.png) no-repeat no-repeat;
 			background-size: 100%;
 			width: calc(var(--grid-cell) * 8);
 			height: calc(var(--grid-cell) * 8);
-
-			// Down / Default
-			// background-position: -7px -16px;
 		}
 	}
 
