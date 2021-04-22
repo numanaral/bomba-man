@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/bomberman/static/css/main.1d33db01.chunk.css",
-    "main.js": "/bomberman/static/js/main.68b4bab2.chunk.js",
+    "main.js": "/bomberman/static/js/main.d03c2fa7.chunk.js",
     "runtime-main.js": "/bomberman/static/js/runtime-main.0bdc7dbc.js",
-    "static/js/2.4ae60412.chunk.js": "/bomberman/static/js/2.4ae60412.chunk.js",
+    "static/js/2.eb1eb422.chunk.js": "/bomberman/static/js/2.eb1eb422.chunk.js",
     "static/js/3.e292ea40.chunk.js": "/bomberman/static/js/3.e292ea40.chunk.js",
     "index.html": "/bomberman/index.html",
-    "static/js/2.4ae60412.chunk.js.LICENSE.txt": "/bomberman/static/js/2.4ae60412.chunk.js.LICENSE.txt"
+    "static/js/2.eb1eb422.chunk.js.LICENSE.txt": "/bomberman/static/js/2.eb1eb422.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.0bdc7dbc.js",
-    "static/js/2.4ae60412.chunk.js",
+    "static/js/2.eb1eb422.chunk.js",
     "static/css/main.1d33db01.chunk.css",
-    "static/js/main.68b4bab2.chunk.js"
+    "static/js/main.d03c2fa7.chunk.js"
   ]
 }
