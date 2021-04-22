@@ -75,6 +75,8 @@ type OnPrepareMoveProps = {
 	onComplete: OnMove;
 };
 
+type OnTriggerMove = (props: Omit<OnPrepareMoveProps, 'onComplete'>) => void;
+
 /** Makes the actual move */
 type OnMoveProps = {
 	playerId: PlayerId;
@@ -97,6 +99,7 @@ export type {
 	OnExplosionProps,
 	OnExplosion,
 	OnPrepareMoveProps,
+	OnTriggerMove,
 	OnMoveProps,
 	OnMove,
 	BombId,
