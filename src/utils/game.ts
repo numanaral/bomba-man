@@ -44,8 +44,8 @@ const generateRandomGameMap = (
 ): GameMap => {
 	const tiles: Array<KeysOf<typeof Tile>> = [
 		...Object.keys(Tile),
-		// we want there to be more of a chance for empty tiles for now
-		...Array(10).fill('Empty'),
+		// reverse block density, we want that many Emptys
+		...Array(11 - config.game.blockDensity).fill('Empty'),
 	];
 	const randomMap = Array(size)
 		.fill(0)

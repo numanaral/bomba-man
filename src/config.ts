@@ -3,6 +3,9 @@ import * as KeyCode from 'keycode-js';
 
 const config = {
 	title: 'Bomberman - Work In Progress',
+	game: {
+		blockDensity: 6 as RangeOf<10, 1>,
+	},
 	size: {
 		game: 15 as RangeOf<15>, // squares
 		character: 32, // px
