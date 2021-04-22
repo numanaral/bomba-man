@@ -1,3 +1,5 @@
+import config from 'config';
+import { OnMove, Players } from 'containers/Game/Game';
 import {
 	AddBomb,
 	CharacterKeyboardConfig,
@@ -7,15 +9,13 @@ import {
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Direction } from 'enums';
-import config from 'config';
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
-	resetRotation,
 	canMove,
 	handleRotateMove,
 	NPCAction,
+	resetRotation,
 } from 'utils/game';
-import { OnMove, Players } from 'containers/Game/Game';
 import useInterval from './useInterval';
 
 type ActionBaseProps = [
@@ -53,7 +53,7 @@ const usePlayerEvents = (
 	>({});
 
 	useInterval(() => {
-		handleNpcActions?.(players, gameMap);
+		handleNpcActions?.({ players, gameMap, onMove, addBomb });
 	}, config.duration.movement);
 
 	useEffect(() => {

@@ -13,7 +13,7 @@ import {
 import Bomb from './Bomb';
 import Character from './Character';
 import Map from './Map';
-import { BombType, AddBomb, TopLeftCoordinates, PlayerId } from './types';
+import { AddBomb, BombType, PlayerId, TopLeftCoordinates } from './types';
 
 const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	text-align: center;
