@@ -18,7 +18,7 @@ import {
 import {
 	GameState,
 	OnMoveProps,
-	OnPrepareMoveProps,
+	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
 import { makeSelectGameSize } from 'store/redux/reducers/game/selectors';
@@ -55,8 +55,8 @@ const useGameProvider = () => {
 		[dispatch]
 	);
 
-	const triggerMove = useCallback(
-		(props: Omit<OnPrepareMoveProps, 'onComplete'>) =>
+	const triggerMove = useCallback<OnTriggerMove>(
+		props =>
 			dispatch(
 				triggerMoveInGame({
 					...props,
