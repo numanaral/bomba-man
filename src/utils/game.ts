@@ -9,6 +9,7 @@ import {
 	PlayerId,
 	PlayerKeyboardConfig,
 	PlayerRef,
+	Players,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Axis, Direction, Tile } from 'enums';
@@ -243,6 +244,45 @@ const getExplosionCoordinates = (
 	return { x, y };
 };
 
+type OnHandleTileBreaking = (
+	newGameMap: GameMap,
+	ySquare: number,
+	xSquare: number
+) => void;
+
+type PlayersToKill = Array<PlayerId>;
+
+type OnHandlePlayerKill = (
+	players: Players,
+	ySquare: number,
+	xSquare: number
+) => PlayersToKill;
+
+const handleTileBreaking: OnHandleTileBreaking = (
+	newGameMap,
+	xSquare,
+	ySquare
+) => {
+	if (newGameMap[ySquare][xSquare] === Tile.Breaking) {
+		// eslint-disable-next-line no-param-reassign
+		newGameMap[ySquare][xSquare] = Tile.Empty;
+	}
+};
+
+const handlePlayerKill: OnHandlePlayerKill = (players, ySquare, xSquare) => {
+	const playersToKill: PlayersToKill = [];
+	Object.values<PlayerConfig>(players).forEach(({ id, coordinates }) => {
+		const {
+			xSquare: playerXSquare,
+			ySquare: playerYSquare,
+		} = topLeftCoordinatesToSquareCoordinates(coordinates);
+		if (playerXSquare === xSquare && playerYSquare === ySquare) {
+			playersToKill.push(id);
+		}
+	});
+	return playersToKill;
+};
+
 /**
  * Breaking tiles are "exploded" and removed from the map.
  *
@@ -253,13 +293,15 @@ const getExplosionCoordinates = (
  */
 const handleExplosionOnGameMap = (
 	gameMap: GameMap,
+	players: Players,
 	bombCoordinates: TopLeftCoordinates,
 	explosionSize: number
 ) => {
-	const gameMapCopy = JSON.parse(JSON.stringify(gameMap));
+	const newGameMap = JSON.parse(JSON.stringify(gameMap));
 	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates(
 		bombCoordinates
 	);
+	let playersToKill: Array<PlayerId> = [];
 
 	// ensure that we are checking within the boundaries
 	for (
@@ -268,9 +310,10 @@ const handleExplosionOnGameMap = (
 		Math.min(config.size.game - 1, ySquare + explosionSize);
 		currentYSquare++
 	) {
-		if (gameMapCopy[currentYSquare][xSquare] === Tile.Breaking) {
-			gameMapCopy[currentYSquare][xSquare] = Tile.Empty;
-		}
+		handleTileBreaking(newGameMap, currentYSquare, xSquare);
+		playersToKill = playersToKill.concat(
+			handlePlayerKill(players, currentYSquare, xSquare)
+		);
 	}
 
 	// ensure that we are checking within the boundaries
@@ -280,12 +323,13 @@ const handleExplosionOnGameMap = (
 		Math.min(config.size.game - 1, xSquare + explosionSize);
 		currentXSquare++
 	) {
-		if (gameMapCopy[ySquare][currentXSquare] === Tile.Breaking) {
-			gameMapCopy[ySquare][currentXSquare] = Tile.Empty;
-		}
+		handleTileBreaking(newGameMap, ySquare, currentXSquare);
+		playersToKill = playersToKill.concat(
+			handlePlayerKill(players, ySquare, currentXSquare)
+		);
 	}
 
-	return gameMapCopy;
+	return { newGameMap, playersToKill };
 };
 
 const getMoveDirectionFromKeyboardCode = (
