@@ -1,10 +1,23 @@
-import { PlayerKeyboardConfig, PlayerId } from 'containers/Game/types';
+import {
+	PlayerKeyboardConfig,
+	PlayerId,
+	PowerUps,
+} from 'containers/Game/types';
+import { PowerUp } from 'enums';
 import * as KeyCode from 'keycode-js';
 
 const config = {
 	title: 'Bomberman - Work In Progress',
 	game: {
 		blockDensity: 6 as RangeOf<10, 1>,
+		// Player defaults
+		lives: 1, // number
+		bombSize: 1, // number
+		movementSpeed: 200, // ms
+		powerUps: {
+			[PowerUp.BombSize]: 1,
+			[PowerUp.BombSize]: 1,
+		} as PowerUps,
 	},
 	size: {
 		game: 15 as RangeOf<15>, // squares
@@ -18,6 +31,7 @@ const config = {
 		explosion: 1, // square
 	},
 	duration: {
+		// TODO: This and the one under "game" should be controlled
 		movement: 200, // ms
 		bomb: {
 			firing: 2, // second

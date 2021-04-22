@@ -93,6 +93,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const topLeft = action.payload as TopLeftCoordinates;
 				const bomb: Bomb = {
 					...topLeft,
+					explosionSize: config.size.explosion,
 					id: new Date().toJSON(),
 				};
 				draft.bombs.push(bomb);
