@@ -28,7 +28,7 @@ type TopLeftCoordinates = {
 	left: number;
 };
 
-type AddBomb = (playerId: PlayerId) => void;
+type OnDropBomb = (playerId: PlayerId) => void;
 
 type Square = Player | Tile | PowerUp | Bomb;
 
@@ -91,7 +91,7 @@ type NPCActionProps = {
 	players: Players;
 	gameMap: GameMap;
 	triggerMove: OnTriggerMove;
-	dropBomb: AddBomb;
+	dropBomb: OnDropBomb;
 };
 
 export type {
@@ -99,7 +99,7 @@ export type {
 	TileProps,
 	BombType,
 	TopLeftCoordinates,
-	AddBomb,
+	OnDropBomb,
 	Square,
 	GameMap,
 	KeyboardEventCode,
