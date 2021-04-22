@@ -88,11 +88,12 @@ const explosionKeyframes = (explosionProps: ExplosionProps, is3D = false) => {
 	`;
 };
 
-const borderKeyframes = (color: string) => keyframes`
-	100% {
-		border-color: ${color};
-		/* Cool? effect */
-		/* border-width: ${config.size.tile * 0.5}px */
+const borderKeyframes = () => keyframes`
+	25% {
+		border-width: ${config.size.tile * 0.5}px
+	}
+	70% {
+		background-color: black;
 	}
 `;
 
@@ -114,7 +115,7 @@ const ExplosionCube = styled(Cube)<
 		'explosionAxis' | 'explosionSize' | 'firingDuration'
 	>
 >`
-	${({ $explosionAxis, $explosionSize, $firingDuration, color }) => css`
+	${({ $explosionAxis, $explosionSize, $firingDuration }) => css`
 		animation: ${explosionKeyframes(
 				{
 					explosionAxis: $explosionAxis,
@@ -127,8 +128,8 @@ const ExplosionCube = styled(Cube)<
 			border: none;
 		}
 		& * {
-			animation: ${borderKeyframes(color!)} ${$firingDuration * 0.75}s
-				ease-out forwards;
+			animation: ${borderKeyframes()} ${$firingDuration * 0.75}s ease-out
+				forwards;
 		}
 	`}
 `;
