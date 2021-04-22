@@ -18,7 +18,7 @@ const config = {
 		explosion: 1, // square
 	},
 	duration: {
-		movement: 300, // ms
+		movement: 200, // ms
 		bomb: {
 			firing: 2, // second
 			exploding: 2, // second
