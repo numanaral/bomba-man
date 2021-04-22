@@ -367,6 +367,7 @@ const playerGenerator = (
 	top: number,
 	left: number
 ): PlayerConfig => {
+	const { blockDensity, ...defaultState } = config.game;
 	return {
 		id: playerId,
 		coordinates: {
@@ -374,6 +375,10 @@ const playerGenerator = (
 			left: left * 32,
 		},
 		ref: null,
+		state: {
+			...defaultState,
+			powerUps: { ...defaultState.powerUps },
+		},
 	};
 };
 
