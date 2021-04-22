@@ -110,12 +110,16 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				} = action.payload as OnExplosionProps;
 				// remove bomb
 				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
-				const newMap = handleExplosionOnGameMap(
+				const { newGameMap, playersToKill } = handleExplosionOnGameMap(
 					state.gameMap,
+					state.players,
 					bombCoordinates,
 					config.size.explosion
 				);
-				draft.gameMap = newMap;
+				draft.gameMap = newGameMap;
+				playersToKill.forEach(playerId => {
+					delete draft.players[playerId];
+				});
 				break;
 			}
 			// GAME SETTINGS
