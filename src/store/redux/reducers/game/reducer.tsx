@@ -40,8 +40,8 @@ import {
 const gameReducer: Reducer<GameState, GameAction> = (
 	state = DEFAULT_VALUES,
 	action
-) =>
-	produce(state, draft => {
+) => {
+	return produce(state, draft => {
 		switch (action.type) {
 			case SET_GAME_STATE:
 				updateImmerDraft(draft, action.payload as GameState);
@@ -168,5 +168,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				break;
 		}
 	});
+};
 
 export default gameReducer;
