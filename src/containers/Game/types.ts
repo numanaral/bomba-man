@@ -17,12 +17,6 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	collisionIndex?: number;
 }
 
-type BombType = {
-	id: string;
-	top: number;
-	left: number;
-};
-
 type TopLeftCoordinates = {
 	top: number;
 	left: number;
@@ -113,7 +107,6 @@ type NPCActionProps = {
 export type {
 	CollisionCoordinates,
 	TileProps,
-	BombType,
 	TopLeftCoordinates,
 	SquareCoordinates,
 	OnDropBomb,
