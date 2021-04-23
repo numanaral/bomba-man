@@ -10,6 +10,7 @@ import {
 	PlayerKeyboardConfig,
 	PlayerRef,
 	Players,
+	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Axis, Direction, PowerUp, Tile } from 'enums';
@@ -67,7 +68,7 @@ const generateRandomGameMap = (
 /**
  * Converts from pixel to square.
  *
- * @param coordinates Coordinates.
+ * @param coordinates Top Left Coordinates.
  * @returns Square version of the coordinates.
  */
 const topLeftCoordinatesToSquareCoordinates = ({
@@ -77,6 +78,22 @@ const topLeftCoordinatesToSquareCoordinates = ({
 	return {
 		ySquare: top / config.size.movement,
 		xSquare: left / config.size.movement,
+	};
+};
+
+/**
+ * Converts from square to pixel.
+ *
+ * @param coordinates Square Coordinates.
+ * @returns Pixel (top, left) version of the coordinates.
+ */
+const squareCoordinatesToTopLeftCoordinates = ({
+	xSquare,
+	ySquare,
+}: SquareCoordinates) => {
+	return {
+		top: ySquare * config.size.movement,
+		left: xSquare * config.size.movement,
 	};
 };
 
@@ -418,4 +435,6 @@ export {
 	getMoveDirectionFromKeyMap,
 	MAX_GAME_SIZE,
 	MIN_GAME_SIZE,
+	topLeftCoordinatesToSquareCoordinates,
+	squareCoordinatesToTopLeftCoordinates,
 };
