@@ -1,4 +1,10 @@
-import { NonNullablePlayer, PlayerId } from 'containers/Game/types';
+import {
+	NonNullablePlayer,
+	PlayerId,
+	Square,
+	SquareCoordinates,
+	TopLeftCoordinates,
+} from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import config from 'config';
 import { Reducer } from 'redux';
@@ -9,6 +15,7 @@ import {
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
+import { Explosive, Player, Tile } from 'enums';
 import {
 	DEFAULT_VALUES,
 	SET_GAME_STATE,
@@ -42,6 +49,27 @@ const gameReducer: Reducer<GameState, GameAction> = (
 	action
 ) => {
 	return produce(state, draft => {
+		const setSquare = (
+			coordinates: SquareCoordinates | TopLeftCoordinates,
+			newSquare: Square
+		) => {
+			let xSquare;
+			let ySquare;
+
+			if ((coordinates as SquareCoordinates).xSquare) {
+				xSquare = (coordinates as SquareCoordinates).xSquare;
+				ySquare = (coordinates as SquareCoordinates).ySquare;
+			} else {
+				const _coordinates = topLeftCoordinatesToSquareCoordinates(
+					coordinates as TopLeftCoordinates
+				);
+				xSquare = _coordinates.xSquare;
+				ySquare = _coordinates.ySquare;
+			}
+
+			draft.gameMap[ySquare][xSquare] = newSquare;
+		};
+
 		switch (action.type) {
 			case SET_GAME_STATE:
 				updateImmerDraft(draft, action.payload as GameState);
@@ -95,8 +123,12 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			}
 			case DROP_BOMB: {
 				const playerId = action.payload as PlayerId;
-				const bomb = generateBomb(state.players[playerId]!);
+				const playerConfig = state.players[playerId]!;
+				const bomb = generateBomb(playerConfig);
 				draft.bombs.push(bomb);
+				// URGENT: This block will contain both the player and the bomb
+				// TODO: Figure out a proper way to handle this for NPC
+				setSquare(playerConfig.coordinates, Explosive.Bomb);
 				break;
 			}
 			case REMOVE_BOMB: {
@@ -118,8 +150,8 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					config.size.explosion
 				);
 				// clear breakable tiles
-				tilesToBreak.forEach(({ xSquare, ySquare }) => {
-					draft.gameMap[ySquare][xSquare] = Tile.Empty;
+				tilesToBreak.forEach(coordinates => {
+					setSquare(coordinates, Tile.Empty);
 				});
 				// clear the bomb
 				const {
@@ -128,13 +160,9 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				} = topLeftCoordinatesToSquareCoordinates(bombCoordinates);
 				draft.gameMap[bombYSquare][bombXSquare] = Tile.Empty;
 				// clear the players
-				playersToKill.forEach(id => {
-					delete draft.players[id];
-					const {
-						xSquare: playerXSquare,
-						ySquare: playerYSquare,
-					} = getPlayerSquareCoordinates(id);
-					draft.gameMap[playerYSquare][playerXSquare] = Tile.Empty;
+				playersToKill.forEach(playerId => {
+					delete draft.players[playerId];
+					setSquare(state.players[playerId]!.coordinates, Tile.Empty);
 				});
 				break;
 			}
