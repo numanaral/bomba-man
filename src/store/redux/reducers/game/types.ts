@@ -22,7 +22,7 @@ type AnimationCounter = number;
 
 type Bomb = {
 	id: string;
-	playerId?: PlayerId;
+	playerId: PlayerId;
 	explosionSize: number;
 } & TopLeftCoordinates;
 
