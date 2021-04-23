@@ -1,6 +1,7 @@
 import config from 'config';
 import { ExplosionProps } from 'containers/Game/components/Bomb';
 import {
+	Coordinates,
 	GameMap,
 	KeyMap,
 	NextMoveProps,
@@ -298,13 +299,11 @@ const getPlayersToKill = (
 	return playersToKill;
 };
 
-const getExplosionSquareCoordinatesFromBomb = (
-	coordinates: SquareCoordinates | TopLeftCoordinates,
-	explosionSize: number
+const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
+	coordinates: Coordinates
 ) => {
 	let xSquare;
 	let ySquare;
-	const explosionCoordinates: Array<SquareCoordinates> = [];
 
 	if ((coordinates as SquareCoordinates).xSquare) {
 		xSquare = (coordinates as SquareCoordinates).xSquare;
@@ -316,6 +315,18 @@ const getExplosionSquareCoordinatesFromBomb = (
 		xSquare = _coordinates.xSquare;
 		ySquare = _coordinates.ySquare;
 	}
+	return { xSquare, ySquare };
+};
+
+const getExplosionSquareCoordinatesFromBomb = (
+	coordinates: Coordinates,
+	explosionSize: number
+) => {
+	const {
+		xSquare,
+		ySquare,
+	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+	const explosionCoordinates: Array<SquareCoordinates> = [];
 
 	// ensure that we are checking within the boundaries
 	for (
@@ -462,4 +473,5 @@ export {
 	MIN_GAME_SIZE,
 	topLeftCoordinatesToSquareCoordinates,
 	squareCoordinatesToTopLeftCoordinates,
+	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 };

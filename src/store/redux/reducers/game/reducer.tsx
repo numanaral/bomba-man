@@ -1,9 +1,8 @@
 import {
+	Coordinates,
 	NonNullablePlayer,
 	PlayerId,
 	Square,
-	SquareCoordinates,
-	TopLeftCoordinates,
 } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import config from 'config';
@@ -11,6 +10,7 @@ import { Reducer } from 'redux';
 import {
 	generateBomb,
 	getExplosionResults,
+	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	handleMove,
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
@@ -49,23 +49,11 @@ const gameReducer: Reducer<GameState, GameAction> = (
 	action
 ) => {
 	return produce(state, draft => {
-		const setSquare = (
-			coordinates: SquareCoordinates | TopLeftCoordinates,
-			newSquare: Square
-		) => {
-			let xSquare;
-			let ySquare;
-
-			if ((coordinates as SquareCoordinates).xSquare) {
-				xSquare = (coordinates as SquareCoordinates).xSquare;
-				ySquare = (coordinates as SquareCoordinates).ySquare;
-			} else {
-				const _coordinates = topLeftCoordinatesToSquareCoordinates(
-					coordinates as TopLeftCoordinates
-				);
-				xSquare = _coordinates.xSquare;
-				ySquare = _coordinates.ySquare;
-			}
+		const setSquare = (coordinates: Coordinates, newSquare: Square) => {
+			const {
+				xSquare,
+				ySquare,
+			} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
 
 			draft.gameMap[ySquare][xSquare] = newSquare;
 		};

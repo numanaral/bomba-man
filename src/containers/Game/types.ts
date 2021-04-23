@@ -22,12 +22,14 @@ type TopLeftCoordinates = {
 	left: number;
 };
 
-type OnDropBomb = (playerId: PlayerId) => void;
-
 type SquareCoordinates = {
 	xSquare: number;
 	ySquare: number;
 };
+
+type Coordinates = TopLeftCoordinates | SquareCoordinates;
+
+type OnDropBomb = (playerId: PlayerId) => void;
 
 type Square = Player | Tile | PowerUp | Explosive;
 
@@ -109,6 +111,7 @@ export type {
 	TileProps,
 	TopLeftCoordinates,
 	SquareCoordinates,
+	Coordinates,
 	OnDropBomb,
 	Square,
 	GameMap,
