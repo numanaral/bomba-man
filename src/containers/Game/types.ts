@@ -1,4 +1,4 @@
-import { Bomb, Direction, Player, PowerUp, Tile } from 'enums';
+import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
 import { OnTriggerMove } from 'store/redux/reducers/game/types';
 // import { Immutable } from 'immer';
@@ -29,7 +29,7 @@ type SquareCoordinates = {
 	ySquare: number;
 };
 
-type Square = Player | Tile | PowerUp | Bomb;
+type Square = Player | Tile | PowerUp | Explosive;
 
 // type GameMap = Immutable<Array<Array<Square>>>;
 type GameMap = Array<Array<Square>>;
