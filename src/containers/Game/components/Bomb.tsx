@@ -1,22 +1,18 @@
 import config from 'config';
 import { Axis, ExplosionState, Explosive } from 'enums';
 import { useEffect, useState } from 'react';
-import { OnExplosion } from 'store/redux/reducers/game/types';
+import { Bomb as BombType, OnExplosion } from 'store/redux/reducers/game/types';
 import styled, { css, keyframes } from 'styled-components';
 import theme from 'theme';
 import { sleep } from 'utils';
 import { getExplosionCoordinates } from 'utils/game';
 import Cube from './Cube';
 
-interface Props {
+interface Props extends BombType {
 	// skin: Skin;
 	color: string;
 	firingDuration: number;
 	explodingDuration: number;
-	explosionSize: number;
-	id: string;
-	top: number;
-	left: number;
 	onExplosion: OnExplosion;
 	is3D: boolean;
 }
