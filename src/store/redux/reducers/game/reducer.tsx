@@ -2,7 +2,12 @@ import { NonNullablePlayer, PlayerId } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import config from 'config';
 import { Reducer } from 'redux';
-import { generateBomb, handleExplosionOnGameMap, handleMove } from 'utils/game';
+import {
+	generateBomb,
+	getExplosionResults,
+	handleMove,
+	topLeftCoordinatesToSquareCoordinates,
+} from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
 import {
 	DEFAULT_VALUES,
@@ -106,15 +111,30 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				} = action.payload as OnExplosionProps;
 				// remove bomb
 				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
-				const { newGameMap, playersToKill } = handleExplosionOnGameMap(
+				const { tilesToBreak, playersToKill } = getExplosionResults(
 					state.gameMap,
 					state.players,
 					bombCoordinates,
 					config.size.explosion
 				);
-				draft.gameMap = newGameMap;
-				playersToKill.forEach(playerId => {
-					delete draft.players[playerId];
+				// clear breakable tiles
+				tilesToBreak.forEach(({ xSquare, ySquare }) => {
+					draft.gameMap[ySquare][xSquare] = Tile.Empty;
+				});
+				// clear the bomb
+				const {
+					xSquare: bombXSquare,
+					ySquare: bombYSquare,
+				} = topLeftCoordinatesToSquareCoordinates(bombCoordinates);
+				draft.gameMap[bombYSquare][bombXSquare] = Tile.Empty;
+				// clear the players
+				playersToKill.forEach(id => {
+					delete draft.players[id];
+					const {
+						xSquare: playerXSquare,
+						ySquare: playerYSquare,
+					} = getPlayerSquareCoordinates(id);
+					draft.gameMap[playerYSquare][playerXSquare] = Tile.Empty;
 				});
 				break;
 			}

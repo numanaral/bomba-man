@@ -263,32 +263,27 @@ const getExplosionCoordinates = (
 	return { x, y };
 };
 
-type OnHandleTileBreaking = (
-	newGameMap: GameMap,
-	ySquare: number,
-	xSquare: number
-) => void;
-
+type TilesToBreak = Array<SquareCoordinates>;
 type PlayersToKill = Array<PlayerId>;
 
-type OnHandlePlayerKill = (
+const getTilesToBreak = (
+	gameMap: GameMap,
+	ySquare: number,
+	xSquare: number
+) => {
+	const tilesToBreak: TilesToBreak = [];
+	if (gameMap[ySquare][xSquare] === Tile.Breaking) {
+		tilesToBreak.push({ ySquare, xSquare });
+	}
+
+	return tilesToBreak;
+};
+
+const getPlayersToKill = (
 	players: Players,
 	ySquare: number,
 	xSquare: number
-) => PlayersToKill;
-
-const handleTileBreaking: OnHandleTileBreaking = (
-	newGameMap,
-	ySquare,
-	xSquare
 ) => {
-	if (newGameMap[ySquare][xSquare] === Tile.Breaking) {
-		// eslint-disable-next-line no-param-reassign
-		newGameMap[ySquare][xSquare] = Tile.Empty;
-	}
-};
-
-const handlePlayerKill: OnHandlePlayerKill = (players, ySquare, xSquare) => {
 	const playersToKill: PlayersToKill = [];
 	Object.values<PlayerConfig>(players).forEach(({ id, coordinates }) => {
 		const {
@@ -299,7 +294,50 @@ const handlePlayerKill: OnHandlePlayerKill = (players, ySquare, xSquare) => {
 			playersToKill.push(id);
 		}
 	});
+
 	return playersToKill;
+};
+
+const getExplosionSquareCoordinatesFromBomb = (
+	coordinates: SquareCoordinates | TopLeftCoordinates,
+	explosionSize: number
+) => {
+	let xSquare;
+	let ySquare;
+	const explosionCoordinates: Array<SquareCoordinates> = [];
+
+	if ((coordinates as SquareCoordinates).xSquare) {
+		xSquare = (coordinates as SquareCoordinates).xSquare;
+		ySquare = (coordinates as SquareCoordinates).ySquare;
+	} else {
+		const _coordinates = topLeftCoordinatesToSquareCoordinates(
+			coordinates as TopLeftCoordinates
+		);
+		xSquare = _coordinates.xSquare;
+		ySquare = _coordinates.ySquare;
+	}
+
+	// ensure that we are checking within the boundaries
+	for (
+		let currentYSquare = Math.max(0, ySquare - explosionSize);
+		currentYSquare <=
+		Math.min(config.size.game - 1, ySquare + explosionSize);
+		currentYSquare++
+	) {
+		explosionCoordinates.push({ ySquare: currentYSquare, xSquare });
+	}
+
+	// ensure that we are checking within the boundaries
+	for (
+		let currentXSquare = Math.max(0, xSquare - explosionSize);
+		currentXSquare <=
+		Math.min(config.size.game - 1, xSquare + explosionSize);
+		currentXSquare++
+	) {
+		explosionCoordinates.push({ ySquare, xSquare: currentXSquare });
+	}
+
+	return explosionCoordinates;
 };
 
 /**
@@ -310,45 +348,30 @@ const handlePlayerKill: OnHandlePlayerKill = (players, ySquare, xSquare) => {
  * @param explosionSize Size of the explosion.
  * @returns New state for the game map with breaking tiles emptied.
  */
-const handleExplosionOnGameMap = (
+const getExplosionResults = (
 	gameMap: GameMap,
 	players: Players,
 	bombCoordinates: TopLeftCoordinates,
 	explosionSize: number
 ) => {
-	const newGameMap = JSON.parse(JSON.stringify(gameMap));
-	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates(
-		bombCoordinates
-	);
-	let playersToKill: Array<PlayerId> = [];
+	let tilesToBreak: TilesToBreak = [];
+	let playersToKill: PlayersToKill = [];
 
-	// ensure that we are checking within the boundaries
-	for (
-		let currentYSquare = Math.max(0, ySquare - explosionSize);
-		currentYSquare <=
-		Math.min(config.size.game - 1, ySquare + explosionSize);
-		currentYSquare++
-	) {
-		handleTileBreaking(newGameMap, currentYSquare, xSquare);
-		playersToKill = playersToKill.concat(
-			handlePlayerKill(players, currentYSquare, xSquare)
-		);
-	}
+	getExplosionSquareCoordinatesFromBomb(
+		bombCoordinates,
+		explosionSize
+	).forEach(({ ySquare, xSquare }) => {
+		tilesToBreak = [
+			...tilesToBreak,
+			...getTilesToBreak(gameMap, ySquare, xSquare),
+		];
+		playersToKill = [
+			...playersToKill,
+			...getPlayersToKill(players, ySquare, xSquare),
+		];
+	});
 
-	// ensure that we are checking within the boundaries
-	for (
-		let currentXSquare = Math.max(0, xSquare - explosionSize);
-		currentXSquare <=
-		Math.min(config.size.game - 1, xSquare + explosionSize);
-		currentXSquare++
-	) {
-		handleTileBreaking(newGameMap, ySquare, currentXSquare);
-		playersToKill = playersToKill.concat(
-			handlePlayerKill(players, ySquare, currentXSquare)
-		);
-	}
-
-	return { newGameMap, playersToKill };
+	return { tilesToBreak, playersToKill };
 };
 
 const generateBomb = ({
@@ -430,7 +453,7 @@ export {
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
 	getExplosionCoordinates,
-	handleExplosionOnGameMap,
+	getExplosionResults,
 	generateBomb,
 	playerGenerator,
 	getMoveDirectionFromKeyboardCode,
