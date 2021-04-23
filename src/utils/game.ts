@@ -13,7 +13,7 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, PowerUp, Tile } from 'enums';
+import { Axis, Direction, PowerUp, Tile, Explosive } from 'enums';
 import { OnMove, Bomb } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
@@ -106,7 +106,9 @@ const canMove = (top: number, left: number, map: GameMap) => {
 	});
 	const nextSquare = map[ySquare]?.[xSquare];
 	const isObstacle =
-		nextSquare === Tile.Breaking || nextSquare === Tile.NonBreaking;
+		nextSquare === Tile.Breaking ||
+		nextSquare === Tile.NonBreaking ||
+		nextSquare === Explosive.Bomb;
 	const isHorizontalEnd = left < BOUNDARY_MIN || left > BOUNDARY_MAX;
 	const isVerticalEnd = top < BOUNDARY_MIN || top > BOUNDARY_MAX;
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
