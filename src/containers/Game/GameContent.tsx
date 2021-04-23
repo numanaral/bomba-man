@@ -7,6 +7,7 @@ import {
 } from 'store/redux/reducers/game/selectors';
 import useGameProvider from 'store/redux/hooks/useGameProvider';
 import theme from 'theme';
+import { useCallback } from 'react';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
@@ -21,12 +22,17 @@ const GameContent = () => {
 
 	const { onExplosion } = useGameProvider();
 
-	const refFunc = ({ id: playerId }: PlayerConfig) => (newRef: any) => {
-		setPlayerRef({
-			playerId,
-			newRef,
-		});
-	};
+	const refFunc = useCallback(
+		({ id: playerId, ref }: PlayerConfig) => (newRef: any) => {
+			// if we already have a ref, don't try setting it again
+			if (ref) return;
+			setPlayerRef({
+				playerId,
+				newRef,
+			});
+		},
+		[setPlayerRef]
+	);
 
 	return (
 		<>
