@@ -92,6 +92,10 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const { playerId, newRef } = action.payload as PlayerWithNewRef;
 				if (!newRef) break;
 				draft.players[playerId]!.ref = castDraft(newRef);
+				setSquare(
+					state.players[playerId]!.coordinates,
+					playerId as Player
+				);
 				break;
 			}
 			case TRIGGER_MOVE: {
@@ -119,6 +123,18 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					newCoordinates,
 				} = action.payload as OnMoveProps;
 				draft.players[playerId]!.coordinates = newCoordinates;
+				const {
+					ySquare,
+					xSquare,
+				} = topLeftCoordinatesToSquareCoordinates(
+					state.players[playerId]!.coordinates
+				);
+				// this can also be a bomb, we don't want to just clear it
+				const lastSquare = state.gameMap[ySquare][xSquare];
+				// replace old player square
+				setSquare(state.players[playerId]!.coordinates, lastSquare);
+				// set new player square
+				setSquare(newCoordinates, playerId as Player);
 				break;
 			}
 			case DROP_BOMB: {
