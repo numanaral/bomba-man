@@ -55,7 +55,15 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				ySquare,
 			} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
 
-			draft.gameMap[ySquare][xSquare] = newSquare;
+			try {
+				draft.gameMap[ySquare][xSquare] = newSquare;
+			} catch (err) {
+				console.error('Square being set is out of boundaries', {
+					gameMap: state.gameMap,
+					xSquare,
+					ySquare,
+				});
+			}
 		};
 
 		switch (action.type) {
@@ -153,6 +161,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					bombCoordinates,
 					config.size.explosion
 				);
+				console.log(tilesToBreak);
 				// clear breakable tiles
 				tilesToBreak.forEach(coordinates => {
 					setSquare(coordinates, Tile.Empty);
