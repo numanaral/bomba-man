@@ -13,6 +13,7 @@ import {
 	getExplosionResults,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	handleMove,
+	isPowerUp,
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
@@ -177,6 +178,18 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// otherwise we can leave whatever was there
 				if (lastSquare === playerId) {
 					setSquare(lastCoordinates, Tile.Empty);
+				}
+				// if there is a powerUp, assign it to the playerState
+				const {
+					ySquare: newCoordinateYSquare,
+					xSquare: newCoordinateXSquare,
+				} = topLeftCoordinatesToSquareCoordinates(newCoordinates);
+				const powerUpOrEmptyTile =
+					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
+				if (isPowerUp(powerUpOrEmptyTile)) {
+					draft.players[playerId]!.state.powerUps[
+						powerUpOrEmptyTile as PowerUp
+					]++;
 				}
 				// set new player square
 				setSquare(newCoordinates, playerId as Player);

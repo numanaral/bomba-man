@@ -11,6 +11,7 @@ import {
 	PlayerRef,
 	Players,
 	PowerUpOrNull,
+	Square,
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
@@ -574,6 +575,10 @@ const generatePowerUpOrNull = () => {
 	return possiblePowerUpOrNulls[getRandomInt(possiblePowerUpOrNulls.length)];
 };
 
+const isPowerUp = (square: Square) => {
+	return Object.values(PowerUp).includes(square as PowerUp);
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -594,4 +599,5 @@ export {
 	squareCoordinatesToTopLeftCoordinates,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	generatePowerUpOrNull,
+	isPowerUp,
 };
