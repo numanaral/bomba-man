@@ -305,7 +305,7 @@ const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
 	let xSquare;
 	let ySquare;
 
-	if ((coordinates as SquareCoordinates).xSquare) {
+	if ((coordinates as SquareCoordinates).xSquare !== undefined) {
 		xSquare = (coordinates as SquareCoordinates).xSquare;
 		ySquare = (coordinates as SquareCoordinates).ySquare;
 	} else {
@@ -318,34 +318,104 @@ const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
 	return { xSquare, ySquare };
 };
 
+const isSquareOutsideBoundaries = (squareCoordinate: number) => {
+	return squareCoordinate < 0 || squareCoordinate >= config.size.game;
+};
+
 const getExplosionSquareCoordinatesFromBomb = (
+	gameMap: GameMap,
 	coordinates: Coordinates,
 	explosionSize: number
 ) => {
+	/* 
+		===========================
+		# LOGIC
+		===========================
+		> Legend
+			- Empty = 'T1',
+			- Breaking = 'T2',
+			- NonBreaking = 'T3',
+			- Bomb = 'B',
+		> Config
+			- bombSize = 3
+		> Current Test Row
+		 	- [T1, T1, T3, B, T1, T2, T2]
+		 				       ^  ^ these ones
+		> Check neighbors (<>: check, x: stop on side):
+		 	- [T1, T1, T3, <B>, T1, T2, T2]
+
+		 	- [T1, T1, T3, <B, T1>, T2, T2]
+						x
+			- [T1, T1, T3, <B, T1, T2>, T2]
+
+			- [T1, T1, T3, <B, T1, T2>, T2]
+										x
+
+		> Stop checking when you hit a T2 or T3
+			- If T2, include it in the list
+		
+	*/
+
 	const {
-		xSquare,
-		ySquare,
+		xSquare: bombX,
+		ySquare: bombY,
 	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
-	const explosionCoordinates: Array<SquareCoordinates> = [];
+	const explosionCoordinates: Array<SquareCoordinates> = [
+		{ xSquare: bombX, ySquare: bombY },
+	];
 
-	// ensure that we are checking within the boundaries
-	for (
-		let currentYSquare = Math.max(0, ySquare - explosionSize);
-		currentYSquare <=
-		Math.min(config.size.game - 1, ySquare + explosionSize);
-		currentYSquare++
-	) {
-		explosionCoordinates.push({ ySquare: currentYSquare, xSquare });
-	}
+	const pushCurrentCoordinates = (xSquare: number, ySquare: number) => {
+		explosionCoordinates.push({
+			xSquare,
+			ySquare,
+		});
+	};
 
-	// ensure that we are checking within the boundaries
-	for (
-		let currentXSquare = Math.max(0, xSquare - explosionSize);
-		currentXSquare <=
-		Math.min(config.size.game - 1, xSquare + explosionSize);
-		currentXSquare++
-	) {
-		explosionCoordinates.push({ ySquare, xSquare: currentXSquare });
+	// used to calculate the next square
+	// value to add to currentX and currentY square coordinates
+	const xyDiff = [
+		[0, -1], // Up
+		[1, 0], // Right
+		[0, 1], // Down
+		[-1, 0], // Left
+	];
+
+	// check all sides
+	for (let i = 0; i < 4; i++) {
+		let currentX = bombX;
+		let currentY = bombY;
+		let shouldContinue = true;
+
+		// loop until the end of the explosion
+		for (let j = 0; j < explosionSize; j++) {
+			if (!shouldContinue) continue;
+
+			const [xDiff, yDiff] = xyDiff[i];
+			currentX += xDiff;
+			currentY += yDiff;
+
+			// don't go out of boundaries
+			if (
+				isSquareOutsideBoundaries(currentX) ||
+				isSquareOutsideBoundaries(currentY)
+			) {
+				continue;
+			}
+
+			switch (gameMap[currentY][currentX]) {
+				case Tile.Breaking:
+					pushCurrentCoordinates(currentX, currentY);
+					shouldContinue = false;
+					break;
+				case Tile.NonBreaking:
+					shouldContinue = false;
+					break;
+				// Tile.Empty, Explosive.Bomb, Player.[any], PowerUps.[any]
+				default:
+					pushCurrentCoordinates(currentX, currentY);
+					break;
+			}
+		}
 	}
 
 	return explosionCoordinates;
@@ -369,6 +439,7 @@ const getExplosionResults = (
 	let playersToKill: PlayersToKill = [];
 
 	getExplosionSquareCoordinatesFromBomb(
+		gameMap,
 		bombCoordinates,
 		explosionSize
 	).forEach(({ ySquare, xSquare }) => {
