@@ -177,11 +177,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					config.size.explosion
 				);
 
-				console.log(
-					'coordinatesToSetOnFireTRIGGER: ',
-					coordinatesToSetOnFire
-				);
-
 				const { horizontal, vertical } = coordinatesToSetOnFire;
 
 				// set fire on all the coordinates
@@ -221,11 +216,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					bombCoordinates,
 					config.size.explosion,
 					true
-				);
-
-				console.log(
-					'coordinatesToSetOnFireCOMPLETE: ',
-					coordinatesToSetOnFire
 				);
 
 				// clear fire
