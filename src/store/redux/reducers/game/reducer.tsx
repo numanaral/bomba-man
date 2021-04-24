@@ -120,19 +120,25 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					playerId,
 					newCoordinates,
 				} = action.payload as OnMoveProps;
-				draft.players[playerId]!.coordinates = newCoordinates;
+
+				const lastCoordinates = state.players[playerId]!.coordinates;
+
 				const {
 					ySquare,
 					xSquare,
-				} = topLeftCoordinatesToSquareCoordinates(
-					state.players[playerId]!.coordinates
-				);
+				} = topLeftCoordinatesToSquareCoordinates(lastCoordinates);
 				// this can also be a bomb, we don't want to just clear it
 				const lastSquare = state.gameMap[ySquare][xSquare];
-				// replace old player square
-				setSquare(state.players[playerId]!.coordinates, lastSquare);
+				// clear lastSquare only if it was the player
+				// (on a Tile.Empty)
+				// otherwise we can leave whatever was there
+				if (lastSquare === playerId) {
+					setSquare(lastCoordinates, Tile.Empty);
+				}
 				// set new player square
 				setSquare(newCoordinates, playerId as Player);
+				// update player's topLeft coordinates
+				draft.players[playerId]!.coordinates = newCoordinates;
 				break;
 			}
 			case DROP_BOMB: {
