@@ -5,7 +5,6 @@ import {
 	Square,
 } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
-import config from 'config';
 import { Reducer } from 'redux';
 import {
 	generateBomb,
@@ -112,6 +111,13 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			draft.powerUps[ySquare][xSquare] = square as PowerUp;
 		};
 
+		const getBombSizeForPlayer = (playerId: PlayerId) => {
+			const playerState = state.players[playerId]!.state;
+			return (
+				playerState.bombSize + playerState.powerUps[PowerUp.BombSize]
+			);
+		};
+
 		switch (action.type) {
 			case SET_GAME_STATE:
 				updateImmerDraft(draft, action.payload as GameState);
@@ -168,11 +174,12 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const lastCoordinates = state.players[playerId]!.coordinates;
 
 				const {
-					ySquare,
-					xSquare,
+					ySquare: lastCoordinateYSquare,
+					xSquare: lastCoordinateXSquare,
 				} = topLeftCoordinatesToSquareCoordinates(lastCoordinates);
 				// this can also be a bomb, we don't want to just clear it
-				const lastSquare = state.gameMap[ySquare][xSquare];
+				const lastSquare =
+					state.gameMap[lastCoordinateYSquare][lastCoordinateXSquare];
 				// clear lastSquare only if it was the player
 				// (on a Tile.Empty)
 				// otherwise we can leave whatever was there
@@ -222,6 +229,8 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					left: currentBomb!.left,
 				};
 
+				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
 				// find surrounding objects to modify
 				const {
 					coordinatesToSetOnFire,
@@ -230,7 +239,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					state.gameMap,
 					state.players,
 					bombCoordinates,
-					config.size.explosion
+					bombSize
 				);
 
 				const { horizontal, vertical } = coordinatesToSetOnFire;
@@ -269,13 +278,15 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					left: currentBomb!.left,
 				};
 
+				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
 				// remove bomb
 				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
 				const { coordinatesToSetOnFire } = getExplosionResults(
 					state.gameMap,
 					state.players,
 					bombCoordinates,
-					config.size.explosion,
+					bombSize,
 					true
 				);
 
