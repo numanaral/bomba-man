@@ -13,11 +13,15 @@ const config = {
 		powerUpChance: 5 as RangeOf<5, 1>,
 		// Player defaults
 		lives: 1, // number
-		bombSize: 1, // number
-		movementSpeed: 200, // ms
+		[PowerUp.BombSize]: 1, // number
+		[PowerUp.MovementSpeed]: 200, // ms
 		powerUps: {
 			[PowerUp.BombSize]: 0,
-			[PowerUp.Speed]: 0,
+			[PowerUp.MovementSpeed]: 0,
+		} as PowerUps,
+		powerUpIncreaseValue: {
+			[PowerUp.BombSize]: 1,
+			[PowerUp.MovementSpeed]: -50,
 		} as PowerUps,
 	},
 	size: {

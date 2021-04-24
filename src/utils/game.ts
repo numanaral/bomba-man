@@ -10,6 +10,7 @@ import {
 	PlayerKeyboardConfig,
 	PlayerRef,
 	Players,
+	PlayerState,
 	PowerUpOrNull,
 	Square,
 	SquareCoordinates,
@@ -163,11 +164,12 @@ const rotateMove = (originalTransform: string, direction: Direction) => {
 
 const handleRotateMove = (
 	characterRef: NonNullablePlayerRef,
-	direction: Direction
+	direction: Direction,
+	movementSpeed: number
 ) => {
 	/* eslint-disable no-param-reassign */
 	// enable animation
-	characterRef.style.transition = `${config.duration.movement}ms`;
+	characterRef.style.transition = `${movementSpeed}ms`;
 	// move
 	characterRef.style.transform = rotateMove(
 		characterRef.style.transform,
@@ -187,6 +189,7 @@ const handleMove = (
 		is3D,
 		gameMap,
 	}: NextMoveProps,
+	movementSpeed: number,
 	onComplete: OnMove
 ) => {
 	let newTop = top;
@@ -217,7 +220,7 @@ const handleMove = (
 	// since we are resetting rotation css, we need an async
 	// event so that the animation can display smoothly
 	setTimeout(() => {
-		if (is3D) handleRotateMove(ref, direction);
+		if (is3D) handleRotateMove(ref, direction, movementSpeed);
 		onComplete({
 			playerId,
 			newCoordinates: { top: newTop, left: newLeft },
@@ -496,15 +499,20 @@ const getExplosionResults = (
 	return { coordinatesToSetOnFire, tilesToBreak, playersToKill };
 };
 
+const getPoweredUpValue = (playerState: PlayerState, powerUp: PowerUp) => {
+	return (
+		playerState[powerUp] +
+		playerState.powerUps[powerUp] *
+			config.game.powerUpIncreaseValue[powerUp]
+	);
+};
+
 const generateBomb = ({
 	id: playerId,
 	coordinates: { top, left },
-	state: {
-		bombSize,
-		powerUps: { [PowerUp.BombSize]: powerUpBombSize },
-	},
+	state,
 }: PlayerConfig) => {
-	const explosionSize = bombSize + powerUpBombSize;
+	const explosionSize = getPoweredUpValue(state, PowerUp.BombSize);
 	const bomb: Bomb = {
 		id: new Date().toJSON(),
 		explosionSize,
@@ -600,4 +608,5 @@ export {
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	generatePowerUpOrNull,
 	isPowerUp,
+	getPoweredUpValue,
 };

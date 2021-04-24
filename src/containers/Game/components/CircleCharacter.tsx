@@ -25,6 +25,7 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 	display: flex;
 	justify-content: center;
 
+	/* TODO: This character type won't be used but update this if it changes */
 	transition: top ${config.duration.movement}ms,
 		left ${config.duration.movement}ms;
 

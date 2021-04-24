@@ -10,6 +10,7 @@ import theme from 'theme';
 import { useCallback } from 'react';
 import usePrevious from 'hooks/usePrevious';
 import { PowerUp } from 'enums';
+import { getPoweredUpValue } from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
@@ -60,9 +61,10 @@ const GameContent = () => {
 			)}
 			{bombs.map(({ id, playerId, ...bombProps }) => {
 				const playerState = players[playerId]!.state;
-				const defaultBombSize = playerState.bombSize;
-				const powerUpBombSize = playerState.powerUps[PowerUp.BombSize];
-				const explosionSize = defaultBombSize + powerUpBombSize;
+				const explosionSize = getPoweredUpValue(
+					playerState,
+					PowerUp.BombSize
+				);
 
 				return (
 					<Bomb

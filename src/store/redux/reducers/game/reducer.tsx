@@ -10,6 +10,7 @@ import {
 	generateBomb,
 	generatePowerUpOrNull,
 	getExplosionResults,
+	getPoweredUpValue,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	handleMove,
 	isPowerUp,
@@ -111,10 +112,21 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			draft.powerUps[ySquare][xSquare] = square as PowerUp;
 		};
 
+		const getPlayerState = (playerId: PlayerId) => {
+			return state.players[playerId]!.state;
+		};
+
 		const getBombSizeForPlayer = (playerId: PlayerId) => {
-			const playerState = state.players[playerId]!.state;
-			return (
-				playerState.bombSize + playerState.powerUps[PowerUp.BombSize]
+			return getPoweredUpValue(
+				getPlayerState(playerId),
+				PowerUp.BombSize
+			);
+		};
+
+		const getMovementSpeedForPlayer = (playerId: PlayerId) => {
+			return getPoweredUpValue(
+				getPlayerState(playerId),
+				PowerUp.MovementSpeed
 			);
 		};
 
@@ -154,6 +166,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				} = action.payload as OnPrepareMoveProps;
 				const { is3D, players, gameMap } = state;
 				const playerConfig = players[playerId] as NonNullablePlayer;
+
 				handleMove(
 					{
 						playerConfig,
@@ -161,6 +174,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 						is3D,
 						gameMap,
 					},
+					getMovementSpeedForPlayer(playerId),
 					onComplete
 				);
 				break;
