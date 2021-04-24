@@ -12,17 +12,19 @@ import {
 	makeMoveInGame,
 	setPlayerRefInGame,
 	dropBombInGame,
-	onExplosionComplete,
+	onExplosionCompleteInGame,
 	triggerMoveInGame,
+	triggerExplosionInGame,
 } from 'store/redux/reducers/game/actions';
 import {
+	BombId,
 	GameState,
 	OnMoveProps,
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
 import { makeSelectGameSize } from 'store/redux/reducers/game/selectors';
-import { GameMap } from 'containers/Game/types';
+import { GameMap, OnDropBomb } from 'containers/Game/types';
 
 const useGameProvider = () => {
 	const dispatch = useDispatch();
@@ -66,18 +68,24 @@ const useGameProvider = () => {
 		[dispatch, makeMove]
 	);
 
-	const dropBomb = useCallback(props => dispatch(dropBombInGame(props)), [
-		dispatch,
-	]);
+	const dropBomb = useCallback<OnDropBomb>(
+		playerId => dispatch(dropBombInGame(playerId)),
+		[dispatch]
+	);
 
 	const removeBomb = useCallback(
 		bombId => dispatch(removeBombFromGame(bombId)),
 		[dispatch]
 	);
 
-	const onExplosion = useCallback(
+	const triggerExplosion = useCallback(
+		(bombId: BombId) => dispatch(triggerExplosionInGame(bombId)),
+		[dispatch]
+	);
+
+	const onExplosionComplete = useCallback(
 		props => {
-			dispatch(onExplosionComplete(props));
+			dispatch(onExplosionCompleteInGame(props));
 		},
 		[dispatch]
 	);
@@ -114,7 +122,8 @@ const useGameProvider = () => {
 		triggerMove,
 		dropBomb,
 		removeBomb,
-		onExplosion,
+		triggerExplosion,
+		onExplosionComplete,
 		// GAME SETTINGS
 		triggerAnimation,
 		toggleDimension,

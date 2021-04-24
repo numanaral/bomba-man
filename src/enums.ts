@@ -38,8 +38,11 @@ enum PowerUp {
 	Invincibility = 'PU3',
 }
 
-enum Bomb {
-	Basic = 'B1',
+enum Explosive {
+	Bomb = 'B',
+	FireCore = 'FC',
+	FireHorizontal = 'FH',
+	FireVertical = 'FV',
 }
 
-export { Direction, Axis, ExplosionState, Player, Tile, PowerUp, Bomb };
+export { Direction, Axis, ExplosionState, Player, Tile, PowerUp, Explosive };

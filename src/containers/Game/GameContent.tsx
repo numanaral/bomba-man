@@ -7,6 +7,7 @@ import {
 } from 'store/redux/reducers/game/selectors';
 import useGameProvider from 'store/redux/hooks/useGameProvider';
 import theme from 'theme';
+import { useCallback } from 'react';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
@@ -19,14 +20,19 @@ const GameContent = () => {
 	const bombs = useSelector(makeSelectGameBombs());
 	const is3D = useSelector(makeSelectGameIs3D());
 
-	const { onExplosion } = useGameProvider();
+	const { triggerExplosion, onExplosionComplete } = useGameProvider();
 
-	const refFunc = ({ id: playerId }: PlayerConfig) => (newRef: any) => {
-		setPlayerRef({
-			playerId,
-			newRef,
-		});
-	};
+	const refFunc = useCallback(
+		({ id: playerId, ref }: PlayerConfig) => (newRef: any) => {
+			// if we already have a ref, don't try setting it again
+			if (ref) return;
+			setPlayerRef({
+				playerId,
+				newRef,
+			});
+		},
+		[setPlayerRef]
+	);
 
 	return (
 		<>
@@ -58,7 +64,8 @@ const GameContent = () => {
 					explosionSize={config.size.explosion}
 					firingDuration={config.duration.bomb.firing}
 					explodingDuration={config.duration.bomb.exploding}
-					onExplosion={onExplosion}
+					triggerExplosion={triggerExplosion}
+					onExplosionComplete={onExplosionComplete}
 					is3D={is3D}
 				/>
 			))}

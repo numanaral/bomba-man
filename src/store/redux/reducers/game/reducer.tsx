@@ -1,9 +1,21 @@
-import { NonNullablePlayer, TopLeftCoordinates } from 'containers/Game/types';
+import {
+	Coordinates,
+	NonNullablePlayer,
+	PlayerId,
+	Square,
+} from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import config from 'config';
 import { Reducer } from 'redux';
-import { handleExplosionOnGameMap, handleMove } from 'utils/game';
+import {
+	generateBomb,
+	getExplosionResults,
+	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
+	handleMove,
+	topLeftCoordinatesToSquareCoordinates,
+} from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
+import { Explosive, Player, Tile } from 'enums';
 import {
 	DEFAULT_VALUES,
 	SET_GAME_STATE,
@@ -21,13 +33,14 @@ import {
 	SET_PLAYER_REF,
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
+	TRIGGER_EXPLOSION,
 } from './constants';
 import {
 	AnimatableGameMap,
 	Bomb,
+	BombId,
 	GameAction,
 	GameState,
-	OnExplosionProps,
 	OnMoveProps,
 	OnPrepareMoveProps,
 	PlayerWithNewRef,
@@ -36,8 +49,25 @@ import {
 const gameReducer: Reducer<GameState, GameAction> = (
 	state = DEFAULT_VALUES,
 	action
-) =>
-	produce(state, draft => {
+) => {
+	return produce(state, draft => {
+		const setSquare = (coordinates: Coordinates, newSquare: Square) => {
+			const {
+				xSquare,
+				ySquare,
+			} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+
+			try {
+				draft.gameMap[ySquare][xSquare] = newSquare;
+			} catch (err) {
+				console.error('Square being set is out of boundaries', {
+					gameMap: state.gameMap,
+					xSquare,
+					ySquare,
+				});
+			}
+		};
+
 		switch (action.type) {
 			case SET_GAME_STATE:
 				updateImmerDraft(draft, action.payload as GameState);
@@ -60,6 +90,10 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const { playerId, newRef } = action.payload as PlayerWithNewRef;
 				if (!newRef) break;
 				draft.players[playerId]!.ref = castDraft(newRef);
+				setSquare(
+					state.players[playerId]!.coordinates,
+					playerId as Player
+				);
 				break;
 			}
 			case TRIGGER_MOVE: {
@@ -87,16 +121,28 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					newCoordinates,
 				} = action.payload as OnMoveProps;
 				draft.players[playerId]!.coordinates = newCoordinates;
+				const {
+					ySquare,
+					xSquare,
+				} = topLeftCoordinatesToSquareCoordinates(
+					state.players[playerId]!.coordinates
+				);
+				// this can also be a bomb, we don't want to just clear it
+				const lastSquare = state.gameMap[ySquare][xSquare];
+				// replace old player square
+				setSquare(state.players[playerId]!.coordinates, lastSquare);
+				// set new player square
+				setSquare(newCoordinates, playerId as Player);
 				break;
 			}
 			case DROP_BOMB: {
-				const topLeft = action.payload as TopLeftCoordinates;
-				const bomb: Bomb = {
-					...topLeft,
-					explosionSize: config.size.explosion,
-					id: new Date().toJSON(),
-				};
+				const playerId = action.payload as PlayerId;
+				const playerConfig = state.players[playerId]!;
+				const bomb = generateBomb(playerConfig);
 				draft.bombs.push(bomb);
+				// URGENT: This block will contain both the player and the bomb
+				// TODO: Figure out a proper way to handle this for NPC
+				setSquare(playerConfig.coordinates, Explosive.Bomb);
 				break;
 			}
 			case REMOVE_BOMB: {
@@ -104,22 +150,82 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
 				break;
 			}
-			case ON_EXPLOSION_COMPLETE: {
+			case TRIGGER_EXPLOSION: {
+				const bombId = action.payload as BombId;
+				const currentBomb = state.bombs.find(
+					({ id }) => id === bombId
+				) as NonNullable<Bomb>;
+				const bombCoordinates = {
+					top: currentBomb.top,
+					left: currentBomb!.left,
+				};
+
+				// find surrounding objects to modify
 				const {
-					bombId,
-					bombCoordinates,
-				} = action.payload as OnExplosionProps;
-				// remove bomb
-				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
-				const { newGameMap, playersToKill } = handleExplosionOnGameMap(
+					coordinatesToSetOnFire,
+					playersToKill,
+				} = getExplosionResults(
 					state.gameMap,
 					state.players,
 					bombCoordinates,
 					config.size.explosion
 				);
-				draft.gameMap = newGameMap;
+
+				console.log(
+					'coordinatesToSetOnFireTRIGGER: ',
+					coordinatesToSetOnFire
+				);
+
+				const { horizontal, vertical } = coordinatesToSetOnFire;
+
+				// set fire on all the coordinates
+				// this automatically "breaks" the breakable tiles
+				// URGENT: This will also contain two entity if Tile, Tile & Fire
+				horizontal.forEach(coordinates => {
+					setSquare(coordinates, Explosive.FireHorizontal);
+				});
+				vertical.forEach(coordinates => {
+					setSquare(coordinates, Explosive.FireVertical);
+				});
+				// Core will not have an explosion direction
+				setSquare(horizontal[0], Explosive.FireCore);
+
+				// clear the players
 				playersToKill.forEach(playerId => {
 					delete draft.players[playerId];
+					setSquare(state.players[playerId]!.coordinates, Tile.Empty);
+				});
+				break;
+			}
+			case ON_EXPLOSION_COMPLETE: {
+				const bombId = action.payload as BombId;
+				const currentBomb = state.bombs.find(
+					({ id }) => id === bombId
+				) as NonNullable<Bomb>;
+				const bombCoordinates = {
+					top: currentBomb.top,
+					left: currentBomb!.left,
+				};
+
+				// remove bomb
+				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
+				const { coordinatesToSetOnFire } = getExplosionResults(
+					state.gameMap,
+					state.players,
+					bombCoordinates,
+					config.size.explosion,
+					true
+				);
+
+				console.log(
+					'coordinatesToSetOnFireCOMPLETE: ',
+					coordinatesToSetOnFire
+				);
+
+				// clear fire
+				const { horizontal, vertical } = coordinatesToSetOnFire;
+				[...horizontal, ...vertical].forEach(coordinates => {
+					setSquare(coordinates, Tile.Empty);
 				});
 				break;
 			}
@@ -153,5 +259,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				break;
 		}
 	});
+};
 
 export default gameReducer;

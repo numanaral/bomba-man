@@ -1,6 +1,6 @@
 import config from 'config';
-import { ExplosionProps } from 'containers/Game/components/Bomb';
 import {
+	Coordinates,
 	GameMap,
 	KeyMap,
 	NextMoveProps,
@@ -10,10 +10,11 @@ import {
 	PlayerKeyboardConfig,
 	PlayerRef,
 	Players,
+	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, Tile } from 'enums';
-import { OnMove } from 'store/redux/reducers/game/types';
+import { Axis, Direction, PowerUp, Tile, Explosive } from 'enums';
+import { OnMove, Bomb } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -67,7 +68,7 @@ const generateRandomGameMap = (
 /**
  * Converts from pixel to square.
  *
- * @param coordinates Coordinates.
+ * @param coordinates Top Left Coordinates.
  * @returns Square version of the coordinates.
  */
 const topLeftCoordinatesToSquareCoordinates = ({
@@ -80,6 +81,22 @@ const topLeftCoordinatesToSquareCoordinates = ({
 	};
 };
 
+/**
+ * Converts from square to pixel.
+ *
+ * @param coordinates Square Coordinates.
+ * @returns Pixel (top, left) version of the coordinates.
+ */
+const squareCoordinatesToTopLeftCoordinates = ({
+	xSquare,
+	ySquare,
+}: SquareCoordinates) => {
+	return {
+		top: ySquare * config.size.movement,
+		left: xSquare * config.size.movement,
+	};
+};
+
 const BOUNDARY_MIN = 0;
 const BOUNDARY_MAX = config.size.movement * (config.size.game - 1);
 const canMove = (top: number, left: number, map: GameMap) => {
@@ -89,7 +106,9 @@ const canMove = (top: number, left: number, map: GameMap) => {
 	});
 	const nextSquare = map[ySquare]?.[xSquare];
 	const isObstacle =
-		nextSquare === Tile.Breaking || nextSquare === Tile.NonBreaking;
+		nextSquare === Tile.Breaking ||
+		nextSquare === Tile.NonBreaking ||
+		nextSquare === Explosive.Bomb;
 	const isHorizontalEnd = left < BOUNDARY_MIN || left > BOUNDARY_MAX;
 	const isVerticalEnd = top < BOUNDARY_MIN || top > BOUNDARY_MAX;
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
@@ -218,58 +237,35 @@ const getExplosionScaleSize = (explosionSize: number) => {
 	return ((explosionSize + 1) * 2 - 1) * 2;
 };
 
-const getExplosionCoordinates = (
-	{ explosionAxis, explosionSize }: ExplosionProps,
-	is3D = false
-) => {
-	let overflowLimit = 0.5;
-	let baseSize = 2;
-	let explosionScaleSize = getExplosionScaleSize(explosionSize);
-	if (is3D) {
-		overflowLimit = 0;
-		baseSize = 1;
-		explosionScaleSize /= 2;
-	}
-
-	let x = baseSize;
-	let y = baseSize;
-
-	if (explosionAxis === Axis.X) x = explosionScaleSize;
-	else y = explosionScaleSize;
-
-	// prevent overflow
-	x -= overflowLimit;
-	y -= overflowLimit;
-
-	return { x, y };
+type TilesToBreak = Array<SquareCoordinates>;
+type PlayersToKill = Array<PlayerId>;
+enum ExplosionDirection {
+	HORIZONTAL = 'horizontal',
+	VERTICAL = 'vertical',
+}
+type CoordinatesToSetOnFire = {
+	[ExplosionDirection.HORIZONTAL]: Array<SquareCoordinates>;
+	[ExplosionDirection.VERTICAL]: Array<SquareCoordinates>;
 };
 
-type OnHandleTileBreaking = (
-	newGameMap: GameMap,
+const getTilesToBreak = (
+	gameMap: GameMap,
 	ySquare: number,
 	xSquare: number
-) => void;
+) => {
+	const tilesToBreak: TilesToBreak = [];
+	if (gameMap[ySquare][xSquare] === Tile.Breaking) {
+		tilesToBreak.push({ ySquare, xSquare });
+	}
 
-type PlayersToKill = Array<PlayerId>;
+	return tilesToBreak;
+};
 
-type OnHandlePlayerKill = (
+const getPlayersToKill = (
 	players: Players,
 	ySquare: number,
 	xSquare: number
-) => PlayersToKill;
-
-const handleTileBreaking: OnHandleTileBreaking = (
-	newGameMap,
-	ySquare,
-	xSquare
 ) => {
-	if (newGameMap[ySquare][xSquare] === Tile.Breaking) {
-		// eslint-disable-next-line no-param-reassign
-		newGameMap[ySquare][xSquare] = Tile.Empty;
-	}
-};
-
-const handlePlayerKill: OnHandlePlayerKill = (players, ySquare, xSquare) => {
 	const playersToKill: PlayersToKill = [];
 	Object.values<PlayerConfig>(players).forEach(({ id, coordinates }) => {
 		const {
@@ -280,7 +276,168 @@ const handlePlayerKill: OnHandlePlayerKill = (players, ySquare, xSquare) => {
 			playersToKill.push(id);
 		}
 	});
+
 	return playersToKill;
+};
+
+const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
+	coordinates: Coordinates
+) => {
+	let xSquare;
+	let ySquare;
+
+	if ((coordinates as SquareCoordinates).xSquare !== undefined) {
+		xSquare = (coordinates as SquareCoordinates).xSquare;
+		ySquare = (coordinates as SquareCoordinates).ySquare;
+	} else {
+		const _coordinates = topLeftCoordinatesToSquareCoordinates(
+			coordinates as TopLeftCoordinates
+		);
+		xSquare = _coordinates.xSquare;
+		ySquare = _coordinates.ySquare;
+	}
+	return { xSquare, ySquare };
+};
+
+const isSquareOutsideBoundaries = (squareCoordinate: number) => {
+	return squareCoordinate < 0 || squareCoordinate >= config.size.game;
+};
+
+const getExplosionSquareCoordinatesFromBomb = (
+	gameMap: GameMap,
+	coordinates: Coordinates,
+	explosionSize: number,
+	/** only returns fire locations */
+	checkOnlyFire = false
+) => {
+	/* 
+		===========================
+		# LOGIC
+		===========================
+		> Legend
+			- Empty = 'T1',
+			- Breaking = 'T2',
+			- NonBreaking = 'T3',
+			- Bomb = 'B',
+		> Config
+			- bombSize = 3
+		> Current Test Row
+		 	- [T1, T1, T3, B, T1, T2, T2]
+		 				       ^  ^ these ones
+		> Check neighbors (<>: check, x: stop on side):
+		 	- [T1, T1, T3, <B>, T1, T2, T2]
+
+		 	- [T1, T1, T3, <B, T1>, T2, T2]
+						x
+			- [T1, T1, T3, <B, T1, T2>, T2]
+
+			- [T1, T1, T3, <B, T1, T2>, T2]
+										x
+
+		> Stop checking when you hit a T2 or T3
+			- If T2, include it in the list
+		
+	*/
+
+	const {
+		xSquare: bombX,
+		ySquare: bombY,
+	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+	const bombSquareCoordinates = { xSquare: bombX, ySquare: bombY };
+	const explosionCoordinates: CoordinatesToSetOnFire = {
+		[ExplosionDirection.HORIZONTAL]: [bombSquareCoordinates],
+		[ExplosionDirection.VERTICAL]: [bombSquareCoordinates],
+	};
+
+	const pushCurrentCoordinates = (
+		xSquare: number,
+		ySquare: number,
+		explosionDirection: ExplosionDirection
+	) => {
+		explosionCoordinates[explosionDirection].push({
+			xSquare,
+			ySquare,
+		});
+	};
+
+	// used to calculate the next square
+	// value to add to currentX and currentY square coordinates
+	const xyDiff = [
+		[0, -1], // Up
+		[1, 0], // Right
+		[0, 1], // Down
+		[-1, 0], // Left
+	];
+
+	// required for proper animation
+	// (expanding in scale X or Y)
+	const directions = [
+		ExplosionDirection.VERTICAL,
+		ExplosionDirection.HORIZONTAL,
+		ExplosionDirection.VERTICAL,
+		ExplosionDirection.HORIZONTAL,
+	];
+
+	// check all sides
+	for (let i = 0; i < 4; i++) {
+		let currentX = bombX;
+		let currentY = bombY;
+		const currentDirection = directions[i];
+		let shouldContinue = true;
+
+		// loop until the end of the explosion
+		for (let j = 0; j < explosionSize; j++) {
+			if (!shouldContinue) continue;
+
+			const [xDiff, yDiff] = xyDiff[i];
+			currentX += xDiff;
+			currentY += yDiff;
+
+			// don't go out of boundaries
+			if (
+				isSquareOutsideBoundaries(currentX) ||
+				isSquareOutsideBoundaries(currentY)
+			) {
+				continue;
+			}
+
+			const currentSquare = gameMap[currentY][currentX];
+			if (checkOnlyFire) {
+				// if it's not a fire, then we reached the end
+				if (
+					currentSquare !== Explosive.FireHorizontal &&
+					currentSquare !== Explosive.FireVertical
+				) {
+					continue;
+				}
+
+				pushCurrentCoordinates(currentX, currentY, currentDirection);
+			}
+			switch (currentSquare) {
+				case Tile.Breaking:
+					pushCurrentCoordinates(
+						currentX,
+						currentY,
+						currentDirection
+					);
+					shouldContinue = false;
+					break;
+				case Tile.NonBreaking:
+					shouldContinue = false;
+					break;
+				// Tile.Empty, Explosive.Bomb, Player.[any], PowerUps.[any]
+				default:
+					pushCurrentCoordinates(
+						currentX,
+						currentY,
+						currentDirection
+					);
+					break;
+			}
+		}
+	}
+
+	return explosionCoordinates;
 };
 
 /**
@@ -291,45 +448,69 @@ const handlePlayerKill: OnHandlePlayerKill = (players, ySquare, xSquare) => {
  * @param explosionSize Size of the explosion.
  * @returns New state for the game map with breaking tiles emptied.
  */
-const handleExplosionOnGameMap = (
+const getExplosionResults = (
 	gameMap: GameMap,
 	players: Players,
 	bombCoordinates: TopLeftCoordinates,
-	explosionSize: number
+	explosionSize: number,
+	/** only returns fire locations */
+	checkOnlyFire = false
 ) => {
-	const newGameMap = JSON.parse(JSON.stringify(gameMap));
-	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates(
-		bombCoordinates
+	let tilesToBreak: TilesToBreak = [];
+	let playersToKill: PlayersToKill = [];
+	const coordinatesToSetOnFire: CoordinatesToSetOnFire = {
+		[ExplosionDirection.HORIZONTAL]: [],
+		[ExplosionDirection.VERTICAL]: [],
+	};
+
+	const explosionSquares = getExplosionSquareCoordinatesFromBomb(
+		gameMap,
+		bombCoordinates,
+		explosionSize,
+		checkOnlyFire
 	);
-	let playersToKill: Array<PlayerId> = [];
+	// { horizontal, vertical }
+	(Object.keys(explosionSquares) as Array<ExplosionDirection>).forEach(
+		explosionDirection => {
+			explosionSquares[explosionDirection].forEach(
+				({ ySquare, xSquare }) => {
+					coordinatesToSetOnFire[explosionDirection].push({
+						xSquare,
+						ySquare,
+					});
+					tilesToBreak = [
+						...tilesToBreak,
+						...getTilesToBreak(gameMap, ySquare, xSquare),
+					];
+					playersToKill = [
+						...playersToKill,
+						...getPlayersToKill(players, ySquare, xSquare),
+					];
+				}
+			);
+		}
+	);
 
-	// ensure that we are checking within the boundaries
-	for (
-		let currentYSquare = Math.max(0, ySquare - explosionSize);
-		currentYSquare <=
-		Math.min(config.size.game - 1, ySquare + explosionSize);
-		currentYSquare++
-	) {
-		handleTileBreaking(newGameMap, currentYSquare, xSquare);
-		playersToKill = playersToKill.concat(
-			handlePlayerKill(players, currentYSquare, xSquare)
-		);
-	}
+	return { coordinatesToSetOnFire, tilesToBreak, playersToKill };
+};
 
-	// ensure that we are checking within the boundaries
-	for (
-		let currentXSquare = Math.max(0, xSquare - explosionSize);
-		currentXSquare <=
-		Math.min(config.size.game - 1, xSquare + explosionSize);
-		currentXSquare++
-	) {
-		handleTileBreaking(newGameMap, ySquare, currentXSquare);
-		playersToKill = playersToKill.concat(
-			handlePlayerKill(players, ySquare, currentXSquare)
-		);
-	}
-
-	return { newGameMap, playersToKill };
+const generateBomb = ({
+	id: playerId,
+	coordinates: { top, left },
+	state: {
+		bombSize,
+		powerUps: { [PowerUp.BombSize]: powerUpBombSize },
+	},
+}: PlayerConfig) => {
+	const explosionSize = bombSize + powerUpBombSize;
+	const bomb: Bomb = {
+		id: new Date().toJSON(),
+		explosionSize,
+		top,
+		left,
+		playerId,
+	};
+	return bomb;
 };
 
 const getMoveDirectionFromKeyboardCode = (
@@ -391,11 +572,14 @@ export {
 	resetRotation,
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
-	getExplosionCoordinates,
-	handleExplosionOnGameMap,
+	getExplosionResults,
+	generateBomb,
 	playerGenerator,
 	getMoveDirectionFromKeyboardCode,
 	getMoveDirectionFromKeyMap,
 	MAX_GAME_SIZE,
 	MIN_GAME_SIZE,
+	topLeftCoordinatesToSquareCoordinates,
+	squareCoordinatesToTopLeftCoordinates,
+	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 };

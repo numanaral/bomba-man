@@ -20,12 +20,13 @@ const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
  */
 type AnimationCounter = number;
 
-// TODO: rename this to prevent clash with the enum
 type Bomb = {
 	id: string;
-	playerId?: PlayerId;
+	playerId: PlayerId;
 	explosionSize: number;
 } & TopLeftCoordinates;
+
+type BombFn = (bombId: BombId) => void;
 
 /** Square coordinates that can break tiles and kill players. */
 type BombExplosionSquareCoordinates = Array<SquareCoordinates>;
@@ -50,7 +51,6 @@ type AnimatableGameMap = {
 type GamePayload =
 	| GameState
 	| ValuesOf<GameState>
-	| OnExplosionProps
 	| BombId
 	| AnimatableGameMap
 	| PlayerWithNewRef
@@ -61,13 +61,6 @@ type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
 	payload?: GamePayload;
 };
-
-type OnExplosionProps = {
-	bombId: string;
-	bombCoordinates: TopLeftCoordinates;
-};
-
-type OnExplosion = (props: OnExplosionProps) => void;
 
 type BombId = string;
 
@@ -99,13 +92,12 @@ type PlayerWithNewRef = {
 
 export type {
 	Bomb,
+	BombFn,
 	BombExplosionSquareCoordinates,
 	GameState,
 	GamePayload,
 	GameAction,
 	GameActionFn,
-	OnExplosionProps,
-	OnExplosion,
 	OnPrepareMoveProps,
 	OnTriggerMove,
 	OnMoveProps,

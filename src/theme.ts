@@ -47,8 +47,8 @@ const GlobalStyles = createGlobalStyle`
 		--default-color: rgb(228, 230, 235); */
 		--error-color: #f44336;
 		--warning-color: #ff9800;
-		--success-color: #2196f3;
-		--info-color: #4caf50;
+		--success-color: #4caf50;
+		--info-color: #2196f3;
 		--default-color: #E4E6EB;
 		/* #endregion */
 
@@ -61,11 +61,14 @@ const GlobalStyles = createGlobalStyle`
 		--character-size: ${config.size.character}px;
 		--tile-size: ${config.size.tile}px;
 		--game-size: ${config.size.game}px;
+		--exploding-duration: ${config.duration.bomb.exploding}s;
+		--firing-duration: ${config.duration.bomb.firing}s;
 		/* #endregion */
 		
 		/* #region ANIMATIONS */
 		/* @see https://easings.net/#easeInOutBack */
 		--ease-in-out-back: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+		--ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
 		--incremental-animation-delay: 0.03s;
 		--block-animation-duration: 0.5s;
 		/* #endregion */
