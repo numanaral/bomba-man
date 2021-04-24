@@ -8,6 +8,7 @@ import {
 import useGameProvider from 'store/redux/hooks/useGameProvider';
 import theme from 'theme';
 import { useCallback } from 'react';
+import usePrevious from 'hooks/usePrevious';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
@@ -19,19 +20,20 @@ const GameContent = () => {
 	const players = useSelector(makeSelectGamePlayers());
 	const bombs = useSelector(makeSelectGameBombs());
 	const is3D = useSelector(makeSelectGameIs3D());
+	const previousIs3D = usePrevious(is3D);
 
 	const { triggerExplosion, onExplosionComplete } = useGameProvider();
 
 	const refFunc = useCallback(
 		({ id: playerId, ref }: PlayerConfig) => (newRef: any) => {
 			// if we already have a ref, don't try setting it again
-			if (ref) return;
+			if (previousIs3D === is3D && ref) return;
 			setPlayerRef({
 				playerId,
 				newRef,
 			});
 		},
-		[setPlayerRef]
+		[is3D, previousIs3D, setPlayerRef]
 	);
 
 	return (
