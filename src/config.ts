@@ -9,15 +9,15 @@ import * as KeyCode from 'keycode-js';
 const config = {
 	title: 'Bomberman - Work In Progress',
 	game: {
-		blockDensity: 6 as RangeOf<10, 1>,
-		powerUpChance: 3 as RangeOf<5, 1>,
+		blockDensity: 8 as RangeOf<10, 1>,
+		powerUpChance: 5 as RangeOf<5, 1>,
 		// Player defaults
 		lives: 1, // number
 		bombSize: 1, // number
 		movementSpeed: 200, // ms
 		powerUps: {
-			[PowerUp.BombSize]: 1,
-			[PowerUp.BombSize]: 1,
+			[PowerUp.BombSize]: 0,
+			[PowerUp.Speed]: 0,
 		} as PowerUps,
 	},
 	size: {
