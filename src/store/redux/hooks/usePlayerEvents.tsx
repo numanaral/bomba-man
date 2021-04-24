@@ -4,11 +4,11 @@ import {
 	KeyMap,
 	PlayerId,
 	PlayerKeyboardConfig,
-	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { useEffect, useRef } from 'react';
+import { PowerUp } from 'enums';
+import { useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { getMoveDirectionFromKeyMap } from 'utils/game';
+import { getMoveDirectionFromKeyMap, getPoweredUpValue } from 'utils/game';
 import { npcAction } from 'utils/npc';
 import useInterval from '../../../hooks/useInterval';
 import {
@@ -18,14 +18,7 @@ import {
 } from '../reducers/game/selectors';
 import useGameProvider from './useGameProvider';
 
-type ActionBaseProps = [
-	coordinates: TopLeftCoordinates,
-	keys: PlayerKeyboardConfig
-];
-
-type MoveAction = (keys: PlayerKeyboardConfig, id: PlayerId) => void;
-
-type BombAction = (...args: ActionBaseProps) => void;
+type KeyDownAction = (id: PlayerId, keys: PlayerKeyboardConfig) => void;
 
 const usePlayerEvents = () => {
 	const { dropBomb, triggerMove } = useGameProvider();
@@ -41,13 +34,21 @@ const usePlayerEvents = () => {
 	});
 	const keyMap = useRef<KeyMap>({});
 
+	const npcMovementSpeed = useMemo(() => {
+		const npcState = players.P4?.state;
+		// if there is no NPC, lets not call this often
+		if (!npcState) return Number.MAX_SAFE_INTEGER;
+		return getPoweredUpValue(npcState, PowerUp.MovementSpeed);
+	}, [players.P4]);
+
 	useInterval(() => {
+		// TODO: Make this dynamic as well
 		if (!players.P4) return;
 		npcAction({ players, gameMap, triggerMove, dropBomb });
-	}, config.duration.movement);
+	}, npcMovementSpeed);
 
 	useEffect(() => {
-		const move: MoveAction = (playerKeyboardConfig, id) => {
+		const move: KeyDownAction = (id, playerKeyboardConfig) => {
 			// reset rotation to 0 so the animations are consistent
 			// if (is3D) resetRotation(ref);
 			const directions = getMoveDirectionFromKeyMap(
@@ -61,12 +62,9 @@ const usePlayerEvents = () => {
 			});
 		};
 
-		const bomb: BombAction = ({ top, left }, { DropBomb }) => {
+		const bomb: KeyDownAction = (id, { DropBomb }) => {
 			if (keyMap.current[DropBomb]) {
-				dropBomb({
-					top,
-					left,
-				});
+				dropBomb(id);
 			}
 		};
 
@@ -84,21 +82,23 @@ const usePlayerEvents = () => {
 			(Object.keys(players) as Array<PlayerId>).forEach(id => {
 				const { [id]: keys } = config.keyboardConfig.player;
 				// we only want to take this action for non-NPC players
+				const playerState = players[id]!.state;
+				const movementSpeed = getPoweredUpValue(
+					playerState,
+					PowerUp.MovementSpeed
+				);
+
 				if (keys) {
-					const { coordinates } = players[id]!;
 					const { ref } = players[id]!;
 
 					if (ref) {
 						const newTime = new Date().getTime();
-						if (
-							newTime - timeOutRef.current[id]! >
-							config.duration.movement
-						) {
+						if (newTime - timeOutRef.current[id]! > movementSpeed) {
 							timeOutRef.current[id] = newTime;
-							move(keys, id);
+							move(id, keys);
 						}
 					}
-					bomb(coordinates, keys);
+					bomb(id, keys);
 				}
 			});
 		};

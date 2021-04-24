@@ -23,6 +23,7 @@ const DEFAULT_VALUES: GameState = {
 	isSideView: false,
 	size: config.size.game,
 	animationCounter: 0,
+	powerUps: {},
 };
 const PLAYERS = {
 	P1,
@@ -41,6 +42,7 @@ const MAKE_MOVE = `${KEY}/MAKE_MOVE`;
 const TRIGGER_MOVE = `${KEY}/TRIGGER_MOVE`;
 const DROP_BOMB = `${KEY}/DROP_BOMB`;
 const REMOVE_BOMB = `${KEY}/REMOVE_BOMB`;
+const TRIGGER_EXPLOSION = `${KEY}/TRIGGER_EXPLOSION`;
 const ON_EXPLOSION_COMPLETE = `${KEY}/ON_EXPLOSION_COMPLETE`;
 // GAME SETTINGS
 const TRIGGER_GAME_ANIMATION = `${KEY}/TRIGGER_ANIMATION`;
@@ -57,6 +59,7 @@ export {
 	START_GAME,
 	SET_GAME_MAP,
 	SET_PLAYER_REF,
+	TRIGGER_EXPLOSION,
 	ON_EXPLOSION_COMPLETE,
 	// GAME ACTIONS
 	MAKE_MOVE,

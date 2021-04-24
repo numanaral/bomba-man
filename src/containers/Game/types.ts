@@ -1,4 +1,4 @@
-import { Bomb, Direction, Player, PowerUp, Tile } from 'enums';
+import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
 import { OnTriggerMove } from 'store/redux/reducers/game/types';
 // import { Immutable } from 'immer';
@@ -11,26 +11,33 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	size: number;
 	top: number;
 	left: number;
-	animate?: boolean;
 	variant: Square;
 	color?: string;
 	collisionIndex?: number;
+	animate?: boolean;
+	fireSquare?: Fire;
 }
 
-type BombType = {
-	id: string;
-	top: number;
-	left: number;
-};
+type Fire =
+	| Explosive.FireCore
+	| Explosive.FireHorizontal
+	| Explosive.FireVertical;
 
 type TopLeftCoordinates = {
 	top: number;
 	left: number;
 };
 
-type AddBomb = ({ top, left }: Omit<BombType, 'id'>) => void;
+type SquareCoordinates = {
+	xSquare: number;
+	ySquare: number;
+};
 
-type Square = Player | Tile | PowerUp | Bomb;
+type Coordinates = TopLeftCoordinates | SquareCoordinates;
+
+type OnDropBomb = (playerId: PlayerId) => void;
+
+type Square = Player | Tile | PowerUp | Explosive;
 
 // type GameMap = Immutable<Array<Array<Square>>>;
 type GameMap = Array<Array<Square>>;
@@ -57,10 +64,21 @@ type Players = {
 
 type PlayerRef = HTMLDivElement | null;
 
+type PowerUps = Record<PowerUp, number>;
+
+type PlayerState = {
+	lives: number;
+	[PowerUp.BombSize]: number;
+	[PowerUp.MovementSpeed]: number;
+	/** How many power-ups have been collected */
+	powerUps: PowerUps;
+};
+
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
 	ref: PlayerRef;
+	state: PlayerState;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
@@ -91,15 +109,18 @@ type NPCActionProps = {
 	players: Players;
 	gameMap: GameMap;
 	triggerMove: OnTriggerMove;
-	dropBomb: AddBomb;
+	dropBomb: OnDropBomb;
 };
+
+type PowerUpOrNull = PowerUp | null;
 
 export type {
 	CollisionCoordinates,
 	TileProps,
-	BombType,
 	TopLeftCoordinates,
-	AddBomb,
+	SquareCoordinates,
+	Coordinates,
+	OnDropBomb,
 	Square,
 	GameMap,
 	KeyboardEventCode,
@@ -107,11 +128,15 @@ export type {
 	PlayerId,
 	Players,
 	PlayerRef,
+	PlayerState,
 	PlayerConfig,
+	PowerUps,
 	NonNullablePlayerRef,
 	NonNullablePlayer,
 	NextMoveProps,
 	KeyMap,
 	CharacterProps,
 	NPCActionProps,
+	Fire,
+	PowerUpOrNull,
 };

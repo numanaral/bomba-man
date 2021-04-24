@@ -10,6 +10,7 @@ import {
 	TOGGLE_GAME_NPC,
 	TOGGLE_GAME_PERSPECTIVE,
 	TOGGLE_GAME_TWO_PLAYER,
+	TRIGGER_EXPLOSION,
 	TRIGGER_GAME_ANIMATION,
 	TRIGGER_MOVE,
 } from './constants';
@@ -51,7 +52,12 @@ const removeBombFromGame: GameActionFn = payload => ({
 	payload,
 });
 
-const onExplosionComplete: GameActionFn = payload => ({
+const triggerExplosionInGame: GameActionFn = payload => ({
+	type: TRIGGER_EXPLOSION,
+	payload,
+});
+
+const onExplosionCompleteInGame: GameActionFn = payload => ({
 	type: ON_EXPLOSION_COMPLETE,
 	payload,
 });
@@ -88,7 +94,8 @@ export {
 	triggerMoveInGame,
 	dropBombInGame,
 	removeBombFromGame,
-	onExplosionComplete,
+	triggerExplosionInGame,
+	onExplosionCompleteInGame,
 	// GAME SETTINGS
 	triggerGameAnimation,
 	toggleGameDimension,

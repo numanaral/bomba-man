@@ -2,10 +2,12 @@ import usePrevious from 'hooks/usePrevious';
 import config from 'config';
 import styled from 'styled-components';
 import theme from 'theme';
-import { Tile as TileEnum } from 'enums';
+import { Explosive, Tile as TileEnum } from 'enums';
+import { isPowerUp } from 'utils/game';
 import Cube from './Cube';
 import Tile from './Tile';
 import { GameMap, Square } from '../types';
+import PowerUp from './PowerUp';
 
 interface Props {
 	size: RangeOf<15>;
@@ -58,13 +60,41 @@ const Map: React.FC<Props> = ({
 						square === TileEnum.NonBreaking ||
 						square === TileEnum.Breaking;
 
+					const key = `${outerInd}_${innerInd}`;
+					const squareSize = config.size.tile;
+					const top = outerInd * config.size.tile;
+					const left = innerInd * config.size.tile;
+
+					// if it's a PowerUp
+					if (isPowerUp(square)) {
+						return (
+							<PowerUp
+								key={key}
+								size={squareSize}
+								variant={square as ValuesOf<typeof PowerUp>}
+								top={top}
+								left={left}
+							/>
+						);
+					}
+
+					let fireSquare;
+					if (
+						square === Explosive.FireCore ||
+						square === Explosive.FireHorizontal ||
+						square === Explosive.FireVertical
+					) {
+						fireSquare = square;
+					}
+
 					const props: React.ComponentPropsWithRef<typeof Cube> = {
-						key: `${outerInd}_${innerInd}`,
-						size: config.size.tile,
-						top: outerInd * config.size.tile,
-						left: innerInd * config.size.tile,
+						key,
+						size: squareSize,
+						top,
+						left,
 						animate: shouldAnimate,
 						variant: square,
+						fireSquare,
 						...(hasCollision && {
 							color:
 								theme.palette.color[

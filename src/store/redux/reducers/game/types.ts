@@ -4,12 +4,15 @@ import {
 	PlayerId,
 	PlayerRef,
 	Players,
+	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Direction } from 'enums';
+import { Direction, PowerUp } from 'enums';
 import * as constants from './constants';
 
 const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
+
+// TODO: merge types?
 
 /**
  * Change in this index triggers animation. This is needed in order to prevent
@@ -17,11 +20,16 @@ const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
  */
 type AnimationCounter = number;
 
-// TODO: rename this to prevent clash with the enum
 type Bomb = {
 	id: string;
-	playerId?: PlayerId;
+	playerId: PlayerId;
+	explosionSize: number;
 } & TopLeftCoordinates;
+
+type BombFn = (bombId: BombId) => void;
+
+/** Square coordinates that can break tiles and kill players. */
+type BombExplosionSquareCoordinates = Array<SquareCoordinates>;
 
 // type GameState = Immutable<{
 type GameState = {
@@ -32,6 +40,8 @@ type GameState = {
 	size: RangeOf<15>;
 	animationCounter: AnimationCounter;
 	bombs: Array<Bomb>;
+	// null for when it's picked up
+	powerUps: Record<number, Record<number, PowerUp | null>>;
 };
 // }>;
 
@@ -43,7 +53,6 @@ type AnimatableGameMap = {
 type GamePayload =
 	| GameState
 	| ValuesOf<GameState>
-	| OnExplosionProps
 	| BombId
 	| AnimatableGameMap
 	| PlayerWithNewRef
@@ -54,13 +63,6 @@ type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
 	payload?: GamePayload;
 };
-
-type OnExplosionProps = {
-	bombId: string;
-	bombCoordinates: TopLeftCoordinates;
-};
-
-type OnExplosion = (props: OnExplosionProps) => void;
 
 type BombId = string;
 
@@ -92,12 +94,12 @@ type PlayerWithNewRef = {
 
 export type {
 	Bomb,
+	BombFn,
+	BombExplosionSquareCoordinates,
 	GameState,
 	GamePayload,
 	GameAction,
 	GameActionFn,
-	OnExplosionProps,
-	OnExplosion,
 	OnPrepareMoveProps,
 	OnTriggerMove,
 	OnMoveProps,
