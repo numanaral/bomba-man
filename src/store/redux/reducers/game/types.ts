@@ -7,7 +7,7 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Direction } from 'enums';
+import { Direction, PowerUp } from 'enums';
 import * as constants from './constants';
 
 const { KEY, DEFAULT_VALUES, PLAYERS, ...actionTypes } = constants;
@@ -40,6 +40,8 @@ type GameState = {
 	size: RangeOf<15>;
 	animationCounter: AnimationCounter;
 	bombs: Array<Bomb>;
+	// null for when it's picked up
+	powerUps: Record<number, Record<number, PowerUp | null>>;
 };
 // }>;
 

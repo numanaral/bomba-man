@@ -68,8 +68,8 @@ type PowerUps = Record<PowerUp, number>;
 
 type PlayerState = {
 	lives: number;
-	bombSize: number;
-	movementSpeed: number;
+	[PowerUp.BombSize]: number;
+	[PowerUp.MovementSpeed]: number;
 	/** How many power-ups have been collected */
 	powerUps: PowerUps;
 };
@@ -112,6 +112,8 @@ type NPCActionProps = {
 	dropBomb: OnDropBomb;
 };
 
+type PowerUpOrNull = PowerUp | null;
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -136,4 +138,5 @@ export type {
 	CharacterProps,
 	NPCActionProps,
 	Fire,
+	PowerUpOrNull,
 };

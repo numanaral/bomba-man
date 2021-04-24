@@ -5,17 +5,19 @@ import {
 	Square,
 } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
-import config from 'config';
 import { Reducer } from 'redux';
 import {
 	generateBomb,
+	generatePowerUpOrNull,
 	getExplosionResults,
+	getPoweredUpValue,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	handleMove,
+	isPowerUp,
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
-import { Explosive, Player, Tile } from 'enums';
+import { Explosive, Player, PowerUp, Tile } from 'enums';
 import {
 	DEFAULT_VALUES,
 	SET_GAME_STATE,
@@ -68,6 +70,66 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			}
 		};
 
+		const getPowerUpOrNull = (coordinates: Coordinates) => {
+			const {
+				xSquare,
+				ySquare,
+			} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+
+			try {
+				const currentSquare = state.gameMap[ySquare][xSquare];
+				if (currentSquare !== Tile.Breaking) return null;
+				const powerUpOrNull = generatePowerUpOrNull();
+				if (!powerUpOrNull) return null;
+				return currentSquare === Tile.Breaking
+					? {
+							square: powerUpOrNull,
+							coordinates: { ySquare, xSquare },
+					  }
+					: null;
+			} catch (err) {
+				console.error('Square being set is out of boundaries', {
+					gameMap: state.gameMap,
+					xSquare,
+					ySquare,
+				});
+				return null;
+			}
+		};
+
+		const populatePowerUps = (coordinates: Coordinates) => {
+			const powerUpOrNull = getPowerUpOrNull(coordinates);
+			if (!powerUpOrNull) return;
+
+			const {
+				square,
+				coordinates: { xSquare, ySquare },
+			} = powerUpOrNull;
+			if (!draft.powerUps[ySquare]) {
+				draft.powerUps[ySquare] = {};
+			}
+			// we know for sure it's a power
+			draft.powerUps[ySquare][xSquare] = square as PowerUp;
+		};
+
+		const getPlayerState = (playerId: PlayerId) => {
+			return state.players[playerId]!.state;
+		};
+
+		const getBombSizeForPlayer = (playerId: PlayerId) => {
+			return getPoweredUpValue(
+				getPlayerState(playerId),
+				PowerUp.BombSize
+			);
+		};
+
+		const getMovementSpeedForPlayer = (playerId: PlayerId) => {
+			return getPoweredUpValue(
+				getPlayerState(playerId),
+				PowerUp.MovementSpeed
+			);
+		};
+
 		switch (action.type) {
 			case SET_GAME_STATE:
 				updateImmerDraft(draft, action.payload as GameState);
@@ -104,6 +166,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				} = action.payload as OnPrepareMoveProps;
 				const { is3D, players, gameMap } = state;
 				const playerConfig = players[playerId] as NonNullablePlayer;
+
 				handleMove(
 					{
 						playerConfig,
@@ -111,6 +174,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 						is3D,
 						gameMap,
 					},
+					getMovementSpeedForPlayer(playerId),
 					onComplete
 				);
 				break;
@@ -124,16 +188,29 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const lastCoordinates = state.players[playerId]!.coordinates;
 
 				const {
-					ySquare,
-					xSquare,
+					ySquare: lastCoordinateYSquare,
+					xSquare: lastCoordinateXSquare,
 				} = topLeftCoordinatesToSquareCoordinates(lastCoordinates);
 				// this can also be a bomb, we don't want to just clear it
-				const lastSquare = state.gameMap[ySquare][xSquare];
+				const lastSquare =
+					state.gameMap[lastCoordinateYSquare][lastCoordinateXSquare];
 				// clear lastSquare only if it was the player
 				// (on a Tile.Empty)
 				// otherwise we can leave whatever was there
 				if (lastSquare === playerId) {
 					setSquare(lastCoordinates, Tile.Empty);
+				}
+				// if there is a powerUp, assign it to the playerState
+				const {
+					ySquare: newCoordinateYSquare,
+					xSquare: newCoordinateXSquare,
+				} = topLeftCoordinatesToSquareCoordinates(newCoordinates);
+				const powerUpOrEmptyTile =
+					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
+				if (isPowerUp(powerUpOrEmptyTile)) {
+					draft.players[playerId]!.state.powerUps[
+						powerUpOrEmptyTile as PowerUp
+					]++;
 				}
 				// set new player square
 				setSquare(newCoordinates, playerId as Player);
@@ -166,6 +243,8 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					left: currentBomb!.left,
 				};
 
+				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
 				// find surrounding objects to modify
 				const {
 					coordinatesToSetOnFire,
@@ -174,12 +253,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					state.gameMap,
 					state.players,
 					bombCoordinates,
-					config.size.explosion
-				);
-
-				console.log(
-					'coordinatesToSetOnFireTRIGGER: ',
-					coordinatesToSetOnFire
+					bombSize
 				);
 
 				const { horizontal, vertical } = coordinatesToSetOnFire;
@@ -188,11 +262,16 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// this automatically "breaks" the breakable tiles
 				// URGENT: This will also contain two entity if Tile, Tile & Fire
 				horizontal.forEach(coordinates => {
+					// check if there is a tile and get a random power up or null
+					populatePowerUps(coordinates);
 					setSquare(coordinates, Explosive.FireHorizontal);
 				});
 				vertical.forEach(coordinates => {
+					// check if there is a tile and get a random power up or null
+					populatePowerUps(coordinates);
 					setSquare(coordinates, Explosive.FireVertical);
 				});
+
 				// Core will not have an explosion direction
 				setSquare(horizontal[0], Explosive.FireCore);
 
@@ -213,25 +292,36 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					left: currentBomb!.left,
 				};
 
+				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
 				// remove bomb
 				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
 				const { coordinatesToSetOnFire } = getExplosionResults(
 					state.gameMap,
 					state.players,
 					bombCoordinates,
-					config.size.explosion,
+					bombSize,
 					true
-				);
-
-				console.log(
-					'coordinatesToSetOnFireCOMPLETE: ',
-					coordinatesToSetOnFire
 				);
 
 				// clear fire
 				const { horizontal, vertical } = coordinatesToSetOnFire;
 				[...horizontal, ...vertical].forEach(coordinates => {
-					setSquare(coordinates, Tile.Empty);
+					const {
+						xSquare,
+						ySquare,
+					} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+						coordinates
+					);
+					// if there is a powerUp, put it on the map
+					const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
+					if (powerUpOrNull) {
+						setSquare(coordinates, powerUpOrNull);
+						// empty the powerUp from the state
+						draft.powerUps[ySquare][xSquare] = null;
+					} else {
+						setSquare(coordinates, Tile.Empty);
+					}
 				});
 				break;
 			}
