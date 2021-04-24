@@ -112,6 +112,8 @@ type NPCActionProps = {
 	dropBomb: OnDropBomb;
 };
 
+type PowerUpOrNull = PowerUp | null;
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -136,4 +138,5 @@ export type {
 	CharacterProps,
 	NPCActionProps,
 	Fire,
+	PowerUpOrNull,
 };

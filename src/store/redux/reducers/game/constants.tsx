@@ -23,6 +23,7 @@ const DEFAULT_VALUES: GameState = {
 	isSideView: false,
 	size: config.size.game,
 	animationCounter: 0,
+	powerUps: {},
 };
 const PLAYERS = {
 	P1,

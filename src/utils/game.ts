@@ -10,6 +10,7 @@ import {
 	PlayerKeyboardConfig,
 	PlayerRef,
 	Players,
+	PowerUpOrNull,
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
@@ -563,6 +564,16 @@ const playerGenerator = (
 	};
 };
 
+const generatePowerUpOrNull = () => {
+	const possiblePowerUpOrNulls: Array<KeysOf<KeysOf<PowerUpOrNull>>> = [
+		...Object.values(PowerUp),
+		// reverse block density, we want that many nulls
+		...Array(6 - config.game.powerUpChance).fill(null),
+	];
+
+	return possiblePowerUpOrNulls[getRandomInt(possiblePowerUpOrNulls.length)];
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -582,4 +593,5 @@ export {
 	topLeftCoordinatesToSquareCoordinates,
 	squareCoordinatesToTopLeftCoordinates,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
+	generatePowerUpOrNull,
 };

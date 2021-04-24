@@ -9,13 +9,14 @@ import config from 'config';
 import { Reducer } from 'redux';
 import {
 	generateBomb,
+	generatePowerUpOrNull,
 	getExplosionResults,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	handleMove,
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
-import { Explosive, Player, Tile } from 'enums';
+import { Explosive, Player, PowerUp, Tile } from 'enums';
 import {
 	DEFAULT_VALUES,
 	SET_GAME_STATE,
@@ -66,6 +67,48 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					ySquare,
 				});
 			}
+		};
+
+		const getPowerUpOrNull = (coordinates: Coordinates) => {
+			const {
+				xSquare,
+				ySquare,
+			} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+
+			try {
+				const currentSquare = state.gameMap[ySquare][xSquare];
+				if (currentSquare !== Tile.Breaking) return null;
+				const powerUpOrNull = generatePowerUpOrNull();
+				if (!powerUpOrNull) return null;
+				return currentSquare === Tile.Breaking
+					? {
+							square: powerUpOrNull,
+							coordinates: { ySquare, xSquare },
+					  }
+					: null;
+			} catch (err) {
+				console.error('Square being set is out of boundaries', {
+					gameMap: state.gameMap,
+					xSquare,
+					ySquare,
+				});
+				return null;
+			}
+		};
+
+		const populatePowerUps = (coordinates: Coordinates) => {
+			const powerUpOrNull = getPowerUpOrNull(coordinates);
+			if (!powerUpOrNull) return;
+
+			const {
+				square,
+				coordinates: { xSquare, ySquare },
+			} = powerUpOrNull;
+			if (!draft.powerUps[ySquare]) {
+				draft.powerUps[ySquare] = {};
+			}
+			// we know for sure it's a power
+			draft.powerUps[ySquare][xSquare] = square as PowerUp;
 		};
 
 		switch (action.type) {
@@ -183,11 +226,16 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// this automatically "breaks" the breakable tiles
 				// URGENT: This will also contain two entity if Tile, Tile & Fire
 				horizontal.forEach(coordinates => {
+					// check if there is a tile and get a random power up or null
+					populatePowerUps(coordinates);
 					setSquare(coordinates, Explosive.FireHorizontal);
 				});
 				vertical.forEach(coordinates => {
+					// check if there is a tile and get a random power up or null
+					populatePowerUps(coordinates);
 					setSquare(coordinates, Explosive.FireVertical);
 				});
+
 				// Core will not have an explosion direction
 				setSquare(horizontal[0], Explosive.FireCore);
 
@@ -221,7 +269,21 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// clear fire
 				const { horizontal, vertical } = coordinatesToSetOnFire;
 				[...horizontal, ...vertical].forEach(coordinates => {
-					setSquare(coordinates, Tile.Empty);
+					const {
+						xSquare,
+						ySquare,
+					} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+						coordinates
+					);
+					// if there is a powerUp, put it on the map
+					const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
+					if (powerUpOrNull) {
+						setSquare(coordinates, powerUpOrNull);
+						// empty the powerUp from the state
+						draft.powerUps[ySquare][xSquare] = null;
+					} else {
+						setSquare(coordinates, Tile.Empty);
+					}
 				});
 				break;
 			}

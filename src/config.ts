@@ -10,6 +10,7 @@ const config = {
 	title: 'Bomberman - Work In Progress',
 	game: {
 		blockDensity: 6 as RangeOf<10, 1>,
+		powerUpChance: 3 as RangeOf<5, 1>,
 		// Player defaults
 		lives: 1, // number
 		bombSize: 1, // number
