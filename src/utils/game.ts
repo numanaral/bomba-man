@@ -1,5 +1,4 @@
 import config from 'config';
-import { ExplosionProps } from 'containers/Game/components/Bomb';
 import {
 	Coordinates,
 	GameMap,
@@ -238,34 +237,16 @@ const getExplosionScaleSize = (explosionSize: number) => {
 	return ((explosionSize + 1) * 2 - 1) * 2;
 };
 
-const getExplosionCoordinates = (
-	{ explosionAxis, explosionSize }: ExplosionProps,
-	is3D = false
-) => {
-	let overflowLimit = 0.5;
-	let baseSize = 2;
-	let explosionScaleSize = getExplosionScaleSize(explosionSize);
-	if (is3D) {
-		overflowLimit = 0;
-		baseSize = 1;
-		explosionScaleSize /= 2;
-	}
-
-	let x = baseSize;
-	let y = baseSize;
-
-	if (explosionAxis === Axis.X) x = explosionScaleSize;
-	else y = explosionScaleSize;
-
-	// prevent overflow
-	x -= overflowLimit;
-	y -= overflowLimit;
-
-	return { x, y };
-};
-
 type TilesToBreak = Array<SquareCoordinates>;
 type PlayersToKill = Array<PlayerId>;
+enum ExplosionDirection {
+	HORIZONTAL = 'horizontal',
+	VERTICAL = 'vertical',
+}
+type CoordinatesToSetOnFire = {
+	[ExplosionDirection.HORIZONTAL]: Array<SquareCoordinates>;
+	[ExplosionDirection.VERTICAL]: Array<SquareCoordinates>;
+};
 
 const getTilesToBreak = (
 	gameMap: GameMap,
@@ -325,7 +306,9 @@ const isSquareOutsideBoundaries = (squareCoordinate: number) => {
 const getExplosionSquareCoordinatesFromBomb = (
 	gameMap: GameMap,
 	coordinates: Coordinates,
-	explosionSize: number
+	explosionSize: number,
+	/** only returns fire locations */
+	checkOnlyFire = false
 ) => {
 	/* 
 		===========================
@@ -360,12 +343,18 @@ const getExplosionSquareCoordinatesFromBomb = (
 		xSquare: bombX,
 		ySquare: bombY,
 	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
-	const explosionCoordinates: Array<SquareCoordinates> = [
-		{ xSquare: bombX, ySquare: bombY },
-	];
+	const bombSquareCoordinates = { xSquare: bombX, ySquare: bombY };
+	const explosionCoordinates: CoordinatesToSetOnFire = {
+		[ExplosionDirection.HORIZONTAL]: [bombSquareCoordinates],
+		[ExplosionDirection.VERTICAL]: [bombSquareCoordinates],
+	};
 
-	const pushCurrentCoordinates = (xSquare: number, ySquare: number) => {
-		explosionCoordinates.push({
+	const pushCurrentCoordinates = (
+		xSquare: number,
+		ySquare: number,
+		explosionDirection: ExplosionDirection
+	) => {
+		explosionCoordinates[explosionDirection].push({
 			xSquare,
 			ySquare,
 		});
@@ -380,10 +369,20 @@ const getExplosionSquareCoordinatesFromBomb = (
 		[-1, 0], // Left
 	];
 
+	// required for proper animation
+	// (expanding in scale X or Y)
+	const directions = [
+		ExplosionDirection.VERTICAL,
+		ExplosionDirection.HORIZONTAL,
+		ExplosionDirection.VERTICAL,
+		ExplosionDirection.HORIZONTAL,
+	];
+
 	// check all sides
 	for (let i = 0; i < 4; i++) {
 		let currentX = bombX;
 		let currentY = bombY;
+		const currentDirection = directions[i];
 		let shouldContinue = true;
 
 		// loop until the end of the explosion
@@ -402,9 +401,25 @@ const getExplosionSquareCoordinatesFromBomb = (
 				continue;
 			}
 
-			switch (gameMap[currentY][currentX]) {
+			const currentSquare = gameMap[currentY][currentX];
+			if (checkOnlyFire) {
+				// if it's not a fire, then we reached the end
+				if (
+					currentSquare !== Explosive.FireHorizontal &&
+					currentSquare !== Explosive.FireVertical
+				) {
+					continue;
+				}
+
+				pushCurrentCoordinates(currentX, currentY, currentDirection);
+			}
+			switch (currentSquare) {
 				case Tile.Breaking:
-					pushCurrentCoordinates(currentX, currentY);
+					pushCurrentCoordinates(
+						currentX,
+						currentY,
+						currentDirection
+					);
 					shouldContinue = false;
 					break;
 				case Tile.NonBreaking:
@@ -412,7 +427,11 @@ const getExplosionSquareCoordinatesFromBomb = (
 					break;
 				// Tile.Empty, Explosive.Bomb, Player.[any], PowerUps.[any]
 				default:
-					pushCurrentCoordinates(currentX, currentY);
+					pushCurrentCoordinates(
+						currentX,
+						currentY,
+						currentDirection
+					);
 					break;
 			}
 		}
@@ -433,27 +452,46 @@ const getExplosionResults = (
 	gameMap: GameMap,
 	players: Players,
 	bombCoordinates: TopLeftCoordinates,
-	explosionSize: number
+	explosionSize: number,
+	/** only returns fire locations */
+	checkOnlyFire = false
 ) => {
 	let tilesToBreak: TilesToBreak = [];
 	let playersToKill: PlayersToKill = [];
+	const coordinatesToSetOnFire: CoordinatesToSetOnFire = {
+		[ExplosionDirection.HORIZONTAL]: [],
+		[ExplosionDirection.VERTICAL]: [],
+	};
 
-	getExplosionSquareCoordinatesFromBomb(
+	const explosionSquares = getExplosionSquareCoordinatesFromBomb(
 		gameMap,
 		bombCoordinates,
-		explosionSize
-	).forEach(({ ySquare, xSquare }) => {
-		tilesToBreak = [
-			...tilesToBreak,
-			...getTilesToBreak(gameMap, ySquare, xSquare),
-		];
-		playersToKill = [
-			...playersToKill,
-			...getPlayersToKill(players, ySquare, xSquare),
-		];
-	});
+		explosionSize,
+		checkOnlyFire
+	);
+	// { horizontal, vertical }
+	(Object.keys(explosionSquares) as Array<ExplosionDirection>).forEach(
+		explosionDirection => {
+			explosionSquares[explosionDirection].forEach(
+				({ ySquare, xSquare }) => {
+					coordinatesToSetOnFire[explosionDirection].push({
+						xSquare,
+						ySquare,
+					});
+					tilesToBreak = [
+						...tilesToBreak,
+						...getTilesToBreak(gameMap, ySquare, xSquare),
+					];
+					playersToKill = [
+						...playersToKill,
+						...getPlayersToKill(players, ySquare, xSquare),
+					];
+				}
+			);
+		}
+	);
 
-	return { tilesToBreak, playersToKill };
+	return { coordinatesToSetOnFire, tilesToBreak, playersToKill };
 };
 
 const generateBomb = ({
@@ -534,7 +572,6 @@ export {
 	resetRotation,
 	CUBE_BASE_TRANSFORM,
 	getExplosionScaleSize,
-	getExplosionCoordinates,
 	getExplosionResults,
 	generateBomb,
 	playerGenerator,

@@ -40,7 +40,9 @@ enum PowerUp {
 
 enum Explosive {
 	Bomb = 'B',
-	Fire = 'F',
+	FireCore = 'FC',
+	FireHorizontal = 'FH',
+	FireVertical = 'FV',
 }
 
 export { Direction, Axis, ExplosionState, Player, Tile, PowerUp, Explosive };

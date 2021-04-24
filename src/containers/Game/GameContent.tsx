@@ -20,7 +20,7 @@ const GameContent = () => {
 	const bombs = useSelector(makeSelectGameBombs());
 	const is3D = useSelector(makeSelectGameIs3D());
 
-	const { onExplosion } = useGameProvider();
+	const { triggerExplosion, onExplosionComplete } = useGameProvider();
 
 	const refFunc = useCallback(
 		({ id: playerId, ref }: PlayerConfig) => (newRef: any) => {
@@ -64,7 +64,8 @@ const GameContent = () => {
 					explosionSize={config.size.explosion}
 					firingDuration={config.duration.bomb.firing}
 					explodingDuration={config.duration.bomb.exploding}
-					onExplosion={onExplosion}
+					triggerExplosion={triggerExplosion}
+					onExplosionComplete={onExplosionComplete}
 					is3D={is3D}
 				/>
 			))}

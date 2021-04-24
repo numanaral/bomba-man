@@ -12,10 +12,12 @@ import {
 	makeMoveInGame,
 	setPlayerRefInGame,
 	dropBombInGame,
-	onExplosionComplete,
+	onExplosionCompleteInGame,
 	triggerMoveInGame,
+	triggerExplosionInGame,
 } from 'store/redux/reducers/game/actions';
 import {
+	BombId,
 	GameState,
 	OnMoveProps,
 	OnTriggerMove,
@@ -76,9 +78,14 @@ const useGameProvider = () => {
 		[dispatch]
 	);
 
-	const onExplosion = useCallback(
+	const triggerExplosion = useCallback(
+		(bombId: BombId) => dispatch(triggerExplosionInGame(bombId)),
+		[dispatch]
+	);
+
+	const onExplosionComplete = useCallback(
 		props => {
-			dispatch(onExplosionComplete(props));
+			dispatch(onExplosionCompleteInGame(props));
 		},
 		[dispatch]
 	);
@@ -115,7 +122,8 @@ const useGameProvider = () => {
 		triggerMove,
 		dropBomb,
 		removeBomb,
-		onExplosion,
+		triggerExplosion,
+		onExplosionComplete,
 		// GAME SETTINGS
 		triggerAnimation,
 		toggleDimension,

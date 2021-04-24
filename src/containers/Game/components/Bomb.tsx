@@ -1,21 +1,11 @@
 import config from 'config';
-import { Axis, ExplosionState, Explosive } from 'enums';
+import { ExplosionState, Explosive } from 'enums';
 import { useEffect, useState } from 'react';
-import { Bomb as BombType, OnExplosion } from 'store/redux/reducers/game/types';
-import styled, { css, keyframes } from 'styled-components';
+import { Bomb as BombType, BombFn } from 'store/redux/reducers/game/types';
+import styled, { keyframes } from 'styled-components';
 import theme from 'theme';
 import { sleep } from 'utils';
-import { getExplosionCoordinates } from 'utils/game';
 import Cube from './Cube';
-
-interface Props extends BombType {
-	// skin: Skin;
-	color: string;
-	firingDuration: number;
-	explodingDuration: number;
-	onExplosion: OnExplosion;
-	is3D: boolean;
-}
 
 const getTransform = (deg: number, is3D: boolean) => {
 	return `${
@@ -57,78 +47,15 @@ const FiringCubeBomb = styled(Cube)`
 	`} */
 	animation: ${incrementalSpeedRotationKeyframes(true)} linear forwards;
 `;
-
-interface ExplosionProps {
-	explosionAxis: Axis;
-	explosionSize: number;
+interface Props extends BombType {
+	// skin: Skin;
+	color: string;
+	firingDuration: number;
+	explodingDuration: number;
+	triggerExplosion: BombFn;
+	onExplosionComplete: BombFn;
+	is3D: boolean;
 }
-
-const explosionKeyframes = (explosionProps: ExplosionProps, is3D = false) => {
-	const { x, y } = getExplosionCoordinates(explosionProps, is3D);
-
-	const transformation3D =
-		(is3D && `translateZ(calc((var(--tile-size) / 2) * 1px)) `) || '';
-
-	return keyframes`
-	  	0% {
-			transform: ${transformation3D}scale(1, 1);
-			/* transform:${transformation3D} scale(${x}, ${y}); */
-			${(!is3D && 'opacity: 1;') || ''}
-		}
-		65% {
-			transform: ${transformation3D}scale(${x}, ${y});
-		}
-		100% {
-			${(!is3D && 'opacity: 0;') || ``}
-		}
-	`;
-};
-
-const borderKeyframes = () => keyframes`
-	25% {
-		border-width: ${config.size.tile * 0.5}px
-	}
-	70% {
-		background-color: black;
-	}
-`;
-
-const Explosion = styled.div<
-	StyledProps<ExplosionProps, 'explosionAxis' | 'explosionSize'>
->`
-	${({ $explosionAxis, $explosionSize }) => css`
-		animation: ${explosionKeyframes({
-				explosionAxis: $explosionAxis,
-				explosionSize: $explosionSize,
-			})}
-			var(--ease-in-out-back) forwards;
-	`}
-`;
-
-const ExplosionCube = styled(Cube)<
-	StyledProps<
-		ExplosionProps & { firingDuration: number },
-		'explosionAxis' | 'explosionSize' | 'firingDuration'
-	>
->`
-	${({ $explosionAxis, $explosionSize, $firingDuration }) => css`
-		animation: ${explosionKeyframes(
-				{
-					explosionAxis: $explosionAxis,
-					explosionSize: $explosionSize,
-				},
-				true
-			)}
-			${$firingDuration}s var(--ease-in-out-back) forwards;
-		& {
-			border: none;
-		}
-		& * {
-			animation: ${borderKeyframes()} ${$firingDuration * 0.75}s ease-out
-				forwards;
-		}
-	`}
-`;
 
 const Bomb = ({
 	color: backgroundColor,
@@ -138,27 +65,30 @@ const Bomb = ({
 	id,
 	top,
 	left,
-	onExplosion,
+	triggerExplosion,
+	onExplosionComplete,
 	is3D,
 }: Props) => {
 	const [explosionState, setExplosionState] = useState<ExplosionState>(
 		ExplosionState.Firing
 	);
 	useEffect(() => {
-		const triggerExplosion = async () => {
+		const kaboom = async () => {
 			await sleep(firingDuration * 1000);
+			triggerExplosion(id);
 			setExplosionState(ExplosionState.Exploding);
 			await sleep((explodingDuration / 2) * 1000);
-			onExplosion({ bombId: id, bombCoordinates: { top, left } });
+			onExplosionComplete(id);
 			// await sleep((300 / 2) * 1000);
 			// setExplosionState(ExplosionState.Exploded);
 		};
-		triggerExplosion();
+		kaboom();
 	}, [
 		explodingDuration,
 		explosionSize,
 		firingDuration,
-		onExplosion,
+		triggerExplosion,
+		onExplosionComplete,
 		top,
 		left,
 		id,
@@ -167,7 +97,6 @@ const Bomb = ({
 	const bombSize = config.size.bomb;
 	const bombSizePadding = bombSize / 2;
 
-	let bombElement = null;
 	const bombStyleProps: React.CSSProperties = {
 		position: 'absolute',
 		backgroundColor,
@@ -175,76 +104,24 @@ const Bomb = ({
 		height: bombSize,
 		top: top + bombSizePadding,
 		left: left + bombSizePadding,
-		animationDuration: `${explodingDuration}s`,
+		animationDuration: `${firingDuration}s`,
 	};
-
-	if (explosionState === ExplosionState.Exploding) {
-		const props = {
-			$explosionSize: explosionSize,
-			$firingDuration: firingDuration,
-		};
-		bombElement = (!is3D && (
-			<>
-				<Explosion
-					style={bombStyleProps}
-					$explosionAxis={Axis.X}
-					{...props}
-				/>
-				<Explosion
-					style={bombStyleProps}
-					$explosionAxis={Axis.Y}
-					{...props}
-				/>
-			</>
-		)) || (
-			<>
-				<ExplosionCube
-					size={config.size.tile}
-					top={top}
-					left={left}
-					// animate
+	return (
+		(explosionState === ExplosionState.Firing &&
+			((!is3D && <FiringBomb style={bombStyleProps} />) || (
+				<FiringCubeBomb
+					size={bombSize}
+					top={Number(bombStyleProps.top)}
+					left={Number(bombStyleProps.left)}
+					animate={false}
 					variant={Explosive.Bomb}
 					color={theme.palette.color.error}
 					collisionIndex={1}
 					style={bombStyleProps}
-					$explosionAxis={Axis.X}
-					{...props}
 				/>
-				<ExplosionCube
-					size={config.size.tile}
-					top={top}
-					left={left}
-					// animate
-					variant={Explosive.Bomb}
-					color={theme.palette.color.error}
-					collisionIndex={1}
-					style={bombStyleProps}
-					$explosionAxis={Axis.Y}
-					{...props}
-				/>
-			</>
-		);
-	}
-	if (explosionState === ExplosionState.Firing) {
-		const style = {
-			...bombStyleProps,
-			animationDuration: `${firingDuration}s`,
-		};
-		bombElement = (!is3D && <FiringBomb style={style} />) || (
-			<FiringCubeBomb
-				size={bombSize}
-				top={Number(bombStyleProps.top)}
-				left={Number(bombStyleProps.left)}
-				animate={false}
-				variant={Explosive.Bomb}
-				color={theme.palette.color.error}
-				collisionIndex={1}
-				style={style}
-			/>
-		);
-	}
-	return bombElement;
+			))) ||
+		null
+	);
 };
 
-export type { ExplosionProps };
 export default Bomb;

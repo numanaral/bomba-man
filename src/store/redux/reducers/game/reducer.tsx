@@ -33,12 +33,14 @@ import {
 	SET_PLAYER_REF,
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
+	TRIGGER_EXPLOSION,
 } from './constants';
 import {
 	AnimatableGameMap,
+	Bomb,
+	BombId,
 	GameAction,
 	GameState,
-	OnExplosionProps,
 	OnMoveProps,
 	OnPrepareMoveProps,
 	PlayerWithNewRef,
@@ -148,34 +150,82 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
 				break;
 			}
-			case ON_EXPLOSION_COMPLETE: {
+			case TRIGGER_EXPLOSION: {
+				const bombId = action.payload as BombId;
+				const currentBomb = state.bombs.find(
+					({ id }) => id === bombId
+				) as NonNullable<Bomb>;
+				const bombCoordinates = {
+					top: currentBomb.top,
+					left: currentBomb!.left,
+				};
+
+				// find surrounding objects to modify
 				const {
-					bombId,
-					bombCoordinates,
-				} = action.payload as OnExplosionProps;
-				// remove bomb
-				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
-				const { tilesToBreak, playersToKill } = getExplosionResults(
+					coordinatesToSetOnFire,
+					playersToKill,
+				} = getExplosionResults(
 					state.gameMap,
 					state.players,
 					bombCoordinates,
 					config.size.explosion
 				);
-				console.log(tilesToBreak);
-				// clear breakable tiles
-				tilesToBreak.forEach(coordinates => {
-					setSquare(coordinates, Tile.Empty);
+
+				console.log(
+					'coordinatesToSetOnFireTRIGGER: ',
+					coordinatesToSetOnFire
+				);
+
+				const { horizontal, vertical } = coordinatesToSetOnFire;
+
+				// set fire on all the coordinates
+				// this automatically "breaks" the breakable tiles
+				// URGENT: This will also contain two entity if Tile, Tile & Fire
+				horizontal.forEach(coordinates => {
+					setSquare(coordinates, Explosive.FireHorizontal);
 				});
-				// clear the bomb
-				const {
-					xSquare: bombXSquare,
-					ySquare: bombYSquare,
-				} = topLeftCoordinatesToSquareCoordinates(bombCoordinates);
-				draft.gameMap[bombYSquare][bombXSquare] = Tile.Empty;
+				vertical.forEach(coordinates => {
+					setSquare(coordinates, Explosive.FireVertical);
+				});
+				// Core will not have an explosion direction
+				setSquare(horizontal[0], Explosive.FireCore);
+
 				// clear the players
 				playersToKill.forEach(playerId => {
 					delete draft.players[playerId];
 					setSquare(state.players[playerId]!.coordinates, Tile.Empty);
+				});
+				break;
+			}
+			case ON_EXPLOSION_COMPLETE: {
+				const bombId = action.payload as BombId;
+				const currentBomb = state.bombs.find(
+					({ id }) => id === bombId
+				) as NonNullable<Bomb>;
+				const bombCoordinates = {
+					top: currentBomb.top,
+					left: currentBomb!.left,
+				};
+
+				// remove bomb
+				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
+				const { coordinatesToSetOnFire } = getExplosionResults(
+					state.gameMap,
+					state.players,
+					bombCoordinates,
+					config.size.explosion,
+					true
+				);
+
+				console.log(
+					'coordinatesToSetOnFireCOMPLETE: ',
+					coordinatesToSetOnFire
+				);
+
+				// clear fire
+				const { horizontal, vertical } = coordinatesToSetOnFire;
+				[...horizontal, ...vertical].forEach(coordinates => {
+					setSquare(coordinates, Tile.Empty);
 				});
 				break;
 			}

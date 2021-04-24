@@ -11,11 +11,17 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	size: number;
 	top: number;
 	left: number;
-	animate?: boolean;
 	variant: Square;
 	color?: string;
 	collisionIndex?: number;
+	animate?: boolean;
+	fireSquare?: Fire;
 }
+
+type Fire =
+	| Explosive.FireCore
+	| Explosive.FireHorizontal
+	| Explosive.FireVertical;
 
 type TopLeftCoordinates = {
 	top: number;
@@ -129,4 +135,5 @@ export type {
 	KeyMap,
 	CharacterProps,
 	NPCActionProps,
+	Fire,
 };

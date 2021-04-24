@@ -2,7 +2,7 @@ import usePrevious from 'hooks/usePrevious';
 import config from 'config';
 import styled from 'styled-components';
 import theme from 'theme';
-import { Tile as TileEnum } from 'enums';
+import { Explosive, Tile as TileEnum } from 'enums';
 import Cube from './Cube';
 import Tile from './Tile';
 import { GameMap, Square } from '../types';
@@ -58,6 +58,15 @@ const Map: React.FC<Props> = ({
 						square === TileEnum.NonBreaking ||
 						square === TileEnum.Breaking;
 
+					let fireSquare;
+					if (
+						square === Explosive.FireCore ||
+						square === Explosive.FireHorizontal ||
+						square === Explosive.FireVertical
+					) {
+						fireSquare = square;
+					}
+
 					const props: React.ComponentPropsWithRef<typeof Cube> = {
 						key: `${outerInd}_${innerInd}`,
 						size: config.size.tile,
@@ -65,6 +74,7 @@ const Map: React.FC<Props> = ({
 						left: innerInd * config.size.tile,
 						animate: shouldAnimate,
 						variant: square,
+						fireSquare,
 						...(hasCollision && {
 							color:
 								theme.palette.color[
