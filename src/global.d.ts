@@ -60,6 +60,8 @@ declare interface DynamicObject {
 
 declare type EmptyFunction = () => void;
 
+declare type NumberOrString = number | string;
+
 /**
  * Allows you to extend to whatever else the function will take. Saves you the
  * trouble of creating a wrapper method.

@@ -7,7 +7,7 @@ import { PowerUp } from 'enums';
 import * as KeyCode from 'keycode-js';
 
 const config = {
-	title: 'Bomberman - Work In Progress',
+	title: 'Bomberman (WIP)',
 	game: {
 		blockDensity: 8 as RangeOf<10, 1>,
 		powerUpChance: 5 as RangeOf<5, 1>,
