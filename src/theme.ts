@@ -1,4 +1,5 @@
 import config from 'config';
+import { lighten } from 'polished';
 import { createGlobalStyle } from 'styled-components';
 
 const theme = {
@@ -9,12 +10,19 @@ const theme = {
 		},
 		color: {
 			primary: 'var(--primary-color)',
+			'primary-lighter': 'var(--primary-color-lighter)',
 			secondary: 'var(--secondary-color)',
+			'secondary-lighter': 'var(--secondary-color-lighter)',
 			error: 'var(--error-color)',
+			'error-lighter': 'var(--error-color-lighter)',
 			warning: 'var(--warning-color)',
+			'warning-lighter': 'var(--warning-color-lighter)',
 			success: 'var(--success-color)',
+			'success-lighter': 'var(--success-color-lighter)',
 			info: 'var(--info-color)',
+			'info-lighter': 'var(--info-color-lighter)',
 			default: 'var(--default-color)',
+			'default-lighter': 'var(--default-color-lighter)',
 		},
 	},
 	shape: {
@@ -29,27 +37,35 @@ const theme = {
 			size: 'var(--tile-size)',
 		},
 	},
+	transition: {
+		hover: 'var(--hover-animation-duration)',
+	},
+	spacing: (s: number) => {
+		return s * 8;
+	},
+};
+
+const COLORS = {
+	'--primary-background': '#13141b',
+	'--secondary-background': '#1a1d28',
+	'--primary-color': '#ec7ebd',
+	'--secondary-color': '#763ee6',
+	'--error-color': '#f44336',
+	'--warning-color': '#ff9800',
+	'--success-color': '#4caf50',
+	'--info-color': '#2196f3',
+	'--default-color': '#E4E6EB',
 };
 
 const GlobalStyles = createGlobalStyle`
 	:root {
 		/* #region COLORS */
-		--primary-background: #13141b;
-		--secondary-background: #1a1d28;
-
-		--primary-color: #ec7ebd;
-		--secondary-color: #763ee6;
-
-		/* --error-color: rgb(255, 122, 105);
-		--warning-color: rgb(241, 168, 23);
-		--success-color: rgb(49, 162, 76);
-		--info-color: rgb(134, 218, 255);
-		--default-color: rgb(228, 230, 235); */
-		--error-color: #f44336;
-		--warning-color: #ff9800;
-		--success-color: #4caf50;
-		--info-color: #2196f3;
-		--default-color: #E4E6EB;
+		${Object.entries(COLORS).reduce((acc, [colorKey, colorValue]) => {
+			return `${acc}${colorKey}: ${colorValue};${colorKey}-lighter: ${lighten(
+				0.1,
+				colorValue
+			)};`;
+		}, '')}
 		/* #endregion */
 
 		/* #region UTILITIES */
@@ -71,6 +87,7 @@ const GlobalStyles = createGlobalStyle`
 		--ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
 		--incremental-animation-delay: 0.03s;
 		--block-animation-duration: 0.5s;
+		--hover-animation-duration: 0.3s;
 		/* #endregion */
 
 		/* #region GENERICS */
@@ -99,6 +116,10 @@ const GlobalStyles = createGlobalStyle`
 		pre {
 			white-space: pre-wrap;
 			word-wrap: break-word;
+		}
+
+		a {
+			text-decoration: none;
 		}
 		/* #endregion */
 
