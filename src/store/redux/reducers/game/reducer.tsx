@@ -36,6 +36,7 @@ import {
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
 	TRIGGER_EXPLOSION,
+	FIRE_VALUES,
 } from './constants';
 import {
 	AnimatableGameMap,
@@ -148,6 +149,15 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			return deathCount >= getPoweredUpValue(playerState, PowerUp.Life);
 		};
 
+		const subtractLifeFromPlayerAndHandleDeath = (playerId: PlayerId) => {
+			const { deathCount } = getPlayerState(playerId);
+			// if next bomb is going to kill the player
+			if (deathCount >= getLivesForPlayer(playerId) - 1) {
+				setSquare(state.players[playerId]!.coordinates, Tile.Empty);
+			}
+			draft.players[playerId]!.state.deathCount++;
+		};
+
 		switch (action.type) {
 			case SET_GAME_STATE:
 				updateImmerDraft(draft, action.payload as GameState);
@@ -187,9 +197,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const { is3D, players, gameMap } = state;
 				const playerConfig = players[playerId] as NonNullablePlayer;
 
-				// TODO: If there is a bomb here, kill the player and don't bother
-				// with the actual movement
-
 				handleMove(
 					{
 						playerConfig,
@@ -209,6 +216,20 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				} = action.payload as OnMoveProps;
 				if (isPlayerDead(playerId)) return;
 
+				// if there is a powerUp, assign it to the playerState
+				const {
+					ySquare: newCoordinateYSquare,
+					xSquare: newCoordinateXSquare,
+				} = topLeftCoordinatesToSquareCoordinates(newCoordinates);
+
+				const newSquare =
+					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
+
+				// if a player steps on explosion fire, subtract a life
+				if (FIRE_VALUES.includes(newSquare as Explosive)) {
+					subtractLifeFromPlayerAndHandleDeath(playerId);
+				}
+
 				const lastCoordinates = state.players[playerId]!.coordinates;
 
 				const {
@@ -224,11 +245,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				if (lastSquare === playerId) {
 					setSquare(lastCoordinates, Tile.Empty);
 				}
-				// if there is a powerUp, assign it to the playerState
-				const {
-					ySquare: newCoordinateYSquare,
-					xSquare: newCoordinateXSquare,
-				} = topLeftCoordinatesToSquareCoordinates(newCoordinates);
 				const powerUpOrEmptyTile =
 					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
 				if (isPowerUp(powerUpOrEmptyTile)) {
@@ -329,17 +345,9 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// Core will not have an explosion direction
 				setSquare(horizontal[0], Explosive.FireCore);
 
-				// Take a life from the players
+				// subtract a life from the players
 				playersToKill.forEach(playerId => {
-					const { deathCount } = getPlayerState(playerId);
-					// if next bomb is going to kill the player
-					if (deathCount >= getLivesForPlayer(playerId) - 1) {
-						setSquare(
-							state.players[playerId]!.coordinates,
-							Tile.Empty
-						);
-					}
-					draft.players[playerId]!.state.deathCount++;
+					subtractLifeFromPlayerAndHandleDeath(playerId);
 				});
 				break;
 			}
