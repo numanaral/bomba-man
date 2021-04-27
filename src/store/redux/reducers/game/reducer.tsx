@@ -54,6 +54,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 	action
 ) => {
 	return produce(state, draft => {
+		// #region UTILITIES
 		const setSquare = (coordinates: Coordinates, newSquare: Square) => {
 			const {
 				xSquare,
@@ -157,6 +158,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			}
 			draft.players[playerId]!.state.deathCount++;
 		};
+		// #endregion
 
 		switch (action.type) {
 			case SET_GAME_STATE:
@@ -395,7 +397,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				});
 				break;
 			}
-			// GAME SETTINGS
+			// #region GAME SETTINGS
 			case TRIGGER_GAME_ANIMATION:
 				draft.animationCounter++;
 				break;
@@ -420,6 +422,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// draft.players = { ...draft.players, ...PLAYERS.P4 };
 				draft.players.P4 = castDraft(PLAYERS.P4);
 				break;
+			// #endregion
 			default:
 				// No default
 				break;
