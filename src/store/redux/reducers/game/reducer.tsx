@@ -247,6 +247,18 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				if (isPlayerDead(playerId)) return;
 
 				const playerConfig = state.players[playerId]!;
+				const { coordinates } = playerConfig;
+				const {
+					xSquare,
+					ySquare,
+				} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+					coordinates
+				);
+				// prevent double bomb in one spot
+				if (state.gameMap[ySquare][xSquare] === Explosive.Bomb) {
+					return;
+				}
+
 				const playerBombCountOnMap = state.bombs.filter(
 					({ playerId: pId }) => pId === playerId
 				).length;
