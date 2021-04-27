@@ -219,24 +219,25 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			);
 
 			// clear fire
-			const { horizontal, vertical } = coordinatesToSetOnFire;
-			[...horizontal, ...vertical].forEach(coordinates => {
-				const {
-					xSquare,
-					ySquare,
-				} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
-					coordinates
-				);
-				// if there is a powerUp, put it on the map
-				const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
-				if (powerUpOrNull) {
-					setSquare(coordinates, powerUpOrNull);
-					// empty the powerUp from the state
-					draft.powerUps[ySquare][xSquare] = null;
-				} else {
-					setSquare(coordinates, Tile.Empty);
-				}
-			});
+			Object.values(coordinatesToSetOnFire)
+				.flat()
+				.forEach(coordinates => {
+					const {
+						xSquare,
+						ySquare,
+					} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+						coordinates
+					);
+					// if there is a powerUp, put it on the map
+					const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
+					if (powerUpOrNull) {
+						setSquare(coordinates, powerUpOrNull);
+						// empty the powerUp from the state
+						draft.powerUps[ySquare][xSquare] = null;
+					} else {
+						setSquare(coordinates, Tile.Empty);
+					}
+				});
 		};
 
 		const triggerExplosion = (
@@ -267,12 +268,16 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				bombSize
 			);
 
-			const { horizontal, vertical } = coordinatesToSetOnFire;
+			const { horizontal, vertical, core } = coordinatesToSetOnFire;
 
 			// set fire on all the coordinates
 			// this automatically "breaks" the breakable tiles
 			// URGENT: This will also contain two entity if Tile, Tile & Fire
 			[
+				{
+					fireCoordinates: core,
+					direction: Explosive.FireCore,
+				},
 				{
 					fireCoordinates: horizontal,
 					direction: Explosive.FireHorizontal,
@@ -308,9 +313,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					}
 				});
 			});
-
-			// Core will not have an explosion direction
-			setSquare(horizontal[0], Explosive.FireCore);
 
 			return explosionToComplete;
 		};

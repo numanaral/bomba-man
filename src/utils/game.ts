@@ -242,14 +242,17 @@ const getExplosionScaleSize = (explosionSize: number) => {
 	return ((explosionSize + 1) * 2 - 1) * 2;
 };
 
-type TilesToBreak = Array<SquareCoordinates>;
+type SquareCoordinateArray = Array<SquareCoordinates>;
+type TilesToBreak = SquareCoordinateArray;
 enum ExplosionDirection {
 	HORIZONTAL = 'horizontal',
 	VERTICAL = 'vertical',
+	CORE = 'core',
 }
 type CoordinatesToSetOnFire = {
-	[ExplosionDirection.HORIZONTAL]: Array<SquareCoordinates>;
-	[ExplosionDirection.VERTICAL]: Array<SquareCoordinates>;
+	[ExplosionDirection.HORIZONTAL]: SquareCoordinateArray;
+	[ExplosionDirection.VERTICAL]: SquareCoordinateArray;
+	[ExplosionDirection.CORE]: SquareCoordinateArray;
 };
 
 const getTilesToBreak = (
@@ -330,8 +333,9 @@ const getExplosionSquareCoordinatesFromBomb = (
 	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
 	const bombSquareCoordinates = { xSquare: bombX, ySquare: bombY };
 	const explosionCoordinates: CoordinatesToSetOnFire = {
-		[ExplosionDirection.HORIZONTAL]: [bombSquareCoordinates],
-		[ExplosionDirection.VERTICAL]: [bombSquareCoordinates],
+		[ExplosionDirection.HORIZONTAL]: [],
+		[ExplosionDirection.VERTICAL]: [],
+		[ExplosionDirection.CORE]: [bombSquareCoordinates],
 	};
 
 	const pushCurrentCoordinates = (
@@ -445,6 +449,7 @@ const getExplosionResults = (
 	const coordinatesToSetOnFire: CoordinatesToSetOnFire = {
 		[ExplosionDirection.HORIZONTAL]: [],
 		[ExplosionDirection.VERTICAL]: [],
+		[ExplosionDirection.CORE]: [],
 	};
 
 	const explosionSquares = getExplosionSquareCoordinatesFromBomb(
