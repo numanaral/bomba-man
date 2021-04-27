@@ -46,16 +46,25 @@ const GameContent = () => {
 					const {
 						[playerId]: keyboardConfig,
 					} = config.keyboardConfig.player;
+					const { coordinates, state } = playerConfig;
+
+					const { deathCount } = state;
+
+					const isAlive =
+						deathCount < getPoweredUpValue(state, PowerUp.Life);
+
 					return (
-						<Character
-							id={playerId}
-							key={playerId}
-							name="Bomber"
-							coordinates={playerConfig.coordinates!}
-							keyboardConfig={keyboardConfig}
-							is3D={is3D}
-							ref={refFunc(playerConfig)}
-						/>
+						isAlive && (
+							<Character
+								id={playerId}
+								key={playerId}
+								name="Bomber"
+								coordinates={coordinates!}
+								keyboardConfig={keyboardConfig}
+								is3D={is3D}
+								ref={refFunc(playerConfig)}
+							/>
+						)
 					);
 				}
 			)}

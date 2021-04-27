@@ -1,8 +1,10 @@
 import {
 	Coordinates,
 	NonNullablePlayer,
+	PlayerConfig,
 	PlayerId,
 	Square,
+	SquareCoordinates,
 } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import { Reducer } from 'redux';
@@ -14,6 +16,7 @@ import {
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	handleMove,
 	isPowerUp,
+	squareCoordinatesToTopLeftCoordinates,
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
@@ -36,10 +39,10 @@ import {
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
 	TRIGGER_EXPLOSION,
+	FIRE_VALUES,
 } from './constants';
 import {
 	AnimatableGameMap,
-	Bomb,
 	BombId,
 	GameAction,
 	GameState,
@@ -53,6 +56,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 	action
 ) => {
 	return produce(state, draft => {
+		// #region UTILITIES
 		const setSquare = (coordinates: Coordinates, newSquare: Square) => {
 			const {
 				xSquare,
@@ -116,6 +120,13 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			return state.players[playerId]!.state;
 		};
 
+		const getBombCountForPlayer = (playerId: PlayerId) => {
+			return getPoweredUpValue(
+				getPlayerState(playerId),
+				PowerUp.BombCount
+			);
+		};
+
 		const getBombSizeForPlayer = (playerId: PlayerId) => {
 			return getPoweredUpValue(
 				getPlayerState(playerId),
@@ -129,6 +140,181 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				PowerUp.MovementSpeed
 			);
 		};
+
+		const isPlayerDead = (playerId: PlayerId) => {
+			const playerState = getPlayerState(playerId);
+			const { deathCount } = playerState;
+			// < 1 to prevent instant double explosion
+			return deathCount >= getPoweredUpValue(playerState, PowerUp.Life);
+		};
+
+		const subtractLifeFromPlayerAndHandleDeath = (playerId: PlayerId) => {
+			draft.players[playerId]!.state.deathCount++;
+		};
+
+		const handlePlayerExplosionHit = (
+			currentFireCoordinates: SquareCoordinates
+		) => {
+			const { xSquare, ySquare } = currentFireCoordinates;
+			Object.values<PlayerConfig>(state.players).forEach(
+				({ id, coordinates }) => {
+					const {
+						xSquare: playerXSquare,
+						ySquare: playerYSquare,
+					} = topLeftCoordinatesToSquareCoordinates(coordinates);
+					if (
+						playerXSquare === xSquare &&
+						playerYSquare === ySquare
+					) {
+						subtractLifeFromPlayerAndHandleDeath(id);
+					}
+				}
+			);
+		};
+
+		const getBombToTriggerFromExplosion = (
+			coordinates: SquareCoordinates,
+			currentBombId: BombId
+		) => {
+			const { ySquare, xSquare } = coordinates;
+			// if there is a bomb by where the explosion hits,
+			// trigger that bomb as well
+			if (state.gameMap[ySquare][xSquare] !== Explosive.Bomb) return null;
+			const { top, left } = squareCoordinatesToTopLeftCoordinates(
+				coordinates
+			);
+			const bombToTrigger = state.bombs.find(
+				({ top: t, left: l }) => top === t && left === l
+			);
+			// there is no bomb there
+			if (!bombToTrigger) return null;
+			// don't recurse on the same bomb that's triggering
+			// the explosion
+			if (bombToTrigger.id === currentBombId) return null;
+
+			return bombToTrigger;
+		};
+
+		const onExplosionComplete = (bombId: BombId) => {
+			const currentBomb = state.bombs.find(({ id }) => id === bombId);
+
+			// If we recursively triggered it
+			if (!currentBomb) return;
+
+			const bombCoordinates = {
+				top: currentBomb.top,
+				left: currentBomb.left,
+			};
+
+			const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
+			// remove bomb
+			draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
+			const { coordinatesToSetOnFire } = getExplosionResults(
+				state.gameMap,
+				state.players,
+				bombCoordinates,
+				bombSize,
+				true
+			);
+
+			// clear fire
+			const { horizontal, vertical } = coordinatesToSetOnFire;
+			[...horizontal, ...vertical].forEach(coordinates => {
+				const {
+					xSquare,
+					ySquare,
+				} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+					coordinates
+				);
+				// if there is a powerUp, put it on the map
+				const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
+				if (powerUpOrNull) {
+					setSquare(coordinates, powerUpOrNull);
+					// empty the powerUp from the state
+					draft.powerUps[ySquare][xSquare] = null;
+				} else {
+					setSquare(coordinates, Tile.Empty);
+				}
+			});
+		};
+
+		const triggerExplosion = (
+			bombId: BombId,
+			bombsToSkip: Array<BombId>
+		) => {
+			const explosionToComplete: Set<BombId> = new Set();
+			// allows us to not re-trigger explosion due to
+			// two adjacent explosions
+			if (bombsToSkip.includes(bombId)) return explosionToComplete;
+			const currentBomb = state.bombs.find(({ id }) => id === bombId);
+
+			// If we recursively triggered it
+			if (!currentBomb) return explosionToComplete;
+
+			const bombCoordinates = {
+				top: currentBomb.top,
+				left: currentBomb.left,
+			};
+
+			const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
+			// find surrounding objects to modify
+			const { coordinatesToSetOnFire } = getExplosionResults(
+				state.gameMap,
+				state.players,
+				bombCoordinates,
+				bombSize
+			);
+
+			const { horizontal, vertical } = coordinatesToSetOnFire;
+
+			// set fire on all the coordinates
+			// this automatically "breaks" the breakable tiles
+			// URGENT: This will also contain two entity if Tile, Tile & Fire
+			[
+				{
+					fireCoordinates: horizontal,
+					direction: Explosive.FireHorizontal,
+				},
+				{
+					fireCoordinates: vertical,
+					direction: Explosive.FireVertical,
+				},
+			].forEach(({ fireCoordinates, direction }) => {
+				fireCoordinates.forEach(coordinates => {
+					// check if there is a tile and get a random power up or null
+					populatePowerUps(coordinates);
+					setSquare(coordinates, direction);
+
+					// subtract a life from the players if they are hit
+					handlePlayerExplosionHit(coordinates);
+
+					const currentBombId = currentBomb.id;
+					// if there are bombs caught in fire, explode them
+					const bombToTrigger = getBombToTriggerFromExplosion(
+						coordinates,
+						currentBombId
+					);
+					if (bombToTrigger) {
+						const _explosionToComplete = triggerExplosion(
+							bombToTrigger.id,
+							[...bombsToSkip, currentBombId]
+						);
+						_explosionToComplete.forEach(bId =>
+							explosionToComplete.add(bId)
+						);
+						explosionToComplete.add(bombToTrigger.id);
+					}
+				});
+			});
+
+			// Core will not have an explosion direction
+			setSquare(horizontal[0], Explosive.FireCore);
+
+			return explosionToComplete;
+		};
+		// #endregion
 
 		switch (action.type) {
 			case SET_GAME_STATE:
@@ -164,6 +350,8 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					direction,
 					onComplete,
 				} = action.payload as OnPrepareMoveProps;
+				if (isPlayerDead(playerId)) return;
+
 				const { is3D, players, gameMap } = state;
 				const playerConfig = players[playerId] as NonNullablePlayer;
 
@@ -184,6 +372,21 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					playerId,
 					newCoordinates,
 				} = action.payload as OnMoveProps;
+				if (isPlayerDead(playerId)) return;
+
+				// if there is a powerUp, assign it to the playerState
+				const {
+					ySquare: newCoordinateYSquare,
+					xSquare: newCoordinateXSquare,
+				} = topLeftCoordinatesToSquareCoordinates(newCoordinates);
+
+				const newSquare =
+					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
+
+				// if a player steps on explosion fire, subtract a life
+				if (FIRE_VALUES.includes(newSquare as Explosive)) {
+					subtractLifeFromPlayerAndHandleDeath(playerId);
+				}
 
 				const lastCoordinates = state.players[playerId]!.coordinates;
 
@@ -200,11 +403,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				if (lastSquare === playerId) {
 					setSquare(lastCoordinates, Tile.Empty);
 				}
-				// if there is a powerUp, assign it to the playerState
-				const {
-					ySquare: newCoordinateYSquare,
-					xSquare: newCoordinateXSquare,
-				} = topLeftCoordinatesToSquareCoordinates(newCoordinates);
 				const powerUpOrEmptyTile =
 					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
 				if (isPowerUp(powerUpOrEmptyTile)) {
@@ -220,9 +418,32 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			}
 			case DROP_BOMB: {
 				const playerId = action.payload as PlayerId;
+				if (isPlayerDead(playerId)) return;
+
 				const playerConfig = state.players[playerId]!;
+				const { coordinates } = playerConfig;
+				const {
+					xSquare,
+					ySquare,
+				} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+					coordinates
+				);
+				// prevent double bomb in one spot
+				if (state.gameMap[ySquare][xSquare] === Explosive.Bomb) {
+					return;
+				}
+
+				const playerBombCountOnMap = state.bombs.filter(
+					({ playerId: pId }) => pId === playerId
+				).length;
+				// ??!!: is >= possible? will > suffice?
+				// don't put more bombs than what you have
+				if (playerBombCountOnMap >= getBombCountForPlayer(playerId)) {
+					return;
+				}
 				const bomb = generateBomb(playerConfig);
 				draft.bombs.push(bomb);
+
 				// URGENT: This block will contain both the player and the bomb
 				// TODO: Figure out a proper way to handle this for NPC
 				setSquare(playerConfig.coordinates, Explosive.Bomb);
@@ -235,97 +456,23 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			}
 			case TRIGGER_EXPLOSION: {
 				const bombId = action.payload as BombId;
-				const currentBomb = state.bombs.find(
-					({ id }) => id === bombId
-				) as NonNullable<Bomb>;
-				const bombCoordinates = {
-					top: currentBomb.top,
-					left: currentBomb!.left,
-				};
+				const { cb } = action;
+				// if current bomb already exploded, don't trigger it again
+				// prevents: state update on an unmounted component
+				if (!state.bombs.find(({ id }) => id === bombId)) {
+					return;
+				}
+				const listOfExplosionsToComplete = triggerExplosion(bombId, []);
 
-				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
-
-				// find surrounding objects to modify
-				const {
-					coordinatesToSetOnFire,
-					playersToKill,
-				} = getExplosionResults(
-					state.gameMap,
-					state.players,
-					bombCoordinates,
-					bombSize
-				);
-
-				const { horizontal, vertical } = coordinatesToSetOnFire;
-
-				// set fire on all the coordinates
-				// this automatically "breaks" the breakable tiles
-				// URGENT: This will also contain two entity if Tile, Tile & Fire
-				horizontal.forEach(coordinates => {
-					// check if there is a tile and get a random power up or null
-					populatePowerUps(coordinates);
-					setSquare(coordinates, Explosive.FireHorizontal);
-				});
-				vertical.forEach(coordinates => {
-					// check if there is a tile and get a random power up or null
-					populatePowerUps(coordinates);
-					setSquare(coordinates, Explosive.FireVertical);
-				});
-
-				// Core will not have an explosion direction
-				setSquare(horizontal[0], Explosive.FireCore);
-
-				// clear the players
-				playersToKill.forEach(playerId => {
-					delete draft.players[playerId];
-					setSquare(state.players[playerId]!.coordinates, Tile.Empty);
-				});
+				cb?.(listOfExplosionsToComplete);
 				break;
 			}
 			case ON_EXPLOSION_COMPLETE: {
 				const bombId = action.payload as BombId;
-				const currentBomb = state.bombs.find(
-					({ id }) => id === bombId
-				) as NonNullable<Bomb>;
-				const bombCoordinates = {
-					top: currentBomb.top,
-					left: currentBomb!.left,
-				};
-
-				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
-
-				// remove bomb
-				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
-				const { coordinatesToSetOnFire } = getExplosionResults(
-					state.gameMap,
-					state.players,
-					bombCoordinates,
-					bombSize,
-					true
-				);
-
-				// clear fire
-				const { horizontal, vertical } = coordinatesToSetOnFire;
-				[...horizontal, ...vertical].forEach(coordinates => {
-					const {
-						xSquare,
-						ySquare,
-					} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
-						coordinates
-					);
-					// if there is a powerUp, put it on the map
-					const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
-					if (powerUpOrNull) {
-						setSquare(coordinates, powerUpOrNull);
-						// empty the powerUp from the state
-						draft.powerUps[ySquare][xSquare] = null;
-					} else {
-						setSquare(coordinates, Tile.Empty);
-					}
-				});
+				onExplosionComplete(bombId);
 				break;
 			}
-			// GAME SETTINGS
+			// #region GAME SETTINGS
 			case TRIGGER_GAME_ANIMATION:
 				draft.animationCounter++;
 				break;
@@ -350,6 +497,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// draft.players = { ...draft.players, ...PLAYERS.P4 };
 				draft.players.P4 = castDraft(PLAYERS.P4);
 				break;
+			// #endregion
 			default:
 				// No default
 				break;

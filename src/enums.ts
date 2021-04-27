@@ -33,9 +33,10 @@ enum Tile {
 }
 
 enum PowerUp {
-	BombSize = 'PU1',
-	MovementSpeed = 'PU2',
-	// Invincibility = 'PU3',
+	Life = 'PU1',
+	BombCount = 'PU2',
+	BombSize = 'PU3',
+	MovementSpeed = 'PU4',
 }
 
 enum Explosive {

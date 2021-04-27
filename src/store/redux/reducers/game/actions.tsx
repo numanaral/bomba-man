@@ -52,9 +52,10 @@ const removeBombFromGame: GameActionFn = payload => ({
 	payload,
 });
 
-const triggerExplosionInGame: GameActionFn = payload => ({
+const triggerExplosionInGame: GameActionFn = (payload, cb) => ({
 	type: TRIGGER_EXPLOSION,
 	payload,
+	cb,
 });
 
 const onExplosionCompleteInGame: GameActionFn = payload => ({

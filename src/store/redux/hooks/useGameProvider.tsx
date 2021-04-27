@@ -17,7 +17,7 @@ import {
 	triggerExplosionInGame,
 } from 'store/redux/reducers/game/actions';
 import {
-	BombId,
+	BombFn,
 	GameState,
 	OnMoveProps,
 	OnTriggerMove,
@@ -78,8 +78,8 @@ const useGameProvider = () => {
 		[dispatch]
 	);
 
-	const triggerExplosion = useCallback(
-		(bombId: BombId) => dispatch(triggerExplosionInGame(bombId)),
+	const triggerExplosion = useCallback<BombFn>(
+		(bombId, cb) => dispatch(triggerExplosionInGame(bombId, cb)),
 		[dispatch]
 	);
 
