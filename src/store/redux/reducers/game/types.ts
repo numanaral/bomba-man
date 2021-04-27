@@ -26,7 +26,7 @@ type Bomb = {
 	explosionSize: number;
 } & TopLeftCoordinates;
 
-type BombFn = (bombId: BombId) => void;
+type BombFn = (bombId: BombId, cb?: CallableFunction) => void;
 
 /** Square coordinates that can break tiles and kill players. */
 type BombExplosionSquareCoordinates = Array<SquareCoordinates>;
@@ -62,13 +62,14 @@ type GamePayload =
 type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
 	payload?: GamePayload;
+	cb?: CallableFunction;
 };
 
 type BombId = string;
 
 type OnExplosionComplete = (bombId: BombId) => void;
 
-type GameActionFn = (payload?: GamePayload) => void;
+type GameActionFn = (payload?: GamePayload, cb?: CallableFunction) => void;
 
 /** Triggers a move */
 type OnPrepareMoveProps = {

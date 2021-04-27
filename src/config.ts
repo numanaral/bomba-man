@@ -46,7 +46,7 @@ const config = {
 		movement: 200, // ms
 		bomb: {
 			firing: 2, // second
-			exploding: 2, // second
+			exploding: 1, // second
 		},
 	},
 	keyboardConfig: {

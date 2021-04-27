@@ -3,6 +3,7 @@ import {
 	NonNullablePlayer,
 	PlayerId,
 	Square,
+	SquareCoordinates,
 } from 'containers/Game/types';
 import produce, { castDraft } from 'immer';
 import { Reducer } from 'redux';
@@ -14,6 +15,7 @@ import {
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	handleMove,
 	isPowerUp,
+	squareCoordinatesToTopLeftCoordinates,
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
@@ -40,7 +42,6 @@ import {
 } from './constants';
 import {
 	AnimatableGameMap,
-	Bomb,
 	BombId,
 	GameAction,
 	GameState,
@@ -157,6 +158,165 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				setSquare(state.players[playerId]!.coordinates, Tile.Empty);
 			}
 			draft.players[playerId]!.state.deathCount++;
+		};
+
+		const getBombToTriggerFromExplosion = (
+			coordinates: SquareCoordinates,
+			currentBombId: BombId
+		) => {
+			const { ySquare, xSquare } = coordinates;
+			// if there is a bomb by where the explosion hits,
+			// trigger that bomb as well
+			if (state.gameMap[ySquare][xSquare] !== Explosive.Bomb) return null;
+			const { top, left } = squareCoordinatesToTopLeftCoordinates(
+				coordinates
+			);
+			const bombToTrigger = state.bombs.find(
+				({ top: t, left: l }) => top === t && left === l
+			);
+			// there is no bomb there
+			if (!bombToTrigger) return null;
+			// don't recurse on the same bomb that's triggering
+			// the explosion
+			if (bombToTrigger.id === currentBombId) return null;
+
+			return bombToTrigger;
+		};
+
+		const onExplosionComplete = (bombId: BombId) => {
+			const currentBomb = state.bombs.find(({ id }) => id === bombId);
+
+			// If we recursively triggered it
+			if (!currentBomb) return;
+
+			const bombCoordinates = {
+				top: currentBomb.top,
+				left: currentBomb.left,
+			};
+
+			const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
+			// remove bomb
+			draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
+			const { coordinatesToSetOnFire } = getExplosionResults(
+				state.gameMap,
+				state.players,
+				bombCoordinates,
+				bombSize,
+				true
+			);
+
+			// clear fire
+			const { horizontal, vertical } = coordinatesToSetOnFire;
+			[...horizontal, ...vertical].forEach(coordinates => {
+				const {
+					xSquare,
+					ySquare,
+				} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+					coordinates
+				);
+				// if there is a powerUp, put it on the map
+				const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
+				if (powerUpOrNull) {
+					setSquare(coordinates, powerUpOrNull);
+					// empty the powerUp from the state
+					draft.powerUps[ySquare][xSquare] = null;
+				} else {
+					setSquare(coordinates, Tile.Empty);
+				}
+			});
+		};
+
+		const triggerExplosion = (
+			bombId: BombId,
+			bombsToSkip: Array<BombId>
+		) => {
+			const explosionToComplete: Set<BombId> = new Set();
+			// allows us to not re-trigger explosion due to
+			// two adjacent explosions
+			if (bombsToSkip.includes(bombId)) return explosionToComplete;
+			const currentBomb = state.bombs.find(({ id }) => id === bombId);
+
+			// If we recursively triggered it
+			if (!currentBomb) return explosionToComplete;
+
+			const bombCoordinates = {
+				top: currentBomb.top,
+				left: currentBomb.left,
+			};
+
+			const bombSize = getBombSizeForPlayer(currentBomb.playerId);
+
+			// find surrounding objects to modify
+			const {
+				coordinatesToSetOnFire,
+				playersToKill,
+			} = getExplosionResults(
+				state.gameMap,
+				state.players,
+				bombCoordinates,
+				bombSize
+			);
+
+			const { horizontal, vertical } = coordinatesToSetOnFire;
+
+			// set fire on all the coordinates
+			// this automatically "breaks" the breakable tiles
+			// URGENT: This will also contain two entity if Tile, Tile & Fire
+			horizontal.forEach(coordinates => {
+				// check if there is a tile and get a random power up or null
+				populatePowerUps(coordinates);
+				setSquare(coordinates, Explosive.FireHorizontal);
+
+				const currentBombId = currentBomb.id;
+				// if there are bombs caught in fire, explode them
+				const bombToTrigger = getBombToTriggerFromExplosion(
+					coordinates,
+					currentBombId
+				);
+				if (bombToTrigger) {
+					const _explosionToComplete = triggerExplosion(
+						bombToTrigger.id,
+						[...bombsToSkip, currentBombId]
+					);
+					_explosionToComplete.forEach(bId =>
+						explosionToComplete.add(bId)
+					);
+					explosionToComplete.add(bombToTrigger.id);
+				}
+			});
+			vertical.forEach(coordinates => {
+				// check if there is a tile and get a random power up or null
+				populatePowerUps(coordinates);
+				setSquare(coordinates, Explosive.FireVertical);
+
+				const currentBombId = currentBomb.id;
+				// if there are bombs caught in fire, explode them
+				const bombToTrigger = getBombToTriggerFromExplosion(
+					coordinates,
+					currentBombId
+				);
+				if (bombToTrigger) {
+					const _explosionToComplete = triggerExplosion(
+						bombToTrigger.id,
+						[...bombsToSkip, currentBombId]
+					);
+					_explosionToComplete.forEach(bId =>
+						explosionToComplete.add(bId)
+					);
+					explosionToComplete.add(bombToTrigger.id);
+				}
+			});
+
+			// Core will not have an explosion direction
+			setSquare(horizontal[0], Explosive.FireCore);
+
+			// subtract a life from the players
+			playersToKill.forEach(playerId => {
+				subtractLifeFromPlayerAndHandleDeath(playerId);
+			});
+
+			return explosionToComplete;
 		};
 		// #endregion
 
@@ -300,101 +460,20 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			}
 			case TRIGGER_EXPLOSION: {
 				const bombId = action.payload as BombId;
-				const currentBomb = state.bombs.find(
-					({ id }) => id === bombId
-				) as NonNullable<Bomb>;
-
-				// BUG: not sure why this happens, look into it further
-				if (!currentBomb) {
-					console.error('Bomb was not found', { state });
+				const { cb } = action;
+				// if current bomb already exploded, don't trigger it again
+				// prevents: state update on an unmounted component
+				if (!state.bombs.find(({ id }) => id === bombId)) {
 					return;
 				}
+				const listOfExplosionsToComplete = triggerExplosion(bombId, []);
 
-				const bombCoordinates = {
-					top: currentBomb.top,
-					left: currentBomb.left,
-				};
-
-				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
-
-				// find surrounding objects to modify
-				const {
-					coordinatesToSetOnFire,
-					playersToKill,
-				} = getExplosionResults(
-					state.gameMap,
-					state.players,
-					bombCoordinates,
-					bombSize
-				);
-
-				const { horizontal, vertical } = coordinatesToSetOnFire;
-
-				// set fire on all the coordinates
-				// this automatically "breaks" the breakable tiles
-				// URGENT: This will also contain two entity if Tile, Tile & Fire
-				horizontal.forEach(coordinates => {
-					// check if there is a tile and get a random power up or null
-					populatePowerUps(coordinates);
-					setSquare(coordinates, Explosive.FireHorizontal);
-				});
-				vertical.forEach(coordinates => {
-					// check if there is a tile and get a random power up or null
-					populatePowerUps(coordinates);
-					setSquare(coordinates, Explosive.FireVertical);
-				});
-
-				// Core will not have an explosion direction
-				setSquare(horizontal[0], Explosive.FireCore);
-
-				// subtract a life from the players
-				playersToKill.forEach(playerId => {
-					subtractLifeFromPlayerAndHandleDeath(playerId);
-				});
+				cb?.(listOfExplosionsToComplete);
 				break;
 			}
 			case ON_EXPLOSION_COMPLETE: {
 				const bombId = action.payload as BombId;
-				const currentBomb = state.bombs.find(
-					({ id }) => id === bombId
-				) as NonNullable<Bomb>;
-
-				const bombCoordinates = {
-					top: currentBomb.top,
-					left: currentBomb!.left,
-				};
-
-				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
-
-				// remove bomb
-				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
-				const { coordinatesToSetOnFire } = getExplosionResults(
-					state.gameMap,
-					state.players,
-					bombCoordinates,
-					bombSize,
-					true
-				);
-
-				// clear fire
-				const { horizontal, vertical } = coordinatesToSetOnFire;
-				[...horizontal, ...vertical].forEach(coordinates => {
-					const {
-						xSquare,
-						ySquare,
-					} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
-						coordinates
-					);
-					// if there is a powerUp, put it on the map
-					const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
-					if (powerUpOrNull) {
-						setSquare(coordinates, powerUpOrNull);
-						// empty the powerUp from the state
-						draft.powerUps[ySquare][xSquare] = null;
-					} else {
-						setSquare(coordinates, Tile.Empty);
-					}
-				});
+				onExplosionComplete(bombId);
 				break;
 			}
 			// #region GAME SETTINGS
