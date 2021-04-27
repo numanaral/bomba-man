@@ -130,6 +130,11 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			);
 		};
 
+		const isPlayerDead = (playerId: PlayerId) => {
+			// < 1 to prevent instant double explosion
+			return state.players[playerId]!.state.lives < 1;
+		};
+
 		switch (action.type) {
 			case SET_GAME_STATE:
 				updateImmerDraft(draft, action.payload as GameState);
@@ -164,8 +169,13 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					direction,
 					onComplete,
 				} = action.payload as OnPrepareMoveProps;
+				if (isPlayerDead(playerId)) return;
+
 				const { is3D, players, gameMap } = state;
 				const playerConfig = players[playerId] as NonNullablePlayer;
+
+				// TODO: If there is a bomb here, kill the player and don't bother
+				// with the actual movement
 
 				handleMove(
 					{
@@ -184,6 +194,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					playerId,
 					newCoordinates,
 				} = action.payload as OnMoveProps;
+				if (isPlayerDead(playerId)) return;
 
 				const lastCoordinates = state.players[playerId]!.coordinates;
 
@@ -220,6 +231,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			}
 			case DROP_BOMB: {
 				const playerId = action.payload as PlayerId;
+				if (isPlayerDead(playerId)) return;
 				const playerConfig = state.players[playerId]!;
 				const bomb = generateBomb(playerConfig);
 				draft.bombs.push(bomb);
@@ -238,6 +250,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const currentBomb = state.bombs.find(
 					({ id }) => id === bombId
 				) as NonNullable<Bomb>;
+
 				const bombCoordinates = {
 					top: currentBomb.top,
 					left: currentBomb!.left,
@@ -275,10 +288,16 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// Core will not have an explosion direction
 				setSquare(horizontal[0], Explosive.FireCore);
 
-				// clear the players
+				// Take a life from the players
 				playersToKill.forEach(playerId => {
-					delete draft.players[playerId];
-					setSquare(state.players[playerId]!.coordinates, Tile.Empty);
+					const { lives } = getPlayerState(playerId);
+					if (lives <= 1) {
+						setSquare(
+							state.players[playerId]!.coordinates,
+							Tile.Empty
+						);
+					}
+					draft.players[playerId]!.state.lives--;
 				});
 				break;
 			}
@@ -287,6 +306,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				const currentBomb = state.bombs.find(
 					({ id }) => id === bombId
 				) as NonNullable<Bomb>;
+
 				const bombCoordinates = {
 					top: currentBomb.top,
 					left: currentBomb!.left,

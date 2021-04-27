@@ -46,16 +46,23 @@ const GameContent = () => {
 					const {
 						[playerId]: keyboardConfig,
 					} = config.keyboardConfig.player;
+					const {
+						coordinates,
+						state: { lives },
+					} = playerConfig;
+
 					return (
-						<Character
-							id={playerId}
-							key={playerId}
-							name="Bomber"
-							coordinates={playerConfig.coordinates!}
-							keyboardConfig={keyboardConfig}
-							is3D={is3D}
-							ref={refFunc(playerConfig)}
-						/>
+						lives > 0 && (
+							<Character
+								id={playerId}
+								key={playerId}
+								name="Bomber"
+								coordinates={coordinates!}
+								keyboardConfig={keyboardConfig}
+								is3D={is3D}
+								ref={refFunc(playerConfig)}
+							/>
+						)
 					);
 				}
 			)}
