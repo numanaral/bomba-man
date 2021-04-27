@@ -12,7 +12,7 @@ const config = {
 		blockDensity: 8 as RangeOf<10, 1>,
 		powerUpChance: 5 as RangeOf<5, 1>,
 		// Player defaults
-		lives: 1, // number
+		deathCount: 0, // number
 		[PowerUp.Life]: 1, // number
 		[PowerUp.BombCount]: 1, // number
 		[PowerUp.BombSize]: 1, // number

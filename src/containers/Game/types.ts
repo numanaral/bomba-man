@@ -67,7 +67,7 @@ type PlayerRef = HTMLDivElement | null;
 type PowerUps = Record<PowerUp, number>;
 
 type PlayerState = {
-	lives: number;
+	deathCount: number;
 	[PowerUp.Life]: number;
 	[PowerUp.BombCount]: number;
 	[PowerUp.BombSize]: number;

@@ -46,13 +46,15 @@ const GameContent = () => {
 					const {
 						[playerId]: keyboardConfig,
 					} = config.keyboardConfig.player;
-					const {
-						coordinates,
-						state: { lives },
-					} = playerConfig;
+					const { coordinates, state } = playerConfig;
+
+					const { deathCount } = state;
+
+					const isAlive =
+						deathCount < getPoweredUpValue(state, PowerUp.Life);
 
 					return (
-						lives > 0 && (
+						isAlive && (
 							<Character
 								id={playerId}
 								key={playerId}

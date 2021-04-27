@@ -116,6 +116,10 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			return state.players[playerId]!.state;
 		};
 
+		const getLivesForPlayer = (playerId: PlayerId) => {
+			return getPoweredUpValue(getPlayerState(playerId), PowerUp.Life);
+		};
+
 		const getBombCountForPlayer = (playerId: PlayerId) => {
 			return getPoweredUpValue(
 				getPlayerState(playerId),
@@ -138,8 +142,10 @@ const gameReducer: Reducer<GameState, GameAction> = (
 		};
 
 		const isPlayerDead = (playerId: PlayerId) => {
+			const playerState = getPlayerState(playerId);
+			const { deathCount } = playerState;
 			// < 1 to prevent instant double explosion
-			return state.players[playerId]!.state.lives < 1;
+			return deathCount >= getPoweredUpValue(playerState, PowerUp.Life);
 		};
 
 		switch (action.type) {
@@ -307,14 +313,15 @@ const gameReducer: Reducer<GameState, GameAction> = (
 
 				// Take a life from the players
 				playersToKill.forEach(playerId => {
-					const { lives } = getPlayerState(playerId);
-					if (lives <= 1) {
+					const { deathCount } = getPlayerState(playerId);
+					// if next bomb is going to kill the player
+					if (deathCount >= getLivesForPlayer(playerId) - 1) {
 						setSquare(
 							state.players[playerId]!.coordinates,
 							Tile.Empty
 						);
 					}
-					draft.players[playerId]!.state.lives--;
+					draft.players[playerId]!.state.deathCount++;
 				});
 				break;
 			}
