@@ -1,5 +1,7 @@
+import Game from 'containers/Game';
+
 const Local = () => {
-	return <div>Local</div>;
+	return <Game />;
 };
 
 export default Local;

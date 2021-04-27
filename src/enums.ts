@@ -45,4 +45,18 @@ enum Explosive {
 	FireVertical = 'FV',
 }
 
-export { Direction, Axis, ExplosionState, Player, Tile, PowerUp, Explosive };
+enum RoomType {
+	Local = 'Local',
+	Online = 'Online',
+}
+
+export {
+	Direction,
+	Axis,
+	ExplosionState,
+	Player,
+	Tile,
+	PowerUp,
+	Explosive,
+	RoomType,
+};

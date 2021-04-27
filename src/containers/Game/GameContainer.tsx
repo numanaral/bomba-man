@@ -1,7 +1,7 @@
 import { makeSelectGameIs3D } from 'store/redux/reducers/game/selectors';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import config from 'config';
+import Spacer from 'components/Spacer';
 
 const SettingsAndMap = styled.div`
 	display: flex;
@@ -32,7 +32,7 @@ const GameContainer: React.FC = ({ children }) => {
 
 	return (
 		<CenteredDiv $is3D={is3D}>
-			<h1>{config.title}</h1>
+			<Spacer direction="top" spacing="2" />
 			<SettingsAndMap>{children}</SettingsAndMap>
 		</CenteredDiv>
 	);

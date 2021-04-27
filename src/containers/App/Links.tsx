@@ -1,5 +1,6 @@
 import config from 'config';
 import { NavLink } from 'react-router-dom';
+import { BASE_PATH } from 'routes/constants';
 // import { NAV_LIST } from 'routes/pages-and-roles';
 import styled from 'styled-components';
 import theme from 'theme';
@@ -27,7 +28,8 @@ const Links = () => {
 			<NavLink to="/">
 				<LinkText>{config.title}</LinkText>
 			</NavLink>
-			<NavLink to="/profile">
+			{/* TODO: grab paths from the constants, or create enum? */}
+			<NavLink to={`${BASE_PATH}/profile`}>
 				<LinkText>Profile</LinkText>
 			</NavLink>
 		</Wrapper>
