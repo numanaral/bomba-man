@@ -128,4 +128,7 @@ const useGameProvider = () => {
 	};
 };
 
+type GameProvider = ReturnType<typeof useGameProvider>;
+
+export type { GameProvider };
 export default useGameProvider;

@@ -1,7 +1,8 @@
 import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
-import { OnTriggerMove } from 'store/redux/reducers/game/types';
+import { GameState, OnTriggerMove } from 'store/redux/reducers/game/types';
 import { FontAwesomeIconProps as FontAwesomeBaseIconProps } from '@fortawesome/react-fontawesome';
+import { GameProvider } from 'store/redux/hooks/useGameProvider';
 
 // import { Immutable } from 'immer';
 
@@ -121,6 +122,13 @@ type PowerUpOrNull = PowerUp | null;
 
 type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
 
+type GameApi = {
+	provider: GameProvider;
+	state: GameState;
+};
+
+type GameApiHook = () => GameApi;
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -147,4 +155,6 @@ export type {
 	Fire,
 	PowerUpOrNull,
 	FontAwesomeIconProps,
+	GameApi,
+	GameApiHook,
 };
