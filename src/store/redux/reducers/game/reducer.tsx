@@ -274,9 +274,15 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					({ id }) => id === bombId
 				) as NonNullable<Bomb>;
 
+				// BUG: not sure why this happens, look into it further
+				if (!currentBomb) {
+					console.error('Bomb was not found', { state });
+					return;
+				}
+
 				const bombCoordinates = {
 					top: currentBomb.top,
-					left: currentBomb!.left,
+					left: currentBomb.left,
 				};
 
 				const bombSize = getBombSizeForPlayer(currentBomb.playerId);
