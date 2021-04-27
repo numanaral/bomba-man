@@ -13,6 +13,7 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 			coordinates: { top, left },
 			style,
 			keyboardConfig,
+			highlight,
 			...rest
 		},
 		ref
@@ -80,6 +81,7 @@ const SpriteCharacter = forwardRef<PlayerRef, CharacterProps>(
 				className="character"
 				data-facing={direction}
 				data-walking={isWalking.toString()}
+				data-highlight={highlight}
 				ref={ref}
 				style={{ ...style, top, left }}
 				{...rest}

@@ -3,6 +3,7 @@ import config from 'config';
 import {
 	makeSelectGameBombs,
 	makeSelectGameIs3D,
+	makeSelectGameMap,
 	makeSelectGamePlayers,
 } from 'store/redux/reducers/game/selectors';
 import useGameProvider from 'store/redux/hooks/useGameProvider';
@@ -10,15 +11,17 @@ import theme from 'theme';
 import { useCallback } from 'react';
 import usePrevious from 'hooks/usePrevious';
 import { PowerUp } from 'enums';
-import { getPoweredUpValue } from 'utils/game';
+import { getPoweredUpValue, isPlayerSteppingOnFire } from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
+import DeadCharacter from './components/DeadCharacter';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
 const GameContent = () => {
 	const { setPlayerRef } = useGameProvider();
+	const gameMap = useSelector(makeSelectGameMap());
 	const players = useSelector(makeSelectGamePlayers());
 	const bombs = useSelector(makeSelectGameBombs());
 	const is3D = useSelector(makeSelectGameIs3D());
@@ -53,8 +56,13 @@ const GameContent = () => {
 					const isAlive =
 						deathCount < getPoweredUpValue(state, PowerUp.Life);
 
+					const isSteppingOnFire = isPlayerSteppingOnFire(
+						gameMap,
+						coordinates
+					);
+
 					return (
-						isAlive && (
+						(isAlive && (
 							<Character
 								id={playerId}
 								key={playerId}
@@ -62,9 +70,10 @@ const GameContent = () => {
 								coordinates={coordinates!}
 								keyboardConfig={keyboardConfig}
 								is3D={is3D}
+								highlight={isSteppingOnFire}
 								ref={refFunc(playerConfig)}
 							/>
-						)
+						)) || <DeadCharacter coordinates={coordinates!} />
 					);
 				}
 			)}

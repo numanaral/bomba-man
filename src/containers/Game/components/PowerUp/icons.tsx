@@ -7,11 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { PowerUp } from 'enums';
 import theme from 'theme';
-
-type FontAwesomeIconProps = Omit<
-	React.ComponentProps<typeof FontAwesomeIcon>,
-	'icon'
->;
+import { FontAwesomeIconProps } from 'containers/Game/types';
 
 const ShoePrintsIcon = (props: FontAwesomeIconProps) => (
 	<FontAwesomeIcon icon={faShoePrints} {...props} />

@@ -20,7 +20,7 @@ import {
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
-import { Explosive, Player, PowerUp, Tile } from 'enums';
+import { Explosive, FIRE_VALUES, Player, PowerUp, Tile } from 'enums';
 import {
 	DEFAULT_VALUES,
 	SET_GAME_STATE,
@@ -39,7 +39,6 @@ import {
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
 	TRIGGER_EXPLOSION,
-	FIRE_VALUES,
 } from './constants';
 import {
 	AnimatableGameMap,
@@ -219,24 +218,25 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			);
 
 			// clear fire
-			const { horizontal, vertical } = coordinatesToSetOnFire;
-			[...horizontal, ...vertical].forEach(coordinates => {
-				const {
-					xSquare,
-					ySquare,
-				} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
-					coordinates
-				);
-				// if there is a powerUp, put it on the map
-				const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
-				if (powerUpOrNull) {
-					setSquare(coordinates, powerUpOrNull);
-					// empty the powerUp from the state
-					draft.powerUps[ySquare][xSquare] = null;
-				} else {
-					setSquare(coordinates, Tile.Empty);
-				}
-			});
+			Object.values(coordinatesToSetOnFire)
+				.flat()
+				.forEach(coordinates => {
+					const {
+						xSquare,
+						ySquare,
+					} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+						coordinates
+					);
+					// if there is a powerUp, put it on the map
+					const powerUpOrNull = state.powerUps[ySquare]?.[xSquare];
+					if (powerUpOrNull) {
+						setSquare(coordinates, powerUpOrNull);
+						// empty the powerUp from the state
+						draft.powerUps[ySquare][xSquare] = null;
+					} else {
+						setSquare(coordinates, Tile.Empty);
+					}
+				});
 		};
 
 		const triggerExplosion = (
@@ -267,12 +267,16 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				bombSize
 			);
 
-			const { horizontal, vertical } = coordinatesToSetOnFire;
+			const { horizontal, vertical, core } = coordinatesToSetOnFire;
 
 			// set fire on all the coordinates
 			// this automatically "breaks" the breakable tiles
 			// URGENT: This will also contain two entity if Tile, Tile & Fire
 			[
+				{
+					fireCoordinates: core,
+					direction: Explosive.FireCore,
+				},
 				{
 					fireCoordinates: horizontal,
 					direction: Explosive.FireHorizontal,
@@ -308,9 +312,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					}
 				});
 			});
-
-			// Core will not have an explosion direction
-			setSquare(horizontal[0], Explosive.FireCore);
 
 			return explosionToComplete;
 		};
@@ -384,8 +385,20 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
 
 				// if a player steps on explosion fire, subtract a life
+				// ??!!: This doesn't account for moving on the same bomb
+				// explosion. If the player continues to move under the
+				// same explosion fire, he will continuously lose a life
 				if (FIRE_VALUES.includes(newSquare as Explosive)) {
 					subtractLifeFromPlayerAndHandleDeath(playerId);
+
+					// if he is dead, stop here
+					if (isPlayerDead(playerId)) return;
+					// URGENT: Pick Bomb over Player on map, this will also be
+					// required by the NPC, but again, gotta handle multiple
+					// Square types in one square inside gameMap
+				} else {
+					// set new player square
+					setSquare(newCoordinates, playerId as Player);
 				}
 
 				const lastCoordinates = state.players[playerId]!.coordinates;
@@ -410,8 +423,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 						powerUpOrEmptyTile as PowerUp
 					]++;
 				}
-				// set new player square
-				setSquare(newCoordinates, playerId as Player);
+
 				// update player's topLeft coordinates
 				draft.players[playerId]!.coordinates = newCoordinates;
 				break;
