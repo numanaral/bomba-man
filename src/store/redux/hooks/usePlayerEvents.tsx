@@ -1,5 +1,6 @@
 import config from 'config';
 import {
+	GameApi,
 	KeyboardEventCode,
 	KeyMap,
 	PlayerId,
@@ -7,24 +8,15 @@ import {
 } from 'containers/Game/types';
 import { PowerUp } from 'enums';
 import { useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { getMoveDirectionFromKeyMap, getPoweredUpValue } from 'utils/game';
 import { npcAction } from 'utils/npc';
 import useInterval from '../../../hooks/useInterval';
-import {
-	makeSelectGameIs3D,
-	makeSelectGameMap,
-	makeSelectGamePlayers,
-} from '../reducers/game/selectors';
-import useGameProvider from './useGameProvider';
 
 type KeyDownAction = (id: PlayerId, keys: PlayerKeyboardConfig) => void;
 
-const usePlayerEvents = () => {
-	const { dropBomb, triggerMove } = useGameProvider();
-	const gameMap = useSelector(makeSelectGameMap());
-	const is3D = useSelector(makeSelectGameIs3D());
-	const players = useSelector(makeSelectGamePlayers());
+const usePlayerEvents = ({ state, provider }: GameApi) => {
+	const { dropBomb, triggerMove } = provider;
+	const { gameMap, is3D, players } = state;
 
 	const timeOutRef = useRef<{ [key in PlayerId]?: number }>({
 		P1: new Date().getTime(),

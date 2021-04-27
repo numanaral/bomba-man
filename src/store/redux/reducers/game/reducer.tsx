@@ -34,7 +34,6 @@ import {
 	PLAYERS,
 	MAKE_MOVE,
 	DROP_BOMB,
-	REMOVE_BOMB,
 	SET_PLAYER_REF,
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
@@ -459,11 +458,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// URGENT: This block will contain both the player and the bomb
 				// TODO: Figure out a proper way to handle this for NPC
 				setSquare(playerConfig.coordinates, Explosive.Bomb);
-				break;
-			}
-			case REMOVE_BOMB: {
-				const bombId = action.payload as string;
-				draft.bombs = draft.bombs.filter(({ id }) => id !== bombId);
 				break;
 			}
 			case TRIGGER_EXPLOSION: {

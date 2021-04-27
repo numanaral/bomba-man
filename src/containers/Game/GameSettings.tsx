@@ -1,24 +1,22 @@
-import {
-	makeSelectGameIs3D,
-	makeSelectGameIsSideView,
-	makeSelectGamePlayers,
-} from 'store/redux/reducers/game/selectors';
-import { useSelector } from 'react-redux';
-import useGameProvider from 'store/redux/hooks/useGameProvider';
 import GameButton from './GameButton';
+import { GameApi } from './types';
 
-const Settings = () => {
+interface Props extends GameApi {}
+
+const GameSettings = ({ state, provider }: Props) => {
 	const {
 		generateNewCollisionCoordinates,
 		togglePerspective,
 		toggleDimension,
 		toggleTwoPlayer,
 		toggleNPC,
-	} = useGameProvider();
+	} = provider;
 
-	const is3D = useSelector(makeSelectGameIs3D());
-	const isSideView = useSelector(makeSelectGameIsSideView());
-	const { P2, P4: NPC } = useSelector(makeSelectGamePlayers());
+	const {
+		is3D,
+		isSideView,
+		players: { P2, P4: NPC },
+	} = state;
 
 	const buttons = [
 		{
@@ -55,4 +53,5 @@ const Settings = () => {
 	);
 };
 
-export default Settings;
+export type { Props as GameSettingsProps };
+export default GameSettings;

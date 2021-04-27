@@ -35,8 +35,8 @@ const makeSelectGameAnimationCounter = () =>
 // #endregion
 
 // Default selector
-const makeSelectDialogProps = () => {
-	return createSelector(selectGameProps, modalPropsState => modalPropsState);
+const makeSelectGameState = () => {
+	return createSelector(selectGameProps, state => state);
 };
 
 export {
@@ -51,4 +51,4 @@ export {
 	makeSelectGameSize,
 	makeSelectGameAnimationCounter,
 };
-export default makeSelectDialogProps;
+export default makeSelectGameState;

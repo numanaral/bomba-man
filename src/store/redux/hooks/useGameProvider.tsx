@@ -8,7 +8,6 @@ import {
 	toggleGameDimension,
 	toggleGameNPC,
 	toggleGameTwoPlayer,
-	removeBombFromGame,
 	makeMoveInGame,
 	setPlayerRefInGame,
 	dropBombInGame,
@@ -18,9 +17,11 @@ import {
 } from 'store/redux/reducers/game/actions';
 import {
 	BombFn,
+	BombId,
 	GameState,
 	OnMoveProps,
 	OnTriggerMove,
+	PlayerWithNewRef,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
 import { makeSelectGameSize } from 'store/redux/reducers/game/selectors';
@@ -47,7 +48,7 @@ const useGameProvider = () => {
 	);
 
 	const setPlayerRef = useCallback(
-		props => dispatch(setPlayerRefInGame(props)),
+		(props: PlayerWithNewRef) => dispatch(setPlayerRefInGame(props)),
 		[dispatch]
 	);
 
@@ -73,18 +74,13 @@ const useGameProvider = () => {
 		[dispatch]
 	);
 
-	const removeBomb = useCallback(
-		bombId => dispatch(removeBombFromGame(bombId)),
-		[dispatch]
-	);
-
 	const triggerExplosion = useCallback<BombFn>(
 		(bombId, cb) => dispatch(triggerExplosionInGame(bombId, cb)),
 		[dispatch]
 	);
 
 	const onExplosionComplete = useCallback(
-		props => {
+		(props: BombId) => {
 			dispatch(onExplosionCompleteInGame(props));
 		},
 		[dispatch]
@@ -121,7 +117,6 @@ const useGameProvider = () => {
 		makeMove,
 		triggerMove,
 		dropBomb,
-		removeBomb,
 		triggerExplosion,
 		onExplosionComplete,
 		// GAME SETTINGS
@@ -133,4 +128,7 @@ const useGameProvider = () => {
 	};
 };
 
+type GameProvider = ReturnType<typeof useGameProvider>;
+
+export type { GameProvider };
 export default useGameProvider;

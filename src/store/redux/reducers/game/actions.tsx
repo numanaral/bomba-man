@@ -2,7 +2,6 @@ import {
 	DROP_BOMB,
 	MAKE_MOVE,
 	ON_EXPLOSION_COMPLETE,
-	REMOVE_BOMB,
 	SET_GAME_MAP,
 	SET_GAME_STATE,
 	SET_PLAYER_REF,
@@ -44,11 +43,6 @@ const triggerMoveInGame: GameActionFn = payload => ({
 
 const dropBombInGame: GameActionFn = payload => ({
 	type: DROP_BOMB,
-	payload,
-});
-
-const removeBombFromGame: GameActionFn = payload => ({
-	type: REMOVE_BOMB,
 	payload,
 });
 
@@ -94,7 +88,6 @@ export {
 	makeMoveInGame,
 	triggerMoveInGame,
 	dropBombInGame,
-	removeBombFromGame,
 	triggerExplosionInGame,
 	onExplosionCompleteInGame,
 	// GAME SETTINGS
