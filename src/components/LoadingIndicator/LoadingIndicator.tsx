@@ -7,7 +7,7 @@ interface Props {
 	fullWidth?: boolean;
 }
 
-const StyledDiv = styled.div<StyledProps<Props, 'fullSize' | 'fullWidth'>>`
+const Wrapper = styled.div<StyledProps<Props, 'fullSize' | 'fullWidth'>>`
 	justify-content: center;
 	align-items: center;
 	display: flex;
@@ -34,32 +34,48 @@ const StyledDiv = styled.div<StyledProps<Props, 'fullSize' | 'fullWidth'>>`
 	`}
 `;
 
-/** @see https://github.com/gregdev38/explosion-effect/blob/b4fc18db74ad5a1d0543affc2a89035c07c1fe11/style.css#L11-L39 */
-const explosionKeyframes = (color: string) => keyframes`
-	0%, 100% {
-		box-shadow: 0 0 20px ${color}33, 0 0 40px ${color}33,
-			0 0 60px ${color}33, 0 0 80px ${color}33,
-			0 0 160px ${color}33, 0 0 240px ${color}33,
-			0 0 420px ${color}33;
+/** @see https://loading.io/css/ */
+const rippleKeyframes = () => keyframes`
+	0% {
+		top: 144px;
+		left: 144px;
+		width: 0;
+		height: 0;
+		opacity: 1;
 	}
-	50% {
-		box-shadow: 0 0 0 30px ${color}33,
-			0 0 0 60px ${color}33, 0 0 0 120px ${color}33,
-			0 0 0 180px ${color}33, 0 0 0 240px ${color}33,
-			0 0 0 360px ${color}33, 0 0 0 480px ${color}33,
-			0 0 0 720px ${color}33, 0 0 0 980px ${color}33;
+	100% {
+		top: 0px;
+		left: 0px;
+		width: 288px;
+		height: 288px;
+		opacity: 0;
 	}
 `;
 
 const Explosion = styled.div<{ $color: string }>`
-	width: 20px;
-	height: 20px;
-	border-radius: 50%;
-	${({ $color }) => css`
-		background: ${$color};
-		animation: ${explosionKeyframes($color)} 3s var(--ease-in-out-quint)
-			infinite;
-	`}
+	display: inline-block;
+	position: relative;
+	width: 200px;
+	height: 200px;
+
+	div {
+		position: absolute;
+		opacity: 1;
+		border-radius: 50%;
+		${({ $color }) => css`
+			border: 4px solid ${$color};
+			animation: ${rippleKeyframes()} 1s cubic-bezier(0, 0.2, 0.8, 1)
+				infinite;
+		`}
+	}
+
+	div:nth-child(2) {
+		animation-delay: -0.5s;
+	}
+
+	div:nth-child(3) {
+		animation-delay: -1s;
+	}
 `;
 
 const LoadingIndicator = ({
@@ -69,9 +85,15 @@ const LoadingIndicator = ({
 	...rest
 }: Props) => {
 	return (
-		<StyledDiv $fullSize={fullSize} $fullWidth={fullWidth} {...rest}>
-			<Explosion $color={color} />
-		</StyledDiv>
+		<Wrapper $fullSize={fullSize} $fullWidth={fullWidth} {...rest}>
+			<Explosion $color={color}>
+				<div />
+				<div />
+				<div />
+				<div />
+				<div />
+			</Explosion>
+		</Wrapper>
 	);
 };
 
