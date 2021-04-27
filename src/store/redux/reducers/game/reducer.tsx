@@ -116,6 +116,13 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			return state.players[playerId]!.state;
 		};
 
+		const getBombCountForPlayer = (playerId: PlayerId) => {
+			return getPoweredUpValue(
+				getPlayerState(playerId),
+				PowerUp.BombCount
+			);
+		};
+
 		const getBombSizeForPlayer = (playerId: PlayerId) => {
 			return getPoweredUpValue(
 				getPlayerState(playerId),
@@ -232,9 +239,19 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			case DROP_BOMB: {
 				const playerId = action.payload as PlayerId;
 				if (isPlayerDead(playerId)) return;
+
 				const playerConfig = state.players[playerId]!;
+				const playerBombCountOnMap = state.bombs.filter(
+					({ playerId: pId }) => pId === playerId
+				).length;
+				// ??!!: is >= possible? will > suffice?
+				// don't put more bombs than what you have
+				if (playerBombCountOnMap >= getBombCountForPlayer(playerId)) {
+					return;
+				}
 				const bomb = generateBomb(playerConfig);
 				draft.bombs.push(bomb);
+
 				// URGENT: This block will contain both the player and the bomb
 				// TODO: Figure out a proper way to handle this for NPC
 				setSquare(playerConfig.coordinates, Explosive.Bomb);
