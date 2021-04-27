@@ -243,7 +243,6 @@ const getExplosionScaleSize = (explosionSize: number) => {
 };
 
 type TilesToBreak = Array<SquareCoordinates>;
-type PlayersToKill = Set<PlayerId>;
 enum ExplosionDirection {
 	HORIZONTAL = 'horizontal',
 	VERTICAL = 'vertical',
@@ -264,25 +263,6 @@ const getTilesToBreak = (
 	}
 
 	return tilesToBreak;
-};
-
-const getPlayersToKill = (
-	players: Players,
-	ySquare: number,
-	xSquare: number
-) => {
-	const playersToKill: PlayersToKill = new Set();
-	Object.values<PlayerConfig>(players).forEach(({ id, coordinates }) => {
-		const {
-			xSquare: playerXSquare,
-			ySquare: playerYSquare,
-		} = topLeftCoordinatesToSquareCoordinates(coordinates);
-		if (playerXSquare === xSquare && playerYSquare === ySquare) {
-			playersToKill.add(id);
-		}
-	});
-
-	return playersToKill;
 };
 
 const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
@@ -462,7 +442,6 @@ const getExplosionResults = (
 	checkOnlyFire = false
 ) => {
 	const tilesToBreak: TilesToBreak = [];
-	const playersToKill: PlayersToKill = new Set();
 	const coordinatesToSetOnFire: CoordinatesToSetOnFire = {
 		[ExplosionDirection.HORIZONTAL]: [],
 		[ExplosionDirection.VERTICAL]: [],
@@ -486,15 +465,12 @@ const getExplosionResults = (
 					getTilesToBreak(gameMap, ySquare, xSquare).forEach(v => {
 						tilesToBreak.push(v);
 					});
-					getPlayersToKill(players, ySquare, xSquare).forEach(v => {
-						playersToKill.add(v);
-					});
 				}
 			);
 		}
 	);
 
-	return { coordinatesToSetOnFire, tilesToBreak, playersToKill };
+	return { coordinatesToSetOnFire, tilesToBreak };
 };
 
 const getPoweredUpValue = (playerState: PlayerState, powerUp: PowerUp) => {
