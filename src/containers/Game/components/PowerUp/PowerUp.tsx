@@ -1,4 +1,5 @@
 import { PowerUp as PowerUpEnum } from 'enums';
+import icons from './icons';
 
 interface Props {
 	variant: PowerUpEnum;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const PowerUp = ({ variant, top, left, size }: Props) => {
+	const { icon: Icon, color } = icons[variant];
 	return (
 		<div
 			style={{
@@ -18,7 +20,7 @@ const PowerUp = ({ variant, top, left, size }: Props) => {
 				height: size,
 			}}
 		>
-			{variant}
+			<Icon color={color} />
 		</div>
 	);
 };
