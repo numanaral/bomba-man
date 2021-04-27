@@ -49,7 +49,8 @@ const Map: React.FC<Props> = ({
 	// we only need to animate when new collision is set using the button
 	// need to prevent explosion diff from re-animating tiles
 	const previousAnimationCounter = usePrevious(animationCounter);
-	const shouldAnimate = animationCounter !== previousAnimationCounter;
+	const shouldAnimate =
+		animationCounter !== previousAnimationCounter || animationCounter === 0;
 
 	let collisionIndex = 1;
 	return (
