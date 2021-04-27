@@ -68,6 +68,8 @@ type PowerUps = Record<PowerUp, number>;
 
 type PlayerState = {
 	lives: number;
+	[PowerUp.Life]: number;
+	[PowerUp.BombCount]: number;
 	[PowerUp.BombSize]: number;
 	[PowerUp.MovementSpeed]: number;
 	/** How many power-ups have been collected */
