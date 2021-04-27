@@ -386,8 +386,20 @@ const gameReducer: Reducer<GameState, GameAction> = (
 					state.gameMap[newCoordinateYSquare][newCoordinateXSquare];
 
 				// if a player steps on explosion fire, subtract a life
+				// ??!!: This doesn't account for moving on the same bomb
+				// explosion. If the player continues to move under the
+				// same explosion fire, he will continuously lose a life
 				if (FIRE_VALUES.includes(newSquare as Explosive)) {
 					subtractLifeFromPlayerAndHandleDeath(playerId);
+
+					// if he is dead, stop here
+					if (isPlayerDead(playerId)) return;
+					// URGENT: Pick Bomb over Player on map, this will also be
+					// required by the NPC, but again, gotta handle multiple
+					// Square types in one square inside gameMap
+				} else {
+					// set new player square
+					setSquare(newCoordinates, playerId as Player);
 				}
 
 				const lastCoordinates = state.players[playerId]!.coordinates;
@@ -412,8 +424,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 						powerUpOrEmptyTile as PowerUp
 					]++;
 				}
-				// set new player square
-				setSquare(newCoordinates, playerId as Player);
+
 				// update player's topLeft coordinates
 				draft.players[playerId]!.coordinates = newCoordinates;
 				break;
