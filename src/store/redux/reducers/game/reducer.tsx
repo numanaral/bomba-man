@@ -1,6 +1,7 @@
 import {
 	Coordinates,
 	NonNullablePlayer,
+	PlayerConfig,
 	PlayerId,
 	Square,
 	SquareCoordinates,
@@ -119,10 +120,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			return state.players[playerId]!.state;
 		};
 
-		const getLivesForPlayer = (playerId: PlayerId) => {
-			return getPoweredUpValue(getPlayerState(playerId), PowerUp.Life);
-		};
-
 		const getBombCountForPlayer = (playerId: PlayerId) => {
 			return getPoweredUpValue(
 				getPlayerState(playerId),
@@ -152,12 +149,27 @@ const gameReducer: Reducer<GameState, GameAction> = (
 		};
 
 		const subtractLifeFromPlayerAndHandleDeath = (playerId: PlayerId) => {
-			const { deathCount } = getPlayerState(playerId);
-			// if next bomb is going to kill the player
-			if (deathCount >= getLivesForPlayer(playerId) - 1) {
-				setSquare(state.players[playerId]!.coordinates, Tile.Empty);
-			}
 			draft.players[playerId]!.state.deathCount++;
+		};
+
+		const handlePlayerExplosionHit = (
+			currentFireCoordinates: SquareCoordinates
+		) => {
+			const { xSquare, ySquare } = currentFireCoordinates;
+			Object.values<PlayerConfig>(state.players).forEach(
+				({ id, coordinates }) => {
+					const {
+						xSquare: playerXSquare,
+						ySquare: playerYSquare,
+					} = topLeftCoordinatesToSquareCoordinates(coordinates);
+					if (
+						playerXSquare === xSquare &&
+						playerYSquare === ySquare
+					) {
+						subtractLifeFromPlayerAndHandleDeath(id);
+					}
+				}
+			);
 		};
 
 		const getBombToTriggerFromExplosion = (
@@ -248,10 +260,7 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			const bombSize = getBombSizeForPlayer(currentBomb.playerId);
 
 			// find surrounding objects to modify
-			const {
-				coordinatesToSetOnFire,
-				playersToKill,
-			} = getExplosionResults(
+			const { coordinatesToSetOnFire } = getExplosionResults(
 				state.gameMap,
 				state.players,
 				bombCoordinates,
@@ -267,6 +276,9 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				// check if there is a tile and get a random power up or null
 				populatePowerUps(coordinates);
 				setSquare(coordinates, Explosive.FireHorizontal);
+
+				// subtract a life from the players if they are hit
+				handlePlayerExplosionHit(coordinates);
 
 				const currentBombId = currentBomb.id;
 				// if there are bombs caught in fire, explode them
@@ -290,6 +302,9 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				populatePowerUps(coordinates);
 				setSquare(coordinates, Explosive.FireVertical);
 
+				// subtract a life from the players if they are hit
+				handlePlayerExplosionHit(coordinates);
+
 				const currentBombId = currentBomb.id;
 				// if there are bombs caught in fire, explode them
 				const bombToTrigger = getBombToTriggerFromExplosion(
@@ -310,11 +325,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 
 			// Core will not have an explosion direction
 			setSquare(horizontal[0], Explosive.FireCore);
-
-			// subtract a life from the players
-			playersToKill.forEach(playerId => {
-				subtractLifeFromPlayerAndHandleDeath(playerId);
-			});
 
 			return explosionToComplete;
 		};
