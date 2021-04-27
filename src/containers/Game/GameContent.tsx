@@ -1,12 +1,4 @@
-import { useSelector } from 'react-redux';
 import config from 'config';
-import {
-	makeSelectGameBombs,
-	makeSelectGameIs3D,
-	makeSelectGameMap,
-	makeSelectGamePlayers,
-} from 'store/redux/reducers/game/selectors';
-import useGameProvider from 'store/redux/hooks/useGameProvider';
 import theme from 'theme';
 import { useCallback } from 'react';
 import usePrevious from 'hooks/usePrevious';
@@ -14,20 +6,18 @@ import { PowerUp } from 'enums';
 import { getPoweredUpValue, isPlayerSteppingOnFire } from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
-import { PlayerId, PlayerConfig } from './types';
+import { PlayerId, PlayerConfig, GameApi } from './types';
 import DeadCharacter from './components/DeadCharacter';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
-const GameContent = () => {
-	const { setPlayerRef } = useGameProvider();
-	const gameMap = useSelector(makeSelectGameMap());
-	const players = useSelector(makeSelectGamePlayers());
-	const bombs = useSelector(makeSelectGameBombs());
-	const is3D = useSelector(makeSelectGameIs3D());
-	const previousIs3D = usePrevious(is3D);
+interface Props extends GameApi {}
 
-	const { triggerExplosion, onExplosionComplete } = useGameProvider();
+const GameContent = ({ state, provider }: Props) => {
+	const { setPlayerRef, triggerExplosion, onExplosionComplete } = provider;
+
+	const { gameMap, players, bombs, is3D } = state;
+	const previousIs3D = usePrevious(is3D);
 
 	const refFunc = useCallback(
 		({ id: playerId, ref }: PlayerConfig) => (newRef: any) => {
@@ -49,12 +39,13 @@ const GameContent = () => {
 					const {
 						[playerId]: keyboardConfig,
 					} = config.keyboardConfig.player;
-					const { coordinates, state } = playerConfig;
+					const { coordinates, state: playerState } = playerConfig;
 
-					const { deathCount } = state;
+					const { deathCount } = playerState;
 
 					const isAlive =
-						deathCount < getPoweredUpValue(state, PowerUp.Life);
+						deathCount <
+						getPoweredUpValue(playerState, PowerUp.Life);
 
 					const isSteppingOnFire = isPlayerSteppingOnFire(
 						gameMap,
@@ -104,4 +95,5 @@ const GameContent = () => {
 	);
 };
 
+export type { Props as GameContentProps };
 export default GameContent;

@@ -129,6 +129,10 @@ type GameApi = {
 
 type GameApiHook = () => GameApi;
 
+type PickedGameState<K extends keyof GameState> = {
+	[P in K]: GameState[P];
+};
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -157,4 +161,5 @@ export type {
 	FontAwesomeIconProps,
 	GameApi,
 	GameApiHook,
+	PickedGameState,
 };
