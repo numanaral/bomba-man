@@ -20,7 +20,7 @@ import {
 	topLeftCoordinatesToSquareCoordinates,
 } from 'utils/game';
 import { updateImmerDraft } from 'utils/immer';
-import { Explosive, Player, PowerUp, Tile } from 'enums';
+import { Explosive, FIRE_VALUES, Player, PowerUp, Tile } from 'enums';
 import {
 	DEFAULT_VALUES,
 	SET_GAME_STATE,
@@ -39,7 +39,6 @@ import {
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
 	TRIGGER_EXPLOSION,
-	FIRE_VALUES,
 } from './constants';
 import {
 	AnimatableGameMap,

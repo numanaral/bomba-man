@@ -1,6 +1,5 @@
 // import { Immutable, castDraft } from 'immer';
 import config from 'config';
-import { Explosive } from 'enums';
 import { generateRandomGameMap, playerGenerator } from 'utils/game';
 import { GameState } from './types';
 
@@ -34,8 +33,6 @@ const PLAYERS = {
 	P4,
 };
 
-const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
-
 // Types
 const SET_GAME_STATE = `${KEY}/SET_GAME_STATE`;
 const START_GAME = `${KEY}/START_GAME`;
@@ -57,7 +54,6 @@ const TOGGLE_GAME_NPC = `${KEY}/TOGGLE_GAME_NPC`;
 
 export {
 	PLAYERS,
-	FIRE_VALUES,
 	KEY,
 	DEFAULT_VALUES,
 	SET_GAME_STATE,

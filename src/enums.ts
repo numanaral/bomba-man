@@ -46,4 +46,15 @@ enum Explosive {
 	FireVertical = 'FV',
 }
 
-export { Direction, Axis, ExplosionState, Player, Tile, PowerUp, Explosive };
+const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
+
+export {
+	Direction,
+	Axis,
+	ExplosionState,
+	Player,
+	Tile,
+	PowerUp,
+	Explosive,
+	FIRE_VALUES,
+};

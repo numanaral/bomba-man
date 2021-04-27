@@ -16,7 +16,7 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, PowerUp, Tile, Explosive } from 'enums';
+import { Axis, Direction, PowerUp, Tile, Explosive, FIRE_VALUES } from 'enums';
 import { OnMove, Bomb } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
@@ -566,6 +566,18 @@ const isPowerUp = (square: Square) => {
 	return Object.values(PowerUp).includes(square as PowerUp);
 };
 
+const isPlayerSteppingOnFire = (
+	gameMap: GameMap,
+	playerCoordinates: TopLeftCoordinates
+) => {
+	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates(
+		playerCoordinates
+	);
+	const currentSquare = gameMap[ySquare][xSquare];
+
+	return FIRE_VALUES.includes(currentSquare as Explosive);
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -588,4 +600,5 @@ export {
 	generatePowerUpOrNull,
 	isPowerUp,
 	getPoweredUpValue,
+	isPlayerSteppingOnFire,
 };

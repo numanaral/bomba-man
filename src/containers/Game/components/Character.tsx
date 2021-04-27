@@ -21,6 +21,7 @@ interface Props {
 	coordinates: TopLeftCoordinates;
 	keyboardConfig: PlayerKeyboardConfig;
 	is3D: boolean;
+	highlight?: boolean;
 }
 
 const Character = forwardRef<PlayerRef, Props>(
@@ -32,6 +33,7 @@ const Character = forwardRef<PlayerRef, Props>(
 			coordinates: { top, left },
 			keyboardConfig,
 			is3D,
+			highlight = false,
 			...rest
 		},
 		ref
@@ -51,6 +53,7 @@ const Character = forwardRef<PlayerRef, Props>(
 			},
 			keyboardConfig,
 			ref,
+			highlight,
 			...rest,
 		};
 
