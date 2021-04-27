@@ -1,6 +1,8 @@
 import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
 import { OnTriggerMove } from 'store/redux/reducers/game/types';
+import { FontAwesomeIconProps as FontAwesomeBaseIconProps } from '@fortawesome/react-fontawesome';
+
 // import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
@@ -117,6 +119,8 @@ type NPCActionProps = {
 
 type PowerUpOrNull = PowerUp | null;
 
+type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -142,4 +146,5 @@ export type {
 	NPCActionProps,
 	Fire,
 	PowerUpOrNull,
+	FontAwesomeIconProps,
 };
