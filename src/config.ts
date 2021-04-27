@@ -13,7 +13,7 @@ const config = {
 		powerUpChance: 5 as RangeOf<5, 1>,
 		// Player defaults
 		deathCount: 0, // number
-		[PowerUp.Life]: 2, // number
+		[PowerUp.Life]: 1, // number
 		[PowerUp.BombCount]: 1, // number
 		[PowerUp.BombSize]: 1, // number
 		[PowerUp.MovementSpeed]: 200, // ms

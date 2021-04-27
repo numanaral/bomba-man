@@ -15,6 +15,7 @@ import { getPoweredUpValue, isPlayerSteppingOnFire } from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig } from './types';
+import DeadCharacter from './components/DeadCharacter';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
@@ -61,7 +62,7 @@ const GameContent = () => {
 					);
 
 					return (
-						isAlive && (
+						(isAlive && (
 							<Character
 								id={playerId}
 								key={playerId}
@@ -72,7 +73,7 @@ const GameContent = () => {
 								highlight={isSteppingOnFire}
 								ref={refFunc(playerConfig)}
 							/>
-						)
+						)) || <DeadCharacter coordinates={coordinates!} />
 					);
 				}
 			)}
