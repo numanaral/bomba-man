@@ -272,55 +272,41 @@ const gameReducer: Reducer<GameState, GameAction> = (
 			// set fire on all the coordinates
 			// this automatically "breaks" the breakable tiles
 			// URGENT: This will also contain two entity if Tile, Tile & Fire
-			horizontal.forEach(coordinates => {
-				// check if there is a tile and get a random power up or null
-				populatePowerUps(coordinates);
-				setSquare(coordinates, Explosive.FireHorizontal);
+			[
+				{
+					fireCoordinates: horizontal,
+					direction: Explosive.FireHorizontal,
+				},
+				{
+					fireCoordinates: vertical,
+					direction: Explosive.FireVertical,
+				},
+			].forEach(({ fireCoordinates, direction }) => {
+				fireCoordinates.forEach(coordinates => {
+					// check if there is a tile and get a random power up or null
+					populatePowerUps(coordinates);
+					setSquare(coordinates, direction);
 
-				// subtract a life from the players if they are hit
-				handlePlayerExplosionHit(coordinates);
+					// subtract a life from the players if they are hit
+					handlePlayerExplosionHit(coordinates);
 
-				const currentBombId = currentBomb.id;
-				// if there are bombs caught in fire, explode them
-				const bombToTrigger = getBombToTriggerFromExplosion(
-					coordinates,
-					currentBombId
-				);
-				if (bombToTrigger) {
-					const _explosionToComplete = triggerExplosion(
-						bombToTrigger.id,
-						[...bombsToSkip, currentBombId]
+					const currentBombId = currentBomb.id;
+					// if there are bombs caught in fire, explode them
+					const bombToTrigger = getBombToTriggerFromExplosion(
+						coordinates,
+						currentBombId
 					);
-					_explosionToComplete.forEach(bId =>
-						explosionToComplete.add(bId)
-					);
-					explosionToComplete.add(bombToTrigger.id);
-				}
-			});
-			vertical.forEach(coordinates => {
-				// check if there is a tile and get a random power up or null
-				populatePowerUps(coordinates);
-				setSquare(coordinates, Explosive.FireVertical);
-
-				// subtract a life from the players if they are hit
-				handlePlayerExplosionHit(coordinates);
-
-				const currentBombId = currentBomb.id;
-				// if there are bombs caught in fire, explode them
-				const bombToTrigger = getBombToTriggerFromExplosion(
-					coordinates,
-					currentBombId
-				);
-				if (bombToTrigger) {
-					const _explosionToComplete = triggerExplosion(
-						bombToTrigger.id,
-						[...bombsToSkip, currentBombId]
-					);
-					_explosionToComplete.forEach(bId =>
-						explosionToComplete.add(bId)
-					);
-					explosionToComplete.add(bombToTrigger.id);
-				}
+					if (bombToTrigger) {
+						const _explosionToComplete = triggerExplosion(
+							bombToTrigger.id,
+							[...bombsToSkip, currentBombId]
+						);
+						_explosionToComplete.forEach(bId =>
+							explosionToComplete.add(bId)
+						);
+						explosionToComplete.add(bombToTrigger.id);
+					}
+				});
 			});
 
 			// Core will not have an explosion direction
