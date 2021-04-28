@@ -28,9 +28,11 @@ const sortByFirebaseDate = (sort: FirebaseSortType = 'desc') => (
  * @param props Properties to be passed into the firebase request.
  * @returns Firebase object with stringified props.
  */
-const toFirestore = (props: FirebaseGenericObject) => {
-	return Object.keys(props).reduce((acc: FirebaseGenericObject, key) => {
-		const value = props[key];
+const toFirestore = <T extends FirebaseGenericObject = FirebaseGenericObject>(
+	props: Partial<T>
+) => {
+	return Object.keys(props).reduce<Record<string, string>>((acc, key) => {
+		const value = props[key] as any;
 		// eslint-disable-next-line no-param-reassign
 		acc[key] =
 			(typeof value === 'object' &&
@@ -38,7 +40,7 @@ const toFirestore = (props: FirebaseGenericObject) => {
 				JSON.stringify(value)) ||
 			value;
 		return acc;
-	}, {});
+	}, {}) as T;
 };
 
 /**

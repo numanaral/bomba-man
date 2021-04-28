@@ -73,8 +73,8 @@ const useGameProvider = () => {
 	);
 
 	const onExplosionComplete = useCallback(
-		(props: BombId) => {
-			dispatch(onExplosionCompleteInGame(props));
+		(bombId: BombId) => {
+			dispatch(onExplosionCompleteInGame(bombId));
 		},
 		[dispatch]
 	);
