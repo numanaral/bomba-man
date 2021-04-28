@@ -522,14 +522,24 @@ const getMoveDirectionFromKeyboardCode = (
 
 const getMoveDirectionFromKeyMap = (
 	keyMap: React.MutableRefObject<KeyMap>,
-	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig,
+	multi = false
 ) => {
-	return [
-		keyMap.current[MoveUp] && Direction.UP,
-		keyMap.current[MoveRight] && Direction.RIGHT,
-		keyMap.current[MoveDown] && Direction.DOWN,
-		keyMap.current[MoveLeft] && Direction.LEFT,
-	].filter(Boolean) as Array<Direction>;
+	return (multi
+		? // record and play all keys that being held
+		  [
+				keyMap.current[MoveUp] && Direction.UP,
+				keyMap.current[MoveRight] && Direction.RIGHT,
+				keyMap.current[MoveDown] && Direction.DOWN,
+				keyMap.current[MoveLeft] && Direction.LEFT,
+		  ].filter(Boolean)
+		: // handle single key down
+		  [
+				(keyMap.current[MoveUp] && Direction.UP) ||
+					(keyMap.current[MoveRight] && Direction.RIGHT) ||
+					(keyMap.current[MoveDown] && Direction.DOWN) ||
+					(keyMap.current[MoveLeft] && Direction.LEFT),
+		  ]) as Array<Direction>;
 };
 
 const playerGenerator = (
