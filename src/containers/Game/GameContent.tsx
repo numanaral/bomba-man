@@ -1,19 +1,19 @@
-import { useSelector } from 'react-redux';
 import config from 'config';
+import { PowerUp } from 'enums';
+import usePrevious from 'hooks/usePrevious';
+import { useCallback } from 'react';
+import { useSelector } from 'react-redux';
+import useGameProvider from 'store/redux/hooks/useGameProvider';
 import {
 	makeSelectGameBombs,
 	makeSelectGameIs3D,
 	makeSelectGamePlayers,
 } from 'store/redux/reducers/game/selectors';
-import useGameProvider from 'store/redux/hooks/useGameProvider';
 import theme from 'theme';
-import { useCallback } from 'react';
-import usePrevious from 'hooks/usePrevious';
-import { PowerUp } from 'enums';
 import { getPoweredUpValue } from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
-import { PlayerId, PlayerConfig } from './types';
+import { PlayerConfig, PlayerId } from './types';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
@@ -60,6 +60,7 @@ const GameContent = () => {
 				}
 			)}
 			{bombs.map(({ id, playerId, ...bombProps }) => {
+				console.log(playerId);
 				const playerState = players[playerId]!.state;
 				const explosionSize = getPoweredUpValue(
 					playerState,

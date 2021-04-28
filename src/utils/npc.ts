@@ -1,17 +1,17 @@
 import config from 'config';
 import {
-	AddBomb,
 	GameMap,
 	NPCActionProps,
+	OnDropBomb,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Direction, Player, Tile } from 'enums';
+import { Direction, Player, PowerUp, Tile } from 'enums';
 import { MAX_GAME_SIZE, MIN_GAME_SIZE } from 'utils/game';
 import { getRandomInt } from './math';
 
 let id: number = 0;
 let parentNodes: MovementNode[] = [];
-let dropBombTest: AddBomb;
+let dropBombTest: OnDropBomb;
 
 let lastBombTime = 0;
 const BOMB_DURATION =
@@ -67,6 +67,11 @@ const generateScore = (
 		return undefined;
 	}
 	const square = gameMap[topCoordinate][leftCoordinate];
+
+	if (square === PowerUp.BombSize || square === PowerUp.MovementSpeed) {
+		return 10;
+	}
+
 	if (
 		topCoordinate === originalCoordinates.top &&
 		leftCoordinate === originalCoordinates.left
@@ -77,7 +82,6 @@ const generateScore = (
 		return 2;
 	}
 	if (square === Tile.Breaking) {
-		console.log('hereeee');
 		if (
 			isAdjacent(
 				{ top: topCoordinate, left: leftCoordinate },
@@ -86,31 +90,34 @@ const generateScore = (
 		) {
 			const currentTime = new Date().getTime();
 			if (lastBombTime <= currentTime - BOMB_DURATION * 1000) {
-				dropBombTest({
-					top: originalCoordinates.top * config.size.movement,
-					left: originalCoordinates.left * config.size.movement,
-				});
-				// immediateStop = false;
+				dropBombTest(Player.P4);
 				lastBombTime = currentTime;
 			}
-			// if (!immediateStop) {
-			// 	immediateStop = true;
-			// 	return -1000;
-			// }
-
-			console.log('Adjacent');
-			return 0;
+			return -10;
 		}
 		if (
 			topCoordinate !== originalCoordinates.top ||
 			leftCoordinate !== originalCoordinates.left
 		) {
-			console.log('here');
 			return 2;
 		}
 	}
 	if (square === Tile.NonBreaking) {
-		return undefined;
+		console.log(
+			isAdjacent(
+				{ top: topCoordinate, left: leftCoordinate },
+				originalCoordinates
+			)
+		);
+		if (
+			isAdjacent(
+				{ top: topCoordinate, left: leftCoordinate },
+				originalCoordinates
+			)
+		) {
+			return -10;
+		}
+		return -1;
 	}
 
 	return 0;
@@ -119,7 +126,7 @@ const generateScore = (
 const generateMovementTree = (
 	topLeftCoordinates: TopLeftCoordinates,
 	gameMap: GameMap,
-	level: number = 2,
+	level: number = 3,
 	originalCoordinates: TopLeftCoordinates,
 	parentId: number | null = null
 ) => {
@@ -196,7 +203,6 @@ const groupMovementNodesByParentId = (movementNodes: MovementNode[]) => {
 	});
 	return movementNodesGroupedById;
 };
-
 const getTotalScoreOfAllNodes = (
 	movementTree: MovementNodeWithKey,
 	parentId: number | undefined | null = undefined
@@ -256,8 +262,6 @@ const findBestMove = (
 		undefined,
 		{ top: topLeftCoordinates.top, left: topLeftCoordinates.left }
 	);
-
-	console.log(movementTree);
 
 	getTotalScoreOfAllNodes(movementTree);
 
