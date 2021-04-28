@@ -537,6 +537,9 @@ const playerGenerator = (
 	top: number,
 	left: number
 ): PlayerConfig => {
+	const {
+		player: { [playerId]: keyboardConfig },
+	} = config.keyboardConfig;
 	const { blockDensity, ...defaultState } = config.game;
 	return {
 		id: playerId,
@@ -548,6 +551,7 @@ const playerGenerator = (
 			...defaultState,
 			powerUps: { ...defaultState.powerUps },
 		},
+		keyboardConfig,
 	};
 };
 
