@@ -25,6 +25,7 @@ const DEFAULT_VALUES: GameState = {
 	animationCounter: 0,
 	powerUps: {},
 };
+
 const PLAYERS = {
 	P1,
 	P2,

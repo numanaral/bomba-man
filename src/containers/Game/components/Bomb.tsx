@@ -1,7 +1,11 @@
 import config from 'config';
 import { ExplosionState, Explosive } from 'enums';
 import { useEffect, useState } from 'react';
-import { Bomb as BombType, BombFn } from 'store/redux/reducers/game/types';
+import {
+	Bomb as BombType,
+	BombFn,
+	BombId,
+} from 'store/redux/reducers/game/types';
 import styled, { keyframes } from 'styled-components';
 import theme from 'theme';
 import { sleep } from 'utils';
@@ -75,12 +79,19 @@ const Bomb = ({
 	useEffect(() => {
 		const kaboom = async () => {
 			await sleep(firingDuration * 1000);
-			triggerExplosion(id);
-			setExplosionState(ExplosionState.Exploding);
-			await sleep((explodingDuration / 2) * 1000);
-			onExplosionComplete(id);
-			// await sleep((300 / 2) * 1000);
-			// setExplosionState(ExplosionState.Exploded);
+			triggerExplosion(id, async (bombIds: Set<BombId>) => {
+				// update animation
+				setExplosionState(ExplosionState.Exploding);
+				await sleep(explodingDuration * 1000);
+				// complete explosion for this bomb
+				onExplosionComplete(id);
+				// then complete the explosion for all the other bombs
+				// that got caught in the fire complete their explosion
+				// as the trigger was already handled in the reducer
+				bombIds.forEach(bId => {
+					onExplosionComplete(bId);
+				});
+			});
 		};
 		kaboom();
 	}, [

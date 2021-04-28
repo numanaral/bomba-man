@@ -16,7 +16,7 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, PowerUp, Tile, Explosive } from 'enums';
+import { Axis, Direction, PowerUp, Tile, Explosive, FIRE_VALUES } from 'enums';
 import { OnMove, Bomb } from 'store/redux/reducers/game/types';
 import { getRandomInt } from './math';
 
@@ -242,15 +242,17 @@ const getExplosionScaleSize = (explosionSize: number) => {
 	return ((explosionSize + 1) * 2 - 1) * 2;
 };
 
-type TilesToBreak = Array<SquareCoordinates>;
-type PlayersToKill = Array<PlayerId>;
+type SquareCoordinateArray = Array<SquareCoordinates>;
+type TilesToBreak = SquareCoordinateArray;
 enum ExplosionDirection {
 	HORIZONTAL = 'horizontal',
 	VERTICAL = 'vertical',
+	CORE = 'core',
 }
 type CoordinatesToSetOnFire = {
-	[ExplosionDirection.HORIZONTAL]: Array<SquareCoordinates>;
-	[ExplosionDirection.VERTICAL]: Array<SquareCoordinates>;
+	[ExplosionDirection.HORIZONTAL]: SquareCoordinateArray;
+	[ExplosionDirection.VERTICAL]: SquareCoordinateArray;
+	[ExplosionDirection.CORE]: SquareCoordinateArray;
 };
 
 const getTilesToBreak = (
@@ -264,25 +266,6 @@ const getTilesToBreak = (
 	}
 
 	return tilesToBreak;
-};
-
-const getPlayersToKill = (
-	players: Players,
-	ySquare: number,
-	xSquare: number
-) => {
-	const playersToKill: PlayersToKill = [];
-	Object.values<PlayerConfig>(players).forEach(({ id, coordinates }) => {
-		const {
-			xSquare: playerXSquare,
-			ySquare: playerYSquare,
-		} = topLeftCoordinatesToSquareCoordinates(coordinates);
-		if (playerXSquare === xSquare && playerYSquare === ySquare) {
-			playersToKill.push(id);
-		}
-	});
-
-	return playersToKill;
 };
 
 const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
@@ -350,8 +333,9 @@ const getExplosionSquareCoordinatesFromBomb = (
 	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
 	const bombSquareCoordinates = { xSquare: bombX, ySquare: bombY };
 	const explosionCoordinates: CoordinatesToSetOnFire = {
-		[ExplosionDirection.HORIZONTAL]: [bombSquareCoordinates],
-		[ExplosionDirection.VERTICAL]: [bombSquareCoordinates],
+		[ExplosionDirection.HORIZONTAL]: [],
+		[ExplosionDirection.VERTICAL]: [],
+		[ExplosionDirection.CORE]: [bombSquareCoordinates],
 	};
 
 	const pushCurrentCoordinates = (
@@ -461,11 +445,11 @@ const getExplosionResults = (
 	/** only returns fire locations */
 	checkOnlyFire = false
 ) => {
-	let tilesToBreak: TilesToBreak = [];
-	let playersToKill: PlayersToKill = [];
+	const tilesToBreak: TilesToBreak = [];
 	const coordinatesToSetOnFire: CoordinatesToSetOnFire = {
 		[ExplosionDirection.HORIZONTAL]: [],
 		[ExplosionDirection.VERTICAL]: [],
+		[ExplosionDirection.CORE]: [],
 	};
 
 	const explosionSquares = getExplosionSquareCoordinatesFromBomb(
@@ -483,20 +467,15 @@ const getExplosionResults = (
 						xSquare,
 						ySquare,
 					});
-					tilesToBreak = [
-						...tilesToBreak,
-						...getTilesToBreak(gameMap, ySquare, xSquare),
-					];
-					playersToKill = [
-						...playersToKill,
-						...getPlayersToKill(players, ySquare, xSquare),
-					];
+					getTilesToBreak(gameMap, ySquare, xSquare).forEach(v => {
+						tilesToBreak.push(v);
+					});
 				}
 			);
 		}
 	);
 
-	return { coordinatesToSetOnFire, tilesToBreak, playersToKill };
+	return { coordinatesToSetOnFire, tilesToBreak };
 };
 
 const getPoweredUpValue = (playerState: PlayerState, powerUp: PowerUp) => {
@@ -587,6 +566,18 @@ const isPowerUp = (square: Square) => {
 	return Object.values(PowerUp).includes(square as PowerUp);
 };
 
+const isPlayerSteppingOnFire = (
+	gameMap: GameMap,
+	playerCoordinates: TopLeftCoordinates
+) => {
+	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates(
+		playerCoordinates
+	);
+	const currentSquare = gameMap[ySquare][xSquare];
+
+	return FIRE_VALUES.includes(currentSquare as Explosive);
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -609,4 +600,5 @@ export {
 	generatePowerUpOrNull,
 	isPowerUp,
 	getPoweredUpValue,
+	isPlayerSteppingOnFire,
 };

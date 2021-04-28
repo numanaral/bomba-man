@@ -7,18 +7,21 @@ import useGameProvider from 'store/redux/hooks/useGameProvider';
 import {
 	makeSelectGameBombs,
 	makeSelectGameIs3D,
+	makeSelectGameMap,
 	makeSelectGamePlayers,
 } from 'store/redux/reducers/game/selectors';
 import theme from 'theme';
-import { getPoweredUpValue } from 'utils/game';
+import { getPoweredUpValue, isPlayerSteppingOnFire } from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
+import DeadCharacter from './components/DeadCharacter';
 import { PlayerConfig, PlayerId } from './types';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
 const GameContent = () => {
 	const { setPlayerRef } = useGameProvider();
+	const gameMap = useSelector(makeSelectGameMap());
 	const players = useSelector(makeSelectGamePlayers());
 	const bombs = useSelector(makeSelectGameBombs());
 	const is3D = useSelector(makeSelectGameIs3D());
@@ -46,16 +49,31 @@ const GameContent = () => {
 					const {
 						[playerId]: keyboardConfig,
 					} = config.keyboardConfig.player;
+					const { coordinates, state } = playerConfig;
+
+					const { deathCount } = state;
+
+					const isAlive =
+						deathCount < getPoweredUpValue(state, PowerUp.Life);
+
+					const isSteppingOnFire = isPlayerSteppingOnFire(
+						gameMap,
+						coordinates
+					);
+
 					return (
-						<Character
-							id={playerId}
-							key={playerId}
-							name="Bomber"
-							coordinates={playerConfig.coordinates!}
-							keyboardConfig={keyboardConfig}
-							is3D={is3D}
-							ref={refFunc(playerConfig)}
-						/>
+						(isAlive && (
+							<Character
+								id={playerId}
+								key={playerId}
+								name="Bomber"
+								coordinates={coordinates!}
+								keyboardConfig={keyboardConfig}
+								is3D={is3D}
+								highlight={isSteppingOnFire}
+								ref={refFunc(playerConfig)}
+							/>
+						)) || <DeadCharacter coordinates={coordinates!} />
 					);
 				}
 			)}

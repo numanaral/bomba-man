@@ -33,9 +33,10 @@ enum Tile {
 }
 
 enum PowerUp {
-	BombSize = 'PU1',
-	MovementSpeed = 'PU2',
-	// Invincibility = 'PU3',
+	Life = 'PU1',
+	BombCount = 'PU2',
+	BombSize = 'PU3',
+	MovementSpeed = 'PU4',
 }
 
 enum Explosive {
@@ -45,4 +46,15 @@ enum Explosive {
 	FireVertical = 'FV',
 }
 
-export { Direction, Axis, ExplosionState, Player, Tile, PowerUp, Explosive };
+const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
+
+export {
+	Direction,
+	Axis,
+	ExplosionState,
+	Player,
+	Tile,
+	PowerUp,
+	Explosive,
+	FIRE_VALUES,
+};
