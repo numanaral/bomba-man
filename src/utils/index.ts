@@ -20,4 +20,6 @@ const wrapPreventFocusLock = (
 	cb(e);
 };
 
-export { sleep, wrapPreventFocusLock };
+const doesNotExist = (value: any) => value === null || value === undefined;
+
+export { sleep, wrapPreventFocusLock, doesNotExist };
