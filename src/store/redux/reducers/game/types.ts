@@ -2,7 +2,6 @@
 import {
 	GameMap,
 	PlayerId,
-	PlayerRef,
 	Players,
 	SquareCoordinates,
 	TopLeftCoordinates,
@@ -55,7 +54,6 @@ type GamePayload =
 	| ValuesOf<GameState>
 	| BombId
 	| AnimatableGameMap
-	| PlayerWithNewRef
 	| OnMoveProps
 	| OnPrepareMoveProps;
 
@@ -88,11 +86,6 @@ type OnMoveProps = {
 
 type OnMove = (props: OnMoveProps) => void;
 
-type PlayerWithNewRef = {
-	playerId: PlayerId;
-	newRef: NonNullable<PlayerRef>;
-};
-
 export type {
 	Bomb,
 	BombFn,
@@ -108,5 +101,4 @@ export type {
 	BombId,
 	OnExplosionComplete,
 	AnimatableGameMap,
-	PlayerWithNewRef,
 };

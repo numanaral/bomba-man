@@ -9,7 +9,6 @@ import {
 	toggleGameNPC,
 	toggleGameTwoPlayer,
 	makeMoveInGame,
-	setPlayerRefInGame,
 	dropBombInGame,
 	onExplosionCompleteInGame,
 	triggerMoveInGame,
@@ -21,7 +20,6 @@ import {
 	GameState,
 	OnMoveProps,
 	OnTriggerMove,
-	PlayerWithNewRef,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
 import { makeSelectGameSize } from 'store/redux/reducers/game/selectors';
@@ -45,11 +43,6 @@ const useGameProvider = () => {
 	const generateNewCollisionCoordinates = useCallback(
 		() => updateGameMap(generateRandomGameMap(gameSize), true),
 		[gameSize, updateGameMap]
-	);
-
-	const setPlayerRef = useCallback(
-		(props: PlayerWithNewRef) => dispatch(setPlayerRefInGame(props)),
-		[dispatch]
 	);
 
 	// #region GAME ACTIONS
@@ -112,7 +105,6 @@ const useGameProvider = () => {
 	return {
 		updateGameSettings,
 		generateNewCollisionCoordinates,
-		setPlayerRef,
 		// GAME ACTIONS
 		makeMove,
 		triggerMove,

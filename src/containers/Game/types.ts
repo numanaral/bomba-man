@@ -82,8 +82,8 @@ type PlayerState = {
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
-	ref: PlayerRef;
 	state: PlayerState;
+	keyboardConfig: PlayerKeyboardConfig;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;

@@ -4,7 +4,6 @@ import {
 	ON_EXPLOSION_COMPLETE,
 	SET_GAME_MAP,
 	SET_GAME_STATE,
-	SET_PLAYER_REF,
 	TOGGLE_GAME_DIMENSION,
 	TOGGLE_GAME_NPC,
 	TOGGLE_GAME_PERSPECTIVE,
@@ -22,11 +21,6 @@ const setGameState: GameActionFn = payload => ({
 
 const setGameMap: GameActionFn = payload => ({
 	type: SET_GAME_MAP,
-	payload,
-});
-
-const setPlayerRefInGame: GameActionFn = payload => ({
-	type: SET_PLAYER_REF,
 	payload,
 });
 
@@ -83,7 +77,6 @@ const toggleGameNPC: GameActionFn = () => ({
 export {
 	setGameState,
 	setGameMap,
-	setPlayerRefInGame,
 	// GAME ACTIONS
 	makeMoveInGame,
 	triggerMoveInGame,

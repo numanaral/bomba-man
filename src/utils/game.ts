@@ -522,14 +522,24 @@ const getMoveDirectionFromKeyboardCode = (
 
 const getMoveDirectionFromKeyMap = (
 	keyMap: React.MutableRefObject<KeyMap>,
-	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig,
+	multi = false
 ) => {
-	return [
-		keyMap.current[MoveUp] && Direction.UP,
-		keyMap.current[MoveRight] && Direction.RIGHT,
-		keyMap.current[MoveDown] && Direction.DOWN,
-		keyMap.current[MoveLeft] && Direction.LEFT,
-	].filter(Boolean) as Array<Direction>;
+	return (multi
+		? // record and play all keys that being held
+		  [
+				keyMap.current[MoveUp] && Direction.UP,
+				keyMap.current[MoveRight] && Direction.RIGHT,
+				keyMap.current[MoveDown] && Direction.DOWN,
+				keyMap.current[MoveLeft] && Direction.LEFT,
+		  ].filter(Boolean)
+		: // handle single key down
+		  [
+				(keyMap.current[MoveUp] && Direction.UP) ||
+					(keyMap.current[MoveRight] && Direction.RIGHT) ||
+					(keyMap.current[MoveDown] && Direction.DOWN) ||
+					(keyMap.current[MoveLeft] && Direction.LEFT),
+		  ]) as Array<Direction>;
 };
 
 const playerGenerator = (
@@ -537,6 +547,9 @@ const playerGenerator = (
 	top: number,
 	left: number
 ): PlayerConfig => {
+	const {
+		player: { [playerId]: keyboardConfig },
+	} = config.keyboardConfig;
 	const { blockDensity, ...defaultState } = config.game;
 	return {
 		id: playerId,
@@ -544,11 +557,11 @@ const playerGenerator = (
 			top: top * 32,
 			left: left * 32,
 		},
-		ref: null,
 		state: {
 			...defaultState,
 			powerUps: { ...defaultState.powerUps },
 		},
+		keyboardConfig,
 	};
 };
 
@@ -578,6 +591,12 @@ const isPlayerSteppingOnFire = (
 	return FIRE_VALUES.includes(currentSquare as Explosive);
 };
 
+const isPlayerDead = (playerState: PlayerState) => {
+	return (
+		playerState.deathCount >= getPoweredUpValue(playerState, PowerUp.Life)
+	);
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -601,4 +620,5 @@ export {
 	isPowerUp,
 	getPoweredUpValue,
 	isPlayerSteppingOnFire,
+	isPlayerDead,
 };
