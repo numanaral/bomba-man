@@ -34,58 +34,6 @@ const useOnlineGameProvider = (id: string) => {
 	} = gameState;
 	const { P2, P4 } = players;
 
-	const updateGameSettings = async (newProps: Partial<GameState>) => {
-		update(newProps);
-	};
-
-	const updateGameMap = async (newGameMap: GameMap, animate = false) => {
-		// NOTE: Should we do a diff here and only update what's necessary?
-		// we aren't sending huge data but should check this out later
-		update({ gameMap: newGameMap });
-		if (!animate) {
-			update({
-				animationCounter: animationCounter + 1,
-			});
-		}
-	};
-
-	const generateNewCollisionCoordinates = async () => {
-		updateGameMap(generateRandomGameMap(gameSize), true);
-	};
-
-	// #region GAME ACTIONS
-	const makeMove = async (props: OnMoveProps) => {
-		// update({ newProps });
-		console.log('makeMoveInGame(props)', props);
-	};
-
-	const triggerMove: OnTriggerMove = async props => {
-		// update({ newProps });
-		console.log(
-			`triggerMoveInGame({
-					...props,
-					onComplete: makeMove,
-				})`,
-			props
-		);
-	};
-
-	const dropBomb: OnDropBomb = async props => {
-		// update({ newProps });
-		console.log('dropBombInGame(playerId)', props);
-	};
-
-	const triggerExplosion: BombFn = async (props, cb) => {
-		// update({ newProps });
-		console.log('triggerExplosionInGame(bombId, cb)', props, cb);
-	};
-
-	const onExplosionComplete = async (bombId: BombId) => {
-		// update({ newProps });
-		console.log('onExplosionCompleteInGame(bombId)', bombId);
-	};
-	// #endregion
-
 	// #region GAME SETTINGS
 	const triggerAnimation = async () => {
 		update({
@@ -135,6 +83,54 @@ const useOnlineGameProvider = (id: string) => {
 			},
 			playerRef
 		);
+	};
+
+	const updateGameSettings = async (newProps: Partial<GameState>) => {
+		update(newProps);
+	};
+
+	const updateGameMap = async (newGameMap: GameMap, animate = false) => {
+		// NOTE: Should we do a diff here and only update what's necessary?
+		// we aren't sending huge data but should check this out later
+		update({ gameMap: newGameMap });
+		if (!animate) triggerAnimation();
+	};
+
+	const generateNewCollisionCoordinates = async () => {
+		updateGameMap(generateRandomGameMap(gameSize), true);
+	};
+	// #endregion
+
+	// #region GAME ACTIONS
+	const makeMove = async (props: OnMoveProps) => {
+		// update({ newProps });
+		console.log('makeMoveInGame(props)', props);
+	};
+
+	const triggerMove: OnTriggerMove = async props => {
+		// update({ newProps });
+		console.log(
+			`triggerMoveInGame({
+					...props,
+					onComplete: makeMove,
+				})`,
+			props
+		);
+	};
+
+	const dropBomb: OnDropBomb = async props => {
+		// update({ newProps });
+		console.log('dropBombInGame(playerId)', props);
+	};
+
+	const triggerExplosion: BombFn = async (props, cb) => {
+		// update({ newProps });
+		console.log('triggerExplosionInGame(bombId, cb)', props, cb);
+	};
+
+	const onExplosionComplete = async (bombId: BombId) => {
+		// update({ newProps });
+		console.log('onExplosionCompleteInGame(bombId)', bombId);
 	};
 	// #endregion
 
