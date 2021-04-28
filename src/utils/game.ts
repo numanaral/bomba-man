@@ -577,6 +577,12 @@ const isPlayerSteppingOnFire = (
 	return FIRE_VALUES.includes(currentSquare as Explosive);
 };
 
+const isPlayerDead = (playerState: PlayerState) => {
+	return (
+		playerState.deathCount >= getPoweredUpValue(playerState, PowerUp.Life)
+	);
+};
+
 export {
 	generateRandomGameMap,
 	canMove,
@@ -600,4 +606,5 @@ export {
 	isPowerUp,
 	getPoweredUpValue,
 	isPlayerSteppingOnFire,
+	isPlayerDead,
 };

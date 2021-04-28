@@ -1,7 +1,11 @@
 import config from 'config';
 import theme from 'theme';
 import { PowerUp } from 'enums';
-import { getPoweredUpValue, isPlayerSteppingOnFire } from 'utils/game';
+import {
+	getPoweredUpValue,
+	isPlayerDead,
+	isPlayerSteppingOnFire,
+} from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
 import { PlayerId, PlayerConfig, GameApi } from './types';
@@ -25,12 +29,7 @@ const GameContent = ({ state, provider }: Props) => {
 					} = config.keyboardConfig.player;
 					const { coordinates, state: playerState } = playerConfig;
 
-					const { deathCount } = playerState;
-
-					const isAlive =
-						deathCount <
-						getPoweredUpValue(playerState, PowerUp.Life);
-
+					const isAlive = !isPlayerDead(playerState);
 					const isSteppingOnFire = isPlayerSteppingOnFire(
 						gameMap,
 						coordinates
