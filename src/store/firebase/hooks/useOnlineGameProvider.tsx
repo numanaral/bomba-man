@@ -1,6 +1,4 @@
-import { useFirebase, useFirebaseConnect } from 'react-redux-firebase';
 // import useAuth from 'store/firebase/hooks/useAuth';
-import { toFirestore } from 'store/firebase/utils';
 // TODO: react-router
 // import LoadingIndicator from 'components/LoadingIndicator';
 // import NoAccess from 'components/NoAccess';
@@ -14,16 +12,17 @@ import {
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
-import { GameMap, OnDropBomb } from 'containers/Game/types';
+import { GameMap, OnDropBomb, PlayerConfig } from 'containers/Game/types';
 import { PLAYERS } from 'store/redux/reducers/game/constants';
 import useOnlineGame from './useOnlineGame';
+import useFirebaseUtils from './useFirebaseUtils';
 
 const useOnlineGameProvider = (id: string) => {
+	const { create, remove, update } = useFirebaseUtils<GameState>(
+		`online/${id}`
+	);
 	// const { notifyError } = useNotificationProvider();
 	// const { userId } = useAuth();
-	const firebase = useFirebase();
-	useFirebaseConnect([`online/${id}`]);
-
 	const { gameState, pending: _, error: __ } = useOnlineGame(id);
 
 	const {
@@ -35,25 +34,18 @@ const useOnlineGameProvider = (id: string) => {
 	} = gameState;
 	const { P2, P4 } = players;
 
-	const updateGameSettings = async (props: Partial<GameState>) => {
-		try {
-			await firebase.update(`online/${id}`, toFirestore(props));
-		} catch (err) {
-			// notifyError(err);
-		}
+	const updateGameSettings = async (newProps: Partial<GameState>) => {
+		update(newProps);
 	};
 
-	const updateGameMap = async (newMap: GameMap, animate = false) => {
-		try {
-			await firebase.update(`online/${id}/gameMap`, newMap);
-			if (animate) {
-				await firebase.update(
-					`online/${id}/animationCounter`,
-					animationCounter + 1
-				);
-			}
-		} catch (err) {
-			// notifyError(err);
+	const updateGameMap = async (newGameMap: GameMap, animate = false) => {
+		// NOTE: Should we do a diff here and only update what's necessary?
+		// we aren't sending huge data but should check this out later
+		update({ gameMap: newGameMap });
+		if (!animate) {
+			update({
+				animationCounter: animationCounter + 1,
+			});
 		}
 	};
 
@@ -63,126 +55,86 @@ const useOnlineGameProvider = (id: string) => {
 
 	// #region GAME ACTIONS
 	const makeMove = async (props: OnMoveProps) => {
-		try {
-			console.log('makeMoveInGame(props)', props);
-			// await firebase.update(`online/${id}`, toFirestore(props));
-		} catch (err) {
-			// notifyError(err);
-		}
+		// update({ newProps });
+		console.log('makeMoveInGame(props)', props);
 	};
 
 	const triggerMove: OnTriggerMove = async props => {
-		try {
-			console.log(
-				`triggerMoveInGame({
+		// update({ newProps });
+		console.log(
+			`triggerMoveInGame({
 					...props,
 					onComplete: makeMove,
 				})`,
-				props
-			);
-			// await firebase.update(`online/${id}`, toFirestore(props));
-		} catch (err) {
-			// notifyError(err);
-		}
+			props
+		);
 	};
 
 	const dropBomb: OnDropBomb = async props => {
-		try {
-			console.log('dropBombInGame(playerId)', props);
-			// await firebase.update(`online/${id}`, toFirestore(props));
-		} catch (err) {
-			// notifyError(err);
-		}
+		// update({ newProps });
+		console.log('dropBombInGame(playerId)', props);
 	};
 
 	const triggerExplosion: BombFn = async (props, cb) => {
-		try {
-			console.log('triggerExplosionInGame(bombId, cb)', props, cb);
-			// await firebase.update(`online/${id}`, toFirestore(props));
-		} catch (err) {
-			// notifyError(err);
-		}
+		// update({ newProps });
+		console.log('triggerExplosionInGame(bombId, cb)', props, cb);
 	};
 
 	const onExplosionComplete = async (bombId: BombId) => {
-		try {
-			console.log('onExplosionCompleteInGame(bombId)', bombId);
-			// await firebase.update(`online/${id}`, toFirestore(props));
-		} catch (err) {
-			// notifyError(err);
-		}
+		// update({ newProps });
+		console.log('onExplosionCompleteInGame(bombId)', bombId);
 	};
 	// #endregion
 
 	// #region GAME SETTINGS
 	const triggerAnimation = async () => {
-		try {
-			await firebase.update(
-				`online/${id}/animationCounter`,
-				animationCounter + 1
-			);
-		} catch (err) {
-			// notifyError(err);
-		}
+		update({
+			animationCounter: animationCounter + 1,
+		});
 	};
 
 	const toggleDimension = async () => {
-		try {
-			await firebase.update(
-				`online/${id}`,
-				toFirestore<GameState>({
-					is3D: !is3D,
-				})
-			);
-		} catch (err) {
-			// notifyError(err);
-		}
+		update({
+			is3D: !is3D,
+		});
 	};
 
 	const togglePerspective = async () => {
-		try {
-			await firebase.update(
-				`online/${id}`,
-				toFirestore<GameState>({
-					isSideView: !isSideView,
-				})
-			);
-		} catch (err) {
-			// notifyError(err);
-		}
+		update({
+			isSideView: !isSideView,
+		});
 	};
 
 	const toggleTwoPlayer = async () => {
-		try {
-			if (P2) {
-				await firebase.remove(`online/${id}/players/P2`);
-				return;
-			}
+		const playerRef = '/players/P2';
+		if (P2) {
+			remove(playerRef);
+			return;
+		}
 
-			await firebase.set(`online/${id}/players/P2`, {
+		create<PlayerConfig>(
+			{
 				...PLAYERS.P2,
 				keyboardConfig: null,
-			});
-		} catch (err) {
-			// notifyError(err);
-		}
+			},
+			playerRef
+		);
 	};
 
 	const toggleNPC = async () => {
-		try {
-			if (P4) {
-				await firebase.remove(`online/${id}/players/P4`);
-				return;
-			}
+		const playerRef = '/players/P4';
+		if (P4) {
+			remove(playerRef);
+			return;
+		}
 
-			await firebase.set(`online/${id}/players/P4`, {
+		create<PlayerConfig>(
+			{
 				...PLAYERS.P4,
 				keyboardConfig: null,
-			});
-		} catch (err) {
-			console.log('err', err);
-			// notifyError(err);
-		}
+			},
+			playerRef
+		);
 	};
 	// #endregion
 
