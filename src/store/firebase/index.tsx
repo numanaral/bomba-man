@@ -5,7 +5,7 @@ import 'firebase/analytics';
 import { createFirestoreInstance } from 'redux-firestore';
 import { ReactReduxFirebaseProviderProps } from 'react-redux-firebase';
 import { Store } from 'redux';
-import { FirebaseGenericObject } from './types';
+import { FirebaseObjects } from './types';
 
 const firebaseConfig = {
 	apiKey: process.env.REACT_APP_API_KEY,
@@ -37,7 +37,7 @@ const reactReduxFirebaseConfig: ReactReduxFirebaseProviderProps['config'] = {
 			throw new Error('Error creating the user, the user was not found');
 		}
 		// const _user = user?.user || user;
-		const profile: FirebaseGenericObject = {
+		const profile: FirebaseObjects.Generic = {
 			email: user.email || user.providerData[0]?.email || null,
 			roles: ['User'],
 		};

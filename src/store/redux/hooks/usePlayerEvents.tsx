@@ -171,7 +171,7 @@ const handleBombForPlayers = (players: Players, dropBomb: OnDropBomb) => (
 ) => {
 	(Object.keys(players) as Array<PlayerId>).forEach(playerId => {
 		if (canPlayerTakeAction(players, playerId)) {
-			const { DropBomb } = players[playerId]!.keyboardConfig;
+			const { DropBomb } = players[playerId]!.keyboardConfig!;
 			if (keyEventCode === DropBomb) {
 				dropBomb(playerId);
 			}

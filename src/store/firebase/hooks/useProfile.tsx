@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useFirebase } from 'react-redux-firebase';
 import { makeSelectProfile } from 'store/redux/reducers/firebase/selectors';
-import { FirebaseProfile } from '../types';
+import { FirebaseSchema } from '../types';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 
@@ -10,7 +10,7 @@ const useProfile = () => {
 	// const { notifySuccess, notifyError } = useNotificationProvider();
 	const firebase = useFirebase();
 
-	const updateProfile = async (props: FirebaseProfile) => {
+	const updateProfile = async (props: FirebaseSchema.FirebaseProfile) => {
 		try {
 			await firebase.updateProfile({ ...props });
 			// notifySuccess('Profile has been updated successfully!');

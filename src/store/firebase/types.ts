@@ -10,6 +10,7 @@ namespace FirebaseObjects {
 		};
 		[key: string]: any;
 	};
+
 	export type Generic = Record<string, any>;
 }
 type FirebaseGenericObject = Record<string, any>;
@@ -21,9 +22,11 @@ namespace FirebaseSchema {
 	export type FirebaseProfile = {
 		roles: Array<string>;
 	};
+
 	export type FirebaseSchema = {
 		online: GameState;
 	};
+
 	// TODO: Once we have are collecting data, update this
 	export type FirestoreSchema = FirebaseObjects.Generic;
 }
