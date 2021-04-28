@@ -544,7 +544,6 @@ const playerGenerator = (
 			top: top * 32,
 			left: left * 32,
 		},
-		ref: null,
 		state: {
 			...defaultState,
 			powerUps: { ...defaultState.powerUps },

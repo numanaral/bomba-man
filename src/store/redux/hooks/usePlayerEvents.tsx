@@ -81,7 +81,7 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 				);
 
 				if (keys) {
-					const { ref } = players[id]!;
+					const ref = document.getElementById(id);
 
 					if (ref) {
 						const newTime = new Date().getTime();

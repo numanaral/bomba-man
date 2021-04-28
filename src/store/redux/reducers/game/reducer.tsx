@@ -34,7 +34,6 @@ import {
 	PLAYERS,
 	MAKE_MOVE,
 	DROP_BOMB,
-	SET_PLAYER_REF,
 	ON_EXPLOSION_COMPLETE,
 	TRIGGER_MOVE,
 	TRIGGER_EXPLOSION,
@@ -46,7 +45,6 @@ import {
 	GameState,
 	OnMoveProps,
 	OnPrepareMoveProps,
-	PlayerWithNewRef,
 } from './types';
 
 const gameReducer: Reducer<GameState, GameAction> = (
@@ -334,16 +332,6 @@ const gameReducer: Reducer<GameState, GameAction> = (
 				break;
 			}
 			// GAME ACTIONS
-			case SET_PLAYER_REF: {
-				const { playerId, newRef } = action.payload as PlayerWithNewRef;
-				if (!newRef) break;
-				draft.players[playerId]!.ref = castDraft(newRef);
-				setSquare(
-					state.players[playerId]!.coordinates,
-					playerId as Player
-				);
-				break;
-			}
 			case TRIGGER_MOVE: {
 				const {
 					playerId,

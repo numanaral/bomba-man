@@ -82,7 +82,6 @@ type PlayerState = {
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
-	ref: PlayerRef;
 	state: PlayerState;
 };
 

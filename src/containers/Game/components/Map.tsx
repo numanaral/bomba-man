@@ -6,7 +6,7 @@ import { Explosive, Tile as TileEnum } from 'enums';
 import { isPowerUp } from 'utils/game';
 import Cube from './Cube';
 import Tile from './Tile';
-import { GameMap, Square } from '../types';
+import { GameMap, Square, TileProps } from '../types';
 import PowerUp from './PowerUp';
 
 interface Props {
@@ -88,7 +88,8 @@ const Map: React.FC<Props> = ({
 						fireSquare = square;
 					}
 
-					const props: React.ComponentPropsWithRef<typeof Cube> = {
+					// TODO: Get this key properly
+					const props: TileProps & { key: string } = {
 						key,
 						size: squareSize,
 						top,
