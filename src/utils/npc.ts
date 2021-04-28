@@ -5,13 +5,15 @@ import {
 	OnDropBomb,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Direction, Player, PowerUp, Tile } from 'enums';
+import { Direction, Explosive, Player, PowerUp, Tile } from 'enums';
 import { MAX_GAME_SIZE, MIN_GAME_SIZE } from 'utils/game';
 import { getRandomInt } from './math';
 
 let id: number = 0;
 let parentNodes: MovementNode[] = [];
 let dropBombTest: OnDropBomb;
+
+let bombCoordinates: TopLeftCoordinates[] = [];
 
 let lastBombTime = 0;
 const BOMB_DURATION =
@@ -53,10 +55,41 @@ const isAdjacent = (
 	);
 };
 
+const canBombsReach = ({
+	top: newTopCoordinate,
+	left: newLeftCoordinate,
+}: TopLeftCoordinates): boolean => {
+	if (bombCoordinates.length === 0) {
+		return false;
+	}
+
+	console.log(bombCoordinates);
+	let canBombExplosionReach = false;
+	bombCoordinates.forEach(bombCoordinate => {
+		canBombExplosionReach =
+			canBombExplosionReach ||
+			(newLeftCoordinate === bombCoordinate.left &&
+				(newTopCoordinate <= bombCoordinate.top + 2 ||
+					newTopCoordinate >= bombCoordinate.top - 2)) ||
+			// directly left or right. Same idea as above but for +1 left coordinate
+			(newTopCoordinate === bombCoordinate.top &&
+				(newLeftCoordinate <= bombCoordinate.left + 2 ||
+					newLeftCoordinate >= bombCoordinate.left - 2));
+	});
+
+	console.log({
+		top: newTopCoordinate,
+		left: newLeftCoordinate,
+	});
+	console.log(canBombExplosionReach);
+	return canBombExplosionReach;
+};
+
 const generateScore = (
 	{ top: topCoordinate, left: leftCoordinate }: TopLeftCoordinates,
 	originalCoordinates: TopLeftCoordinates,
-	gameMap: GameMap
+	gameMap: GameMap,
+	level: number
 ): number | undefined => {
 	if (
 		topCoordinate > MAX_GAME_SIZE ||
@@ -68,8 +101,16 @@ const generateScore = (
 	}
 	const square = gameMap[topCoordinate][leftCoordinate];
 
-	if (square === PowerUp.BombSize || square === PowerUp.MovementSpeed) {
-		return 10;
+	if (square === Explosive.Bomb) {
+		bombCoordinates.push({ top: topCoordinate, left: leftCoordinate });
+	}
+
+	if (canBombsReach({ top: topCoordinate, left: leftCoordinate })) {
+		return -10000;
+	}
+
+	if (Object.values(PowerUp).includes(square as PowerUp)) {
+		return 1000 * level;
 	}
 
 	if (
@@ -78,6 +119,7 @@ const generateScore = (
 	) {
 		return 0;
 	}
+
 	if (square === Tile.Empty) {
 		return 2;
 	}
@@ -93,31 +135,25 @@ const generateScore = (
 				dropBombTest(Player.P4);
 				lastBombTime = currentTime;
 			}
-			return -10;
+			return -100;
 		}
 		if (
 			topCoordinate !== originalCoordinates.top ||
 			leftCoordinate !== originalCoordinates.left
 		) {
-			return 2;
+			return 3;
 		}
 	}
 	if (square === Tile.NonBreaking) {
-		console.log(
-			isAdjacent(
-				{ top: topCoordinate, left: leftCoordinate },
-				originalCoordinates
-			)
-		);
 		if (
 			isAdjacent(
 				{ top: topCoordinate, left: leftCoordinate },
 				originalCoordinates
 			)
 		) {
-			return -10;
+			return -100;
 		}
-		return -1;
+		return -5;
 	}
 
 	return 0;
@@ -126,7 +162,7 @@ const generateScore = (
 const generateMovementTree = (
 	topLeftCoordinates: TopLeftCoordinates,
 	gameMap: GameMap,
-	level: number = 3,
+	level: number = 2,
 	originalCoordinates: TopLeftCoordinates,
 	parentId: number | null = null
 ) => {
@@ -157,7 +193,8 @@ const generateMovementTree = (
 		const score = generateScore(
 			{ top: newTopCoordinate, left: newLeftCoordinate },
 			{ top: originalCoordinates.top, left: originalCoordinates.left },
-			gameMap
+			gameMap,
+			level
 		);
 
 		playerMovementTree[id] = {
@@ -186,7 +223,23 @@ const generateMovementTree = (
 
 const findNodeWithHighestScore = (movementNodes: MovementNode[]) => {
 	return movementNodes.reduce((acc, current) => {
-		return acc.score! > current.score! ? acc : current;
+		let retVal = current;
+		if (current.score === undefined) {
+			retVal = acc;
+		}
+
+		if (acc.score! > current.score!) {
+			retVal = acc;
+		}
+		if (acc.score! < current.score!) {
+			retVal = current;
+		}
+		if (acc.score === current.score) {
+			const randomInt = getRandomInt(2);
+			retVal = randomInt === 0 ? current : acc;
+		}
+
+		return retVal;
 	});
 };
 
@@ -208,46 +261,53 @@ const getTotalScoreOfAllNodes = (
 	parentId: number | undefined | null = undefined
 ) => {
 	let validMovementNodes: MovementNode[];
-	if (parentId === null) {
-		return;
-	}
-	if (parentId === undefined) {
-		validMovementNodes = Object.values(movementTree).filter(
-			movementNode =>
-				!movementNode.hasChildren && movementNode.score !== undefined
-		);
-	} else {
-		validMovementNodes = Object.values(movementTree).filter(
-			movementNode =>
-				movementNode.parentId === movementTree[parentId].parentId &&
-				movementNode.score !== undefined
-		);
-	}
 
-	const movementNodesGroupedByParentId = groupMovementNodesByParentId(
-		validMovementNodes
-	);
-
-	Object.entries(movementNodesGroupedByParentId).forEach(
-		([groupParentId, movementNodes]) => {
-			const _groupParentId =
-				groupParentId === 'null' ? null : Number(groupParentId);
-
-			const nodeWithHighestScore = findNodeWithHighestScore(
-				movementNodes!
+	if (parentId !== null) {
+		if (parentId === undefined) {
+			validMovementNodes = Object.values(movementTree).filter(
+				movementNode => !movementNode.hasChildren
 			);
-
-			if (!_groupParentId) {
-				parentNodes.push(nodeWithHighestScore);
-			} else {
-				// eslint-disable-next-line no-param-reassign
-				movementTree[_groupParentId].score =
-					movementTree[_groupParentId].score! +
-					nodeWithHighestScore.score!;
-				getTotalScoreOfAllNodes(movementTree, _groupParentId);
-			}
+		} else {
+			validMovementNodes = Object.values(movementTree).filter(
+				movementNode =>
+					movementNode.parentId === movementTree[parentId!].parentId
+			);
 		}
-	);
+
+		const movementNodesGroupedByParentId = groupMovementNodesByParentId(
+			validMovementNodes!
+		);
+
+		Object.entries(movementNodesGroupedByParentId).forEach(
+			([groupParentId, movementNodes]) => {
+				const _groupParentId =
+					groupParentId === 'null' ? null : Number(groupParentId);
+
+				const nodeWithHighestScore = findNodeWithHighestScore(
+					movementNodes!
+				);
+
+				if (!_groupParentId) {
+					if (
+						!parentNodes.some(
+							parentNode =>
+								parentNode.direction ===
+								nodeWithHighestScore.direction
+						)
+					)
+						parentNodes.push(nodeWithHighestScore);
+				} else {
+					// eslint-disable-next-line no-param-reassign
+					movementTree[_groupParentId].score =
+						movementTree[_groupParentId].score! +
+						(nodeWithHighestScore.score!
+							? nodeWithHighestScore.score
+							: 0);
+					getTotalScoreOfAllNodes(movementTree, _groupParentId);
+				}
+			}
+		);
+	}
 };
 
 const findBestMove = (
@@ -256,6 +316,7 @@ const findBestMove = (
 ): MovementNode | null => {
 	id = 0;
 	parentNodes = [];
+	bombCoordinates = [];
 	const movementTree = generateMovementTree(
 		topLeftCoordinates,
 		gameMap,
@@ -264,10 +325,10 @@ const findBestMove = (
 	);
 
 	getTotalScoreOfAllNodes(movementTree);
-
+	console.log(movementTree);
 	console.log(parentNodes);
 
-	return parentNodes[getRandomInt(parentNodes.length)];
+	return findNodeWithHighestScore(parentNodes);
 };
 
 type NPCAction = (props: NPCActionProps) => void;
@@ -298,6 +359,7 @@ const npcAction: NPCAction = ({ players, gameMap, triggerMove, dropBomb }) => {
 	) {
 		triggerMove({ playerId, direction: bestMovementNode.direction });
 	}
+	debugger;
 };
 
 export type { NPCAction };
