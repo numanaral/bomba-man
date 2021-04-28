@@ -1,6 +1,6 @@
 import { FirestoreReducer } from 'redux-firestore';
-import { FirestoreSchema } from 'store/firebase/types';
+import { FirebaseSchema } from 'store/firebase/types';
 
-type FirestoreState = FirestoreReducer.Reducer<FirestoreSchema>;
+type FirestoreState = FirestoreReducer.Reducer<FirebaseSchema.FirestoreSchema>;
 
 export type { FirestoreState };

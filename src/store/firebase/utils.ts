@@ -1,10 +1,5 @@
 import firebase from 'firebase/app';
-import {
-	FirebaseGenericObject,
-	FirebaseObjectKeys,
-	FirebaseSortableObject,
-	FirebaseSortType,
-} from './types';
+import { FirebaseObjects } from './types';
 
 /**
  * Sort firebase objects by their `second`s.
@@ -12,9 +7,9 @@ import {
  * @param sort Ascending/Descending
  * @returns Sorter result
  */
-const sortByFirebaseDate = (sort: FirebaseSortType = 'desc') => (
-	a: FirebaseSortableObject,
-	b: FirebaseSortableObject
+const sortByFirebaseDate = (sort: 'desc' | 'asc' = 'desc') => (
+	a: FirebaseObjects.Sortable,
+	b: FirebaseObjects.Sortable
 ) => {
 	return (
 		((sort === 'desc' && -1) || 1) *
@@ -28,7 +23,9 @@ const sortByFirebaseDate = (sort: FirebaseSortType = 'desc') => (
  * @param props Properties to be passed into the firebase request.
  * @returns Firebase object with stringified props.
  */
-const toFirestore = <T extends FirebaseGenericObject = FirebaseGenericObject>(
+const toFirestore = <
+	T extends FirebaseObjects.Generic = FirebaseObjects.Generic
+>(
 	props: Partial<T>
 ) => {
 	return Object.keys(props).reduce<Record<string, string>>((acc, key) => {
@@ -51,10 +48,10 @@ const toFirestore = <T extends FirebaseGenericObject = FirebaseGenericObject>(
  * @returns Firebase object with parsed props.
  */
 const fromFirestore = (
-	props: FirebaseGenericObject,
-	keys: FirebaseObjectKeys = []
+	props: FirebaseObjects.Generic,
+	keys: Array<string> = []
 ) => {
-	return Object.keys(props).reduce((acc: FirebaseGenericObject, key) => {
+	return Object.keys(props).reduce((acc: FirebaseObjects.Generic, key) => {
 		const value = props[key];
 		// eslint-disable-next-line no-param-reassign
 		acc[key] =
@@ -71,8 +68,8 @@ const fromFirestore = (
  * @param keys List of keys that need their value string parsed as JSON object.
  * @returns Mapped result
  */
-const mapFromFireStore = (keys: FirebaseObjectKeys = []) => (
-	props: FirebaseGenericObject
+const mapFromFireStore = (keys: Array<string> = []) => (
+	props: FirebaseObjects.Generic
 ) => fromFirestore(props, keys);
 
 export { sortByFirebaseDate, toFirestore, fromFirestore, mapFromFireStore };

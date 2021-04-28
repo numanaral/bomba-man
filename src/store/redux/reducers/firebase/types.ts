@@ -1,6 +1,9 @@
 import { FirebaseReducer } from 'react-redux-firebase';
-import { FirebaseProfile, FirebaseSchema } from 'store/firebase/types';
+import { FirebaseSchema } from 'store/firebase/types';
 
-type FirebaseState = FirebaseReducer.Reducer<FirebaseProfile, FirebaseSchema>;
+type FirebaseState = FirebaseReducer.Reducer<
+	FirebaseSchema.FirebaseProfile,
+	FirebaseSchema.FirebaseSchema
+>;
 
 export type { FirebaseState };
