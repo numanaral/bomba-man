@@ -1,6 +1,6 @@
 import {
-	// isEmpty,
-	// isLoaded,
+	isEmpty,
+	isLoaded,
 	useFirebase,
 	useFirebaseConnect,
 } from 'react-redux-firebase';
@@ -16,18 +16,19 @@ import { GameState } from 'store/redux/reducers/game/types';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 
+const LoadingIndicator = () => <>LoadingIndicator</>;
+const NoAccess = () => <>NoAccess</>;
+
 const useOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
 	const { userId } = useAuth();
 	const firebase = useFirebase();
-	useFirebaseConnect({
-		path: `online/${id}`,
-	});
+	useFirebaseConnect([`online/${id}`]);
 
 	const onlineGameFromFirebase = useSelector(makeSelectOnlineGame(id));
 
-	// const pending = !isLoaded(liveOptionsFromFirebase) && <LoadingIndicator />;
-	// const error = isEmpty(liveOptionsFromFirebase) && <NoAccess />;
+	const pending = !isLoaded(onlineGameFromFirebase) && <LoadingIndicator />;
+	const error = isEmpty(onlineGameFromFirebase) && <NoAccess />;
 
 	const onlineGame =
 		(onlineGameFromFirebase && fromFirestore(onlineGameFromFirebase)) || [];
@@ -63,13 +64,24 @@ const useOnlineGame = (id: string) => {
 		}
 	};
 
+	const gameState: GameState = {
+		animationCounter: onlineGame.animationCounter || 0,
+		bombs: onlineGame.bombs || [],
+		gameMap: onlineGame.gameMap || [[]],
+		is3D: onlineGame.is3D || false,
+		isSideView: onlineGame.isSideView || false,
+		players: onlineGame.players || [],
+		powerUps: onlineGame.powerUps || {},
+		size: onlineGame.size || 15,
+	};
+
 	return {
-		onlineGame,
+		gameState,
 		createOnlineGame,
 		updateOnlineGame,
 		deleteOnlineGame,
 		pending,
-		// error,
+		error,
 	};
 };
 
