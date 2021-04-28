@@ -15,7 +15,7 @@ type FirebaseProfile = {
 	roles: Array<string>;
 };
 type FirebaseSchema = {
-	games: GameState;
+	online: GameState;
 };
 // TODO: Once we have are collecting data, update this
 type FirestoreSchema = FirebaseGenericObject;

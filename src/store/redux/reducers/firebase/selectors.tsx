@@ -17,7 +17,10 @@ const makeSelectProfile = () => {
 };
 
 const makeSelectOnlineGame = (id: string) => {
-	return createSelector(selectFirebase, ({ data: { games } }) => games[id]);
+	return createSelector(
+		selectFirebase,
+		({ data: { online } }) => online?.[id]
+	);
 };
 
 // Default selector
