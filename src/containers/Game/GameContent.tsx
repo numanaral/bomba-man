@@ -47,7 +47,12 @@ const GameContent = ({ state, provider }: Props) => {
 								is3D={is3D}
 								highlight={isSteppingOnFire}
 							/>
-						)) || <DeadCharacter coordinates={coordinates!} />
+						)) || (
+							<DeadCharacter
+								key={playerId}
+								coordinates={coordinates!}
+							/>
+						)
 					);
 				}
 			)}
