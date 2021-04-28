@@ -49,8 +49,11 @@ const Map: React.FC<Props> = ({
 	// we only need to animate when new collision is set using the button
 	// need to prevent explosion diff from re-animating tiles
 	const previousAnimationCounter = usePrevious(animationCounter);
+	const previousIs3D = usePrevious(is3D);
 	const shouldAnimate =
-		animationCounter !== previousAnimationCounter || animationCounter === 0;
+		animationCounter !== previousAnimationCounter ||
+		// 3d toggle should not trigger reanimation
+		(animationCounter === 0 && is3D === previousIs3D);
 
 	let collisionIndex = 1;
 	return (
