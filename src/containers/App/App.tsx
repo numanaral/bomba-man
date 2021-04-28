@@ -5,6 +5,8 @@ import { Provider as StoreProvider } from 'react-redux';
 import configureStore from 'store/redux';
 import { __IS_DEV__ } from 'app';
 import useLocalGame from 'store/redux/hooks/useLocalGame';
+import { getReactReduxFirebaseProps } from 'store/firebase';
+import { ReactReduxFirebaseProvider } from 'react-redux-firebase';
 
 const initialState = {};
 const store = configureStore(initialState);
@@ -19,11 +21,13 @@ const LocalGame = () => {
 const App = () => {
 	return (
 		<StoreProvider store={store}>
-			<Container>
-				<LocalGame />
-			</Container>
-			<div id="created-by-numan" />
-			<GlobalStyles />
+			<ReactReduxFirebaseProvider {...getReactReduxFirebaseProps(store)}>
+				<Container>
+					<LocalGame />
+				</Container>
+				<div id="created-by-numan" />
+				<GlobalStyles />
+			</ReactReduxFirebaseProvider>
 		</StoreProvider>
 	);
 };
