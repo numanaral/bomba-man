@@ -10,7 +10,7 @@ import { PowerUp } from 'enums';
 import { useEffect, useMemo, useRef } from 'react';
 import { getMoveDirectionFromKeyMap, getPoweredUpValue } from 'utils/game';
 import { npcAction } from 'utils/npc';
-import useInterval from '../../../hooks/useInterval';
+import useInterval from 'hooks/useInterval';
 
 type KeyDownAction = (id: PlayerId, keys: PlayerKeyboardConfig) => void;
 
