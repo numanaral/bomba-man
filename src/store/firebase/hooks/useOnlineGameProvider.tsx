@@ -5,6 +5,7 @@
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 import {
+	AnimatableGameMap,
 	BombFn,
 	BombId,
 	GameState,
@@ -12,127 +13,87 @@ import {
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
-import { GameMap, OnDropBomb, PlayerConfig } from 'containers/Game/types';
-import { PLAYERS } from 'store/redux/reducers/game/constants';
-import useOnlineGame from './useOnlineGame';
+import { OnDropBomb } from 'containers/Game/types';
+import GameUtils from 'api/GameUtils';
+import OnlineGameUpdater from 'api/OnlineGameUpdater';
+import { useCallback, useEffect, useRef } from 'react';
 import useFirebaseUtils from './useFirebaseUtils';
 
-const useOnlineGameProvider = (id: string) => {
-	const { create, remove, update } = useFirebaseUtils<GameState>(
-		`online/${id}`
-	);
+const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
+	const updaters = useFirebaseUtils<GameState>(`online/${gameId}`);
 	// const { notifyError } = useNotificationProvider();
 	// const { userId } = useAuth();
-	const { gameState, pending: _, error: __ } = useOnlineGame(id);
 
-	const {
-		size: gameSize,
-		animationCounter,
-		is3D,
-		isSideView,
-		players,
-	} = gameState;
-	const { P2, P4 } = players;
+	const gameUpdater = useRef(new OnlineGameUpdater(gameState, updaters));
+	const gameUtils = useRef(new GameUtils(gameState, gameUpdater.current));
+	const state = useRef(gameState);
 
-	// #region GAME SETTINGS
-	const triggerAnimation = async () => {
-		update({
-			animationCounter: animationCounter + 1,
+	useEffect(() => {
+		gameUpdater.current = new OnlineGameUpdater(gameState, updaters);
+		gameUtils.current = new GameUtils(gameState, gameUpdater.current);
+	}, [gameState, updaters]);
+
+	const updateGameSettings = useCallback((props: GameState) => {
+		gameUpdater.current.updateGameState(props);
+	}, []);
+
+	const updateGameMap = useCallback((props: AnimatableGameMap) => {
+		gameUpdater.current.updateGameMap(props);
+	}, []);
+
+	const generateNewCollisionCoordinates = useCallback(() => {
+		updateGameMap({
+			gameMap: generateRandomGameMap(state.current.size),
+			animate: true,
 		});
-	};
+	}, [updateGameMap]);
 
-	const toggleDimension = async () => {
-		update({
-			is3D: !is3D,
-		});
-	};
+	const makeMove = useCallback((props: OnMoveProps) => {
+		gameUtils.current.makeMove(props);
+	}, []);
 
-	const togglePerspective = async () => {
-		update({
-			isSideView: !isSideView,
-		});
-	};
+	const triggerMove = useCallback<OnTriggerMove>(
+		props => {
+			gameUtils.current.triggerMove({
+				...props,
+				onComplete: makeMove,
+			});
+		},
+		[gameUtils, makeMove]
+	);
 
-	const toggleTwoPlayer = async () => {
-		const playerRef = '/players/P2';
-		if (P2) {
-			remove(playerRef);
-			return;
-		}
+	const dropBomb = useCallback<OnDropBomb>(props => {
+		gameUtils.current.dropBomb(props);
+	}, []);
 
-		create<PlayerConfig>(
-			{
-				...PLAYERS.P2,
-				keyboardConfig: null,
-			},
-			playerRef
-		);
-	};
+	const triggerExplosion = useCallback<BombFn>((props, cb) => {
+		console.log(state.current.players.P1?.coordinates);
+		gameUtils.current.triggerExplosion(props, cb);
+	}, []);
 
-	const toggleNPC = async () => {
-		const playerRef = '/players/P4';
-		if (P4) {
-			remove(playerRef);
-			return;
-		}
+	const onExplosionComplete = useCallback((props: BombId) => {
+		gameUtils.current.onExplosionComplete(props);
+	}, []);
 
-		create<PlayerConfig>(
-			{
-				...PLAYERS.P4,
-				keyboardConfig: null,
-			},
-			playerRef
-		);
-	};
+	const triggerAnimation = useCallback(() => {
+		gameUtils.current.triggerGameAnimation();
+	}, []);
 
-	const updateGameSettings = async (newProps: Partial<GameState>) => {
-		update(newProps);
-	};
+	const toggleDimension = useCallback(() => {
+		gameUtils.current.toggleGameDimension();
+	}, []);
 
-	const updateGameMap = async (newGameMap: GameMap, animate = false) => {
-		// NOTE: Should we do a diff here and only update what's necessary?
-		// we aren't sending huge data but should check this out later
-		update({ gameMap: newGameMap });
-		if (!animate) triggerAnimation();
-	};
+	const togglePerspective = useCallback(() => {
+		gameUtils.current.toggleGamePerspective();
+	}, []);
 
-	const generateNewCollisionCoordinates = async () => {
-		updateGameMap(generateRandomGameMap(gameSize), true);
-	};
-	// #endregion
+	const toggleTwoPlayer = useCallback(() => {
+		gameUtils.current.toggleGameTwoPlayer();
+	}, []);
 
-	// #region GAME ACTIONS
-	const makeMove = async (props: OnMoveProps) => {
-		// update({ newProps });
-		console.log('makeMoveInGame(props)', props);
-	};
-
-	const triggerMove: OnTriggerMove = async props => {
-		// update({ newProps });
-		console.log(
-			`triggerMoveInGame({
-					...props,
-					onComplete: makeMove,
-				})`,
-			props
-		);
-	};
-
-	const dropBomb: OnDropBomb = async props => {
-		// update({ newProps });
-		console.log('dropBombInGame(playerId)', props);
-	};
-
-	const triggerExplosion: BombFn = async (props, cb) => {
-		// update({ newProps });
-		console.log('triggerExplosionInGame(bombId, cb)', props, cb);
-	};
-
-	const onExplosionComplete = async (bombId: BombId) => {
-		// update({ newProps });
-		console.log('onExplosionCompleteInGame(bombId)', bombId);
-	};
-	// #endregion
+	const toggleNPC = useCallback(() => {
+		gameUtils.current.toggleGameNpc();
+	}, []);
 
 	return {
 		updateGameSettings,

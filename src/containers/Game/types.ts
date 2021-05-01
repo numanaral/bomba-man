@@ -122,9 +122,12 @@ type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
 type GameApi = {
 	provider: GameProvider;
 	state: GameState;
+} & {
+	pending?: false | JSX.Element;
+	error?: false | JSX.Element;
 };
 
-type GameApiHook = () => GameApi;
+type GameApiHook = (gameId?: string) => GameApi;
 
 type PickedGameState<K extends keyof GameState> = {
 	[P in K]: GameState[P];
