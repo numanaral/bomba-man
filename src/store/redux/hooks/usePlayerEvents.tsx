@@ -2,6 +2,7 @@ import {
 	GameApi,
 	KeyboardEventCode,
 	KeyMap,
+	NonNullablePlayerRef,
 	OnDropBomb,
 	PlayerId,
 	PlayerKeyboardConfig,
@@ -46,7 +47,7 @@ const useEvents = ({
 }) => {
 	const playerRefs = usePlayerRefs();
 
-	const move: KeyDownAction = (id, playerKeyboardConfig) => {
+	const move: KeyDownAction = (playerId, playerKeyboardConfig) => {
 		const directions = getMoveDirectionFromKeyMap(
 			keyMap,
 			playerKeyboardConfig
@@ -54,7 +55,11 @@ const useEvents = ({
 		if (!directions.length) return;
 
 		directions.forEach(direction => {
-			triggerMove({ playerId: id, direction });
+			triggerMove({
+				playerId,
+				direction,
+				ref: playerRefs.current[playerId] as NonNullablePlayerRef,
+			});
 		});
 	};
 
@@ -200,7 +205,13 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 	usePlayerInterval(players, 'P2', handleActions);
 	usePlayerInterval(players, 'P3', handleActions);
 	usePlayerInterval(players, 'P4', () => {
-		npcAction({ dropBomb, gameMap, players, triggerMove });
+		npcAction({
+			dropBomb,
+			gameMap,
+			players,
+			triggerMove,
+			ref: playerRefs.current.P4 as NonNullablePlayerRef,
+		});
 	});
 };
 

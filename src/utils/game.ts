@@ -183,14 +183,14 @@ const handleMove = (
 		playerConfig: {
 			id: playerId,
 			coordinates: { top, left },
-			ref,
 		},
 		direction,
 		is3D,
 		gameMap,
 	}: NextMoveProps,
 	movementSpeed: number,
-	onComplete: OnMove
+	onComplete: OnMove,
+	ref: NonNullablePlayerRef
 ) => {
 	if (!direction) return;
 

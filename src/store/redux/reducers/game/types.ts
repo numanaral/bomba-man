@@ -1,6 +1,7 @@
 // import { Immutable } from 'immer';
 import {
 	GameMap,
+	NonNullablePlayerRef,
 	PlayerId,
 	Players,
 	SquareCoordinates,
@@ -75,6 +76,8 @@ type OnPrepareMoveProps = {
 	playerId: PlayerId;
 	direction: Direction;
 	onComplete: OnMove;
+	// TODO: Eventually move into the store
+	ref: NonNullablePlayerRef;
 };
 
 type OnTriggerMove = (props: Omit<OnPrepareMoveProps, 'onComplete'>) => void;

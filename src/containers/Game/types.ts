@@ -88,12 +88,8 @@ type PlayerConfig = {
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
 
-type NonNullablePlayer = NonNullable<PlayerConfig> & {
-	ref: NonNullablePlayerRef;
-};
-
 type NextMoveProps = {
-	playerConfig: NonNullablePlayer;
+	playerConfig: PlayerConfig;
 	direction: Direction;
 	is3D: boolean;
 	gameMap: GameMap;
@@ -116,6 +112,7 @@ type NPCActionProps = {
 	gameMap: GameMap;
 	triggerMove: OnTriggerMove;
 	dropBomb: OnDropBomb;
+	ref: NonNullablePlayerRef;
 };
 
 type PowerUpOrNull = PowerUp | null;
@@ -151,7 +148,6 @@ export type {
 	PlayerConfig,
 	PowerUps,
 	NonNullablePlayerRef,
-	NonNullablePlayer,
 	NextMoveProps,
 	KeyMap,
 	CharacterProps,

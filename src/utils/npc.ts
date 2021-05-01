@@ -174,7 +174,7 @@ const findBestMove = (
 };
 
 type NPCAction = (props: NPCActionProps) => void;
-const npcAction: NPCAction = ({ players, gameMap, triggerMove }) => {
+const npcAction: NPCAction = ({ players, gameMap, triggerMove, ref }) => {
 	const playerId = Player.P4;
 	const currentPlayer = players[playerId];
 
@@ -194,7 +194,7 @@ const npcAction: NPCAction = ({ players, gameMap, triggerMove }) => {
 	);
 
 	if (bestMovementDirection) {
-		triggerMove({ playerId, direction: bestMovementDirection });
+		triggerMove({ playerId, direction: bestMovementDirection, ref });
 	}
 
 	// TODO: Move to another file later
