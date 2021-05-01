@@ -57,6 +57,11 @@ namespace FirebaseUtils {
 		OverrideSchema
 	>;
 
+	export type PushProps<RootSchema, OverrideSchema> = CreateOrUpdateProps<
+		RootSchema,
+		OverrideSchema
+	>;
+
 	export type RemoveProps = [subPath?: RefSubPath, cb?: PromiseCallback];
 }
 

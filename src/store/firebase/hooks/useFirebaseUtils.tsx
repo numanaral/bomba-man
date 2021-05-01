@@ -81,6 +81,28 @@ const useFirebaseUtils = <RootSchema extends FirebaseUtils.UpdateableValue>(
 		}
 	};
 
+	const push = async <
+		OverrideSchema extends FirebaseUtils.OverridableValue = void
+	>(
+		...[newProps, subPaths, cb]: FirebaseUtils.PushProps<
+			RootSchema,
+			OverrideSchema
+		>
+	): FirebaseUtils.DataSnapshotPromise => {
+		try {
+			const dataSnapshot = await firebase.push(
+				getPath(subPaths),
+				newProps
+			);
+			cb?.onSuccess?.(dataSnapshot);
+			return dataSnapshot;
+		} catch (err) {
+			if (cb?.onError) cb.onError(err);
+			// else notifyError(err);
+			return err;
+		}
+	};
+
 	const remove = async (
 		...[subPaths, cb]: FirebaseUtils.RemoveProps
 	): FirebaseUtils.DataSnapshotPromise => {
@@ -99,6 +121,7 @@ const useFirebaseUtils = <RootSchema extends FirebaseUtils.UpdateableValue>(
 		create,
 		read,
 		update,
+		push,
 		remove,
 	};
 };
