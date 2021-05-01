@@ -192,6 +192,8 @@ const handleMove = (
 	movementSpeed: number,
 	onComplete: OnMove
 ) => {
+	if (!direction) return;
+
 	let newTop = top;
 	let newLeft = left;
 	switch (direction) {
@@ -493,7 +495,7 @@ const generateBomb = ({
 }: PlayerConfig) => {
 	const explosionSize = getPoweredUpValue(state, PowerUp.BombSize);
 	const bomb: Bomb = {
-		id: new Date().toJSON(),
+		id: new Date().getTime().toString(),
 		explosionSize,
 		top,
 		left,
@@ -532,14 +534,15 @@ const getMoveDirectionFromKeyMap = (
 				keyMap.current[MoveRight] && Direction.RIGHT,
 				keyMap.current[MoveDown] && Direction.DOWN,
 				keyMap.current[MoveLeft] && Direction.LEFT,
-		  ].filter(Boolean)
+		  ]
 		: // handle single key down
 		  [
 				(keyMap.current[MoveUp] && Direction.UP) ||
 					(keyMap.current[MoveRight] && Direction.RIGHT) ||
 					(keyMap.current[MoveDown] && Direction.DOWN) ||
 					(keyMap.current[MoveLeft] && Direction.LEFT),
-		  ]) as Array<Direction>;
+		  ]
+	).filter(Boolean) as Array<Direction>;
 };
 
 const playerGenerator = (

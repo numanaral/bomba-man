@@ -10,7 +10,7 @@ import { GameMap, Square, TileProps } from '../types';
 import PowerUp from './PowerUp';
 
 interface Props {
-	size: RangeOf<15>;
+	size: RangeOf<15, 6>;
 	gameMap: GameMap;
 	is3D: boolean;
 	isTopView: boolean;

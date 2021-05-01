@@ -34,13 +34,14 @@ type BombExplosionSquareCoordinates = Array<SquareCoordinates>;
 type GameState = {
 	players: Players;
 	gameMap: GameMap;
-	is3D: boolean;
-	isSideView: boolean;
-	size: RangeOf<15>;
-	animationCounter: AnimationCounter;
-	bombs: Array<Bomb>;
+	bombs: Record<string, Bomb>;
 	// null for when it's picked up
 	powerUps: Record<number, Record<number, PowerUp | null>>;
+	is3D: boolean;
+	isSideView: boolean;
+	// TODO: rename to gameSize
+	size: RangeOf<15, 6>;
+	animationCounter: AnimationCounter;
 };
 // }>;
 

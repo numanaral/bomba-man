@@ -31,7 +31,7 @@ const config = {
 		} as PowerUps,
 	},
 	size: {
-		game: 15 as RangeOf<15>, // squares
+		game: 15 as RangeOf<15, 6>, // squares
 		character: 32, // px
 		// ??!!: Size<title | movement> ?== Size<character>
 		tile: 32, // px

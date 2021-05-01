@@ -62,7 +62,7 @@ const useFirebaseUtils = <RootSchema extends FirebaseUtils.UpdateableValue>(
 	const update = async <
 		OverrideSchema extends FirebaseUtils.OverridableValue = void
 	>(
-		...[newProps, subPaths, cb]: FirebaseUtils.CreateOrUpdateProps<
+		...[newProps, subPaths, cb]: FirebaseUtils.UpdateProps<
 			RootSchema,
 			OverrideSchema
 		>

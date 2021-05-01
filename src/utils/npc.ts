@@ -148,7 +148,6 @@ const findBestMove = (
 		leftCoordinate,
 		gameMap
 	);
-	console.log(movementTree);
 
 	let bestMovementNode: MovementNode | null = null;
 	let bestMovementDirection: Direction;
@@ -194,7 +193,6 @@ const npcAction: NPCAction = ({ players, gameMap, triggerMove }) => {
 		gameMap
 	);
 
-	console.log(bestMovementDirection);
 	if (bestMovementDirection) {
 		triggerMove({ playerId, direction: bestMovementDirection });
 	}
