@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import theme from 'theme';
 import { Explosive, Tile as TileEnum } from 'enums';
 import { isPowerUp } from 'utils/game';
+import { useEffect } from 'react';
 import Cube from './Cube';
 import Tile from './Tile';
 import { GameMap, Square, TileProps } from '../types';
@@ -49,11 +50,12 @@ const Map: React.FC<Props> = ({
 	// we only need to animate when new collision is set using the button
 	// need to prevent explosion diff from re-animating tiles
 	const previousAnimationCounter = usePrevious(animationCounter);
-	const previousIs3D = usePrevious(is3D);
-	const shouldAnimate =
-		animationCounter !== previousAnimationCounter ||
-		// 3d toggle should not trigger reanimation
-		(animationCounter === 0 && is3D === previousIs3D);
+	let shouldAnimate = animationCounter !== previousAnimationCounter;
+
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		shouldAnimate = true;
+	}, []);
 
 	let collisionIndex = 1;
 	return (
