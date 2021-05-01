@@ -23,7 +23,10 @@ namespace FirebaseUtils {
 	export type UpdateableValue = string | number | boolean | object;
 	export type OverridableValue = UpdateableValue | void;
 
-	export type RefSubPath = `/${string}`;
+	// | string is required to make it work with Template Strings
+	// this is better than just casting every time, this will only
+	// be here as a reference
+	export type RefSubPath = `/${string}` | string;
 
 	export type PromiseCallback = {
 		onSuccess?: (data: DataSnapshot) => void;
