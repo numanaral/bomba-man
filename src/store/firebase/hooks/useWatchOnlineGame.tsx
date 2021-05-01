@@ -10,6 +10,8 @@ import useAuth from 'store/firebase/hooks/useAuth';
 import { fromFirestore, toFirestore } from 'store/firebase/utils';
 import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
 import { GameState } from 'store/redux/reducers/game/types';
+// import { generateRandomGameMap } from 'utils/game';
+// import config from 'config';
 // TODO: react-router
 // import LoadingIndicator from 'components/LoadingIndicator';
 // import NoAccess from 'components/NoAccess';
@@ -19,11 +21,11 @@ import { GameState } from 'store/redux/reducers/game/types';
 const LoadingIndicator = () => <>LoadingIndicator</>;
 const NoAccess = () => <>NoAccess</>;
 
-const useOnlineGame = (id: string) => {
+const useWatchOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
 	const { userId } = useAuth();
 	const firebase = useFirebase();
-	useFirebaseConnect([`online/${id}`]);
+	useFirebaseConnect(`online/${id}`);
 
 	const onlineGameFromFirebase = useSelector(makeSelectOnlineGame(id));
 
@@ -65,14 +67,15 @@ const useOnlineGame = (id: string) => {
 	};
 
 	const gameState: GameState = {
-		animationCounter: onlineGame.animationCounter || 0,
-		bombs: onlineGame.bombs || [],
-		gameMap: onlineGame.gameMap || [[]],
+		players: onlineGame.players || {},
+		// gameMap: onlineGame.gameMap || generateRandomGameMap(config.size.game),
+		gameMap: onlineGame.gameMap || {},
+		bombs: onlineGame.bombs || {},
+		powerUps: onlineGame.powerUps || {},
 		is3D: onlineGame.is3D || false,
 		isSideView: onlineGame.isSideView || false,
-		players: onlineGame.players || [],
-		powerUps: onlineGame.powerUps || {},
 		size: onlineGame.size || 15,
+		animationCounter: onlineGame.animationCounter || 0,
 	};
 
 	return {
@@ -85,4 +88,4 @@ const useOnlineGame = (id: string) => {
 	};
 };
 
-export default useOnlineGame;
+export default useWatchOnlineGame;
