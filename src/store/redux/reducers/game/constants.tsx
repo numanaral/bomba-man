@@ -17,7 +17,7 @@ const DEFAULT_VALUES: GameState = {
 	players: {
 		P1,
 	},
-	bombs: [],
+	bombs: {},
 	gameMap: generateRandomGameMap(config.size.game),
 	is3D: false,
 	isSideView: false,

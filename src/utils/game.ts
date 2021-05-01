@@ -51,13 +51,15 @@ const generateRandomGameMap = (
 		// reverse block density, we want that many Emptys
 		...Array(11 - config.game.blockDensity).fill('Empty'),
 	];
-	const randomMap = Array(size)
-		.fill(0)
-		.map(() =>
-			Array(size)
-				.fill(0)
-				.map(() => Tile[tiles[getRandomInt(tiles.length)]])
-		);
+	const sizedArray = Array(size).fill(0);
+
+	const randomMap = sizedArray.reduce((accOuter, _, indOuter) => {
+		accOuter[indOuter] = sizedArray.reduce((accInner, __, indInner) => {
+			accInner[indInner] = Tile[tiles[getRandomInt(tiles.length)]];
+			return accInner;
+		}, {});
+		return accOuter;
+	}, {});
 	// ensure we don't fill the char beginning squares with blocks
 	forbiddenCoordinates.forEach(([y, x]) => {
 		if (randomMap[y][x] !== Tile.Empty) {

@@ -43,7 +43,7 @@ type OnDropBomb = (playerId: PlayerId) => void;
 type Square = Player | Tile | PowerUp | Explosive;
 
 // type GameMap = Immutable<Array<Array<Square>>>;
-type GameMap = Array<Array<Square>>;
+type GameMap = Record<string, Record<string, Square>>;
 
 type KeyboardEventCode = ValuesOf<typeof KeyCode>;
 
