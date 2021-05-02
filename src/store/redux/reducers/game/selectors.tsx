@@ -20,6 +20,10 @@ const makeSelectGameBombs = () => {
 // //#endregion
 
 // #region GAME SETTINGS
+const makeSelectGameConfig = () => {
+	return createSelector(selectGameProps, ({ config }) => config);
+};
+
 const makeSelectGameIs3D = () => {
 	return createSelector(selectGameProps, ({ is3D }) => is3D);
 };
@@ -55,6 +59,7 @@ export {
 	makeSelectGamePlayers,
 	makeSelectGameBombs,
 	// GAME SETTINGS
+	makeSelectGameConfig,
 	makeSelectGameIs3D,
 	makeSelectGameIsSideView,
 	makeSelectGameMap,
