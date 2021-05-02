@@ -16,8 +16,22 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, PowerUp, Tile, Explosive, FIRE_VALUES } from 'enums';
-import { OnMove, Bomb } from 'store/redux/reducers/game/types';
+import {
+	Axis,
+	Direction,
+	PowerUp,
+	Tile,
+	Explosive,
+	FIRE_VALUES,
+	Player,
+} from 'enums';
+import {
+	OnMove,
+	Bomb,
+	GameConfigRanges,
+	GameState,
+} from 'store/redux/reducers/game/types';
+import * as KeyCode from 'keycode-js';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -68,6 +82,115 @@ const generateRandomGameMap = (
 	});
 
 	return randomMap;
+};
+
+const generatePlayer = (
+	playerId: PlayerId,
+	top: number,
+	left: number
+): PlayerConfig => {
+	const {
+		player: { [playerId]: keyboardConfig },
+	} = config.keyboardConfig;
+	const { blockDensity, ...defaultState } = config.game;
+	return {
+		id: playerId,
+		coordinates: {
+			top: top * 32,
+			left: left * 32,
+		},
+		state: {
+			...defaultState,
+			powerUps: { ...defaultState.powerUps },
+		},
+		keyboardConfig,
+	};
+};
+
+const generatePlayers = (
+	mapSize: GameConfigRanges.MapSize
+): Record<PlayerId, PlayerConfig> => {
+	const BOUNDARY_MIN = 0;
+	const BOUNDARY_MAX = mapSize - 1;
+
+	return {
+		P1: generatePlayer(Player.P1, BOUNDARY_MIN, BOUNDARY_MIN),
+		P2: generatePlayer(Player.P2, BOUNDARY_MIN, BOUNDARY_MAX),
+		P3: generatePlayer(Player.P3, BOUNDARY_MAX, BOUNDARY_MAX),
+		P4: generatePlayer(Player.P4, BOUNDARY_MAX, BOUNDARY_MIN),
+	};
+};
+
+const generateDefaultGameState = (): GameState => {
+	return {
+		players: {
+			P1: generatePlayer(Player.P1, 0, 0),
+		},
+		gameMap: generateRandomGameMap(config.size.game),
+		bombs: {},
+		powerUps: {},
+		config: {
+			game: {
+				powerUps: {
+					chance: 5,
+					defaults: {
+						[PowerUp.Life]: 1,
+						[PowerUp.BombCount]: 1,
+						[PowerUp.BombSize]: 1,
+						[PowerUp.MovementSpeed]: 150,
+					},
+					increaseValues: {
+						[PowerUp.Life]: 1,
+						[PowerUp.BombCount]: 1,
+						[PowerUp.BombSize]: 1,
+						[PowerUp.MovementSpeed]: -15,
+					},
+					maxDropCount: {
+						[PowerUp.Life]: 4,
+						[PowerUp.BombCount]: 6,
+						[PowerUp.BombSize]: 6,
+						[PowerUp.MovementSpeed]: 5,
+					},
+				},
+				mapSize: 15,
+			},
+			random: {
+				blockDensity: 8,
+			},
+			size: {
+				character: 32,
+				tile: 32,
+				movement: 32,
+				bomb: 16,
+			},
+			duration: {
+				bomb: {
+					firing: 2,
+					exploding: 1,
+				},
+			},
+			keyboardConfig: {
+				P1: {
+					MoveUp: KeyCode.CODE_W,
+					MoveRight: KeyCode.CODE_D,
+					MoveDown: KeyCode.CODE_S,
+					MoveLeft: KeyCode.CODE_A,
+					DropBomb: KeyCode.CODE_SPACE,
+				},
+				P2: {
+					MoveUp: KeyCode.CODE_UP,
+					MoveRight: KeyCode.CODE_RIGHT,
+					MoveDown: KeyCode.CODE_DOWN,
+					MoveLeft: KeyCode.CODE_LEFT,
+					DropBomb: KeyCode.CODE_SEMICOLON,
+				},
+			},
+		},
+		is3D: false,
+		isSideView: false,
+		size: config.size.game,
+		animationCounter: 0,
+	};
 };
 
 /**
@@ -547,29 +670,6 @@ const getMoveDirectionFromKeyMap = (
 	).filter(Boolean) as Array<Direction>;
 };
 
-const playerGenerator = (
-	playerId: PlayerId,
-	top: number,
-	left: number
-): PlayerConfig => {
-	const {
-		player: { [playerId]: keyboardConfig },
-	} = config.keyboardConfig;
-	const { blockDensity, ...defaultState } = config.game;
-	return {
-		id: playerId,
-		coordinates: {
-			top: top * 32,
-			left: left * 32,
-		},
-		state: {
-			...defaultState,
-			powerUps: { ...defaultState.powerUps },
-		},
-		keyboardConfig,
-	};
-};
-
 const generatePowerUpOrNull = () => {
 	const possiblePowerUpOrNulls: Array<KeysOf<KeysOf<PowerUpOrNull>>> = [
 		...Object.values(PowerUp),
@@ -604,6 +704,9 @@ const isPlayerDead = (playerState: PlayerState) => {
 
 export {
 	generateRandomGameMap,
+	generatePlayer,
+	generatePlayers,
+	generateDefaultGameState,
 	canMove,
 	rotateMove,
 	handleRotateMove,
@@ -613,7 +716,6 @@ export {
 	getExplosionScaleSize,
 	getExplosionResults,
 	generateBomb,
-	playerGenerator,
 	getMoveDirectionFromKeyboardCode,
 	getMoveDirectionFromKeyMap,
 	MAX_GAME_SIZE,

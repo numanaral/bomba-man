@@ -16,7 +16,7 @@ const config = {
 		[PowerUp.Life]: 1, // number
 		[PowerUp.BombCount]: 1, // number
 		[PowerUp.BombSize]: 1, // number
-		[PowerUp.MovementSpeed]: 200, // ms
+		[PowerUp.MovementSpeed]: 150, // ms
 		powerUps: {
 			[PowerUp.Life]: 0, // number
 			[PowerUp.BombCount]: 0, // number
@@ -27,7 +27,7 @@ const config = {
 			[PowerUp.Life]: 1, // number
 			[PowerUp.BombCount]: 1, // number
 			[PowerUp.BombSize]: 1, // number
-			[PowerUp.MovementSpeed]: -50, // ms
+			[PowerUp.MovementSpeed]: -15, // ms
 		} as PowerUps,
 	},
 	size: {
@@ -43,7 +43,7 @@ const config = {
 	},
 	duration: {
 		// TODO: This and the one under "game" should be controlled
-		movement: 200, // ms
+		movement: 150, // ms
 		bomb: {
 			firing: 2, // second
 			exploding: 1, // second

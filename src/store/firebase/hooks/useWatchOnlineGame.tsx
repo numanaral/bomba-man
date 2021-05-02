@@ -10,6 +10,7 @@ import useAuth from 'store/firebase/hooks/useAuth';
 import { fromFirestore, toFirestore } from 'store/firebase/utils';
 import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
 import { GameState } from 'store/redux/reducers/game/types';
+import { generateDefaultGameState } from 'utils/game';
 // import { generateRandomGameMap } from 'utils/game';
 // import config from 'config';
 // TODO: react-router
@@ -20,6 +21,8 @@ import { GameState } from 'store/redux/reducers/game/types';
 
 const LoadingIndicator = () => <>LoadingIndicator</>;
 const NoAccess = () => <>NoAccess</>;
+
+const defaultGameState = generateDefaultGameState();
 
 const useWatchOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
@@ -76,6 +79,7 @@ const useWatchOnlineGame = (id: string) => {
 		isSideView: onlineGame.isSideView || false,
 		size: onlineGame.size || 15,
 		animationCounter: onlineGame.animationCounter || 0,
+		config: defaultGameState.config,
 	};
 
 	return {

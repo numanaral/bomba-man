@@ -4,9 +4,9 @@ import {
 	PlayerId,
 	SquareCoordinates,
 	PlayerConfig,
+	Players,
 } from 'containers/Game/types';
 import { Tile, PowerUp, Explosive, FIRE_VALUES, Player } from 'enums';
-import { PLAYERS } from 'store/redux/reducers/game/constants';
 import {
 	AnimatableGameMap,
 	BombId,
@@ -24,15 +24,20 @@ import {
 	handleMove,
 	isPowerUp,
 	generateBomb,
+	generatePlayers,
 } from 'utils/game';
 import LocalGameUpdater from './LocalGameUpdater';
 import OnlineGameUpdater from './OnlineGameUpdater';
 
 class GameUtils {
+	defaultPlayers: Players;
+
 	constructor(
 		public state: GameState,
 		public updaters: OnlineGameUpdater | LocalGameUpdater
-	) {}
+	) {
+		this.defaultPlayers = generatePlayers(state.config.game.mapSize);
+	}
 
 	// #region STATE UTILITIES
 	getPlayerState = (playerId: PlayerId) => {
@@ -452,7 +457,10 @@ class GameUtils {
 			return;
 		}
 
-		this.updaters.addPlayer(PLAYERS.P2, Player.P2);
+		this.updaters.addPlayer(
+			this.defaultPlayers.P2 as PlayerConfig,
+			Player.P2
+		);
 	};
 
 	toggleGameNpc = () => {
@@ -461,7 +469,10 @@ class GameUtils {
 			return;
 		}
 
-		this.updaters.addPlayer(PLAYERS.P4, Player.P4);
+		this.updaters.addPlayer(
+			this.defaultPlayers.P4 as PlayerConfig,
+			Player.P4
+		);
 	};
 	// #endregion
 }
