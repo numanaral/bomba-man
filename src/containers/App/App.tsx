@@ -8,6 +8,7 @@ import { getReactReduxFirebaseProps } from 'store/firebase';
 import { ReactReduxFirebaseProvider } from 'react-redux-firebase';
 import useOnlineGame from 'store/redux/hooks/useOnlineGame';
 import ThemeProvider from 'containers/ThemeProvider';
+import './created-by-numan';
 
 const initialState = {};
 const store = configureStore(initialState);
