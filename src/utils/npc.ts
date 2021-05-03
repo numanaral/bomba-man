@@ -159,7 +159,7 @@ const generateScore = (
 	if (isSquareOutOfBoundaries(newCoordinates, Store!.sizes.map)) {
 		return undefined;
 	}
-	debugger;
+
 	const newSquare = Store!.gameMap[newYSquare][newXSquare];
 	// TODO: Please comment
 	if (isSquareAPossibleFire(newCoordinates)) {

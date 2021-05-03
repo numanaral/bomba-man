@@ -162,7 +162,6 @@ class GameUtils {
 	};
 
 	handlePlayerExplosionHit = (currentFireCoordinates: SquareCoordinates) => {
-		// debugger;
 		const { xSquare, ySquare } = currentFireCoordinates;
 		Object.values<PlayerConfig>(this.state.players).forEach(
 			({ id: playerId, coordinates }) => {
@@ -302,7 +301,6 @@ class GameUtils {
 
 	makeMove = ({ playerId, newCoordinates }: OnMoveProps) => {
 		if (this.isPlayerDead(playerId)) return;
-		// debugger;
 		// if there is a powerUp, assign it to the playerState
 		const {
 			ySquare: newCoordinateYSquare,
@@ -321,7 +319,6 @@ class GameUtils {
 		// explosion. If the player continues to move under the
 		// same explosion fire, he will continuously lose a life
 		if (FIRE_VALUES.includes(newSquare as Explosive)) {
-			// debugger;
 			this.updaters.incrementPlayerDeathCount(playerId);
 
 			// if he is dead, stop here
@@ -410,7 +407,6 @@ class GameUtils {
 	};
 
 	triggerExplosion = (bombId: BombId, cb?: CallableFunction) => {
-		console.log('CALLED');
 		// if current bomb already exploded, don't trigger it again
 		// prevents: state update on an unmounted component
 		if (!this.state.bombs[bombId]) {
