@@ -26,6 +26,17 @@ let Store: NpcStore;
 
 type Score = number | undefined;
 
+enum NPCScore {
+	IsDanger = -10000,
+	IsNonBreakingTile = -100,
+	IsNonAdjacentNonBreakingTile = -5,
+	IsStuck = 0,
+	IsEmptyTile = 2,
+	IsBreakingTile = 3,
+	IsPlayer = 4,
+	IsPowerUp = 1000,
+}
+
 type MovementNode = {
 	score: Score;
 	parentId: number | null;
@@ -124,7 +135,6 @@ const generateScore = (
 	level: number
 ): number | undefined => {
 	const { ySquare: newYSquare, xSquare: newXSquare } = newCoordinates;
-	const { ySquare: oldYSquare, xSquare: oldXSquare } = oldCoordinates;
 
 	if (isSquareOutOfBoundaries(newCoordinates, Store!.sizes.map)) {
 		return undefined;
@@ -136,22 +146,22 @@ const generateScore = (
 		Store!.bombCoordinates.push(newCoordinates);
 	}
 	if (canBombsReach(newCoordinates)) {
-		return -10000;
+		return NPCScore.IsDanger;
 	}
 	if (Object.values(PowerUp).includes(newSquare as PowerUp)) {
-		return 1000 * level;
+		return NPCScore.IsPowerUp * level;
 	}
-	if (newYSquare === oldYSquare && newXSquare === oldXSquare) {
-		return 0;
+	if (isDifferentSquare(newCoordinates, oldCoordinates)) {
+		return NPCScore.IsStuck;
 	}
 	if (newSquare === Tile.Empty) {
-		return 2;
+		return NPCScore.IsEmptyTile;
 	}
 	if (isSquareAPlayer(newSquare)) {
 		const score = dropBombAndRunOrScoreTarget(
 			newCoordinates,
 			oldCoordinates,
-			4
+			NPCScore.IsPlayer
 		);
 		if (score !== null) return score;
 	}
@@ -159,19 +169,19 @@ const generateScore = (
 		const score = dropBombAndRunOrScoreTarget(
 			newCoordinates,
 			oldCoordinates,
-			3
+			NPCScore.IsBreakingTile
 		);
 		if (score !== null) return score;
 	}
 	if (newSquare === Tile.NonBreaking) {
 		// TODO: is this necessary? it's already the nextSquare
 		if (isAdjacent(newCoordinates, oldCoordinates)) {
-			return -100;
+			return NPCScore.IsNonBreakingTile;
 		}
-		return -5;
+		return NPCScore.IsNonAdjacentNonBreakingTile;
 	}
 
-	return 0;
+	return NPCScore.IsStuck;
 };
 
 const generateMovementTree = (
