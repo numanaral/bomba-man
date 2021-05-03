@@ -1,41 +1,14 @@
-// import { Immutable, castDraft } from 'immer';
-import config from 'config';
-import { generateRandomGameMap, playerGenerator } from 'utils/game';
+import { generateDefaultGameState } from 'utils/game';
 import { GameState } from './types';
-
-const BOUNDARY_MIN = 0;
-const BOUNDARY_MAX = config.size.game - 1;
-const P1 = playerGenerator('P1', BOUNDARY_MIN, BOUNDARY_MIN);
-// const P1 = playerGenerator('P1', BOUNDARY_MAX, 7);
-const P2 = playerGenerator('P2', BOUNDARY_MIN, BOUNDARY_MAX);
-const P3 = playerGenerator('P3', BOUNDARY_MAX, BOUNDARY_MAX);
-const P4 = playerGenerator('P4', BOUNDARY_MAX, BOUNDARY_MIN);
 
 // Defaults
 const KEY = 'Game';
-const DEFAULT_VALUES: GameState = {
-	players: {
-		P1,
-	},
-	bombs: [],
-	gameMap: generateRandomGameMap(config.size.game),
-	is3D: false,
-	isSideView: false,
-	size: config.size.game,
-	animationCounter: 0,
-	powerUps: {},
-};
-
-const PLAYERS = {
-	P1,
-	P2,
-	P3,
-	P4,
-};
+const DEFAULT_VALUES: GameState = generateDefaultGameState();
 
 // Types
 const SET_GAME_STATE = `${KEY}/SET_GAME_STATE`;
 const START_GAME = `${KEY}/START_GAME`;
+const END_GAME = `${KEY}/END_GAME`;
 const SET_GAME_MAP = `${KEY}/SET_GAME_MAP`;
 // GAME ACTIONS
 const MAKE_MOVE = `${KEY}/MAKE_MOVE`;
@@ -51,11 +24,11 @@ const TOGGLE_GAME_TWO_PLAYER = `${KEY}/TOGGLE_GAME_TWO_PLAYER`;
 const TOGGLE_GAME_NPC = `${KEY}/TOGGLE_GAME_NPC`;
 
 export {
-	PLAYERS,
 	KEY,
 	DEFAULT_VALUES,
 	SET_GAME_STATE,
 	START_GAME,
+	END_GAME,
 	SET_GAME_MAP,
 	TRIGGER_EXPLOSION,
 	ON_EXPLOSION_COMPLETE,

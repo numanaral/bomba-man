@@ -43,7 +43,7 @@ type OnDropBomb = (playerId: PlayerId) => void;
 type Square = Player | Tile | PowerUp | Explosive;
 
 // type GameMap = Immutable<Array<Array<Square>>>;
-type GameMap = Array<Array<Square>>;
+type GameMap = Record<string, Record<string, Square>>;
 
 type KeyboardEventCode = ValuesOf<typeof KeyCode>;
 
@@ -71,29 +71,21 @@ type PowerUps = Record<PowerUp, number>;
 
 type PlayerState = {
 	deathCount: number;
-	[PowerUp.Life]: number;
-	[PowerUp.BombCount]: number;
-	[PowerUp.BombSize]: number;
-	[PowerUp.MovementSpeed]: number;
 	/** How many power-ups have been collected */
 	powerUps: PowerUps;
-};
+} & PowerUps;
 
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
 	state: PlayerState;
-	keyboardConfig: PlayerKeyboardConfig;
+	keyboardConfig: PlayerKeyboardConfig | null;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
 
-type NonNullablePlayer = NonNullable<PlayerConfig> & {
-	ref: NonNullablePlayerRef;
-};
-
 type NextMoveProps = {
-	playerConfig: NonNullablePlayer;
+	playerConfig: PlayerConfig;
 	direction: Direction;
 	is3D: boolean;
 	gameMap: GameMap;
@@ -116,6 +108,7 @@ type NPCActionProps = {
 	gameMap: GameMap;
 	triggerMove: OnTriggerMove;
 	dropBomb: OnDropBomb;
+	ref: NonNullablePlayerRef;
 };
 
 type PowerUpOrNull = PowerUp | null;
@@ -125,9 +118,12 @@ type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
 type GameApi = {
 	provider: GameProvider;
 	state: GameState;
+} & {
+	pending?: false | JSX.Element;
+	error?: false | JSX.Element;
 };
 
-type GameApiHook = () => GameApi;
+type GameApiHook = (gameId?: string) => GameApi;
 
 type PickedGameState<K extends keyof GameState> = {
 	[P in K]: GameState[P];
@@ -151,7 +147,6 @@ export type {
 	PlayerConfig,
 	PowerUps,
 	NonNullablePlayerRef,
-	NonNullablePlayer,
 	NextMoveProps,
 	KeyMap,
 	CharacterProps,

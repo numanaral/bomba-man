@@ -16,8 +16,22 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, PowerUp, Tile, Explosive, FIRE_VALUES } from 'enums';
-import { OnMove, Bomb } from 'store/redux/reducers/game/types';
+import {
+	Axis,
+	Direction,
+	PowerUp,
+	Tile,
+	Explosive,
+	FIRE_VALUES,
+	Player,
+} from 'enums';
+import {
+	OnMove,
+	Bomb,
+	GameConfigRanges,
+	GameState,
+} from 'store/redux/reducers/game/types';
+import * as KeyCode from 'keycode-js';
 import { getRandomInt } from './math';
 
 const MIN_GAME_SIZE = 0;
@@ -51,13 +65,15 @@ const generateRandomGameMap = (
 		// reverse block density, we want that many Emptys
 		...Array(11 - config.game.blockDensity).fill('Empty'),
 	];
-	const randomMap = Array(size)
-		.fill(0)
-		.map(() =>
-			Array(size)
-				.fill(0)
-				.map(() => Tile[tiles[getRandomInt(tiles.length)]])
-		);
+	const sizedArray = Array(size).fill(0);
+
+	const randomMap = sizedArray.reduce((accOuter, _, indOuter) => {
+		accOuter[indOuter] = sizedArray.reduce((accInner, __, indInner) => {
+			accInner[indInner] = Tile[tiles[getRandomInt(tiles.length)]];
+			return accInner;
+		}, {});
+		return accOuter;
+	}, {});
 	// ensure we don't fill the char beginning squares with blocks
 	forbiddenCoordinates.forEach(([y, x]) => {
 		if (randomMap[y][x] !== Tile.Empty) {
@@ -66,6 +82,115 @@ const generateRandomGameMap = (
 	});
 
 	return randomMap;
+};
+
+const generatePlayer = (
+	playerId: PlayerId,
+	top: number,
+	left: number
+): PlayerConfig => {
+	const {
+		player: { [playerId]: keyboardConfig },
+	} = config.keyboardConfig;
+	const { blockDensity, ...defaultState } = config.game;
+	return {
+		id: playerId,
+		coordinates: {
+			top: top * 32,
+			left: left * 32,
+		},
+		state: {
+			...defaultState,
+			powerUps: { ...defaultState.powerUps },
+		},
+		keyboardConfig,
+	};
+};
+
+const generatePlayers = (
+	mapSize: GameConfigRanges.MapSize
+): Record<PlayerId, PlayerConfig> => {
+	const BOUNDARY_MIN = 0;
+	const BOUNDARY_MAX = mapSize - 1;
+
+	return {
+		P1: generatePlayer(Player.P1, BOUNDARY_MIN, BOUNDARY_MIN),
+		P2: generatePlayer(Player.P2, BOUNDARY_MIN, BOUNDARY_MAX),
+		P3: generatePlayer(Player.P3, BOUNDARY_MAX, BOUNDARY_MAX),
+		P4: generatePlayer(Player.P4, BOUNDARY_MAX, BOUNDARY_MIN),
+	};
+};
+
+const generateDefaultGameState = (): GameState => {
+	return {
+		players: {
+			P1: generatePlayer(Player.P1, 0, 0),
+		},
+		gameMap: generateRandomGameMap(config.size.game),
+		bombs: {},
+		powerUps: {},
+		config: {
+			game: {
+				powerUps: {
+					chance: 5,
+					defaults: {
+						[PowerUp.Life]: 1,
+						[PowerUp.BombCount]: 1,
+						[PowerUp.BombSize]: 1,
+						[PowerUp.MovementSpeed]: 150,
+					},
+					increaseValues: {
+						[PowerUp.Life]: 1,
+						[PowerUp.BombCount]: 1,
+						[PowerUp.BombSize]: 1,
+						[PowerUp.MovementSpeed]: -15,
+					},
+					maxDropCount: {
+						[PowerUp.Life]: 4,
+						[PowerUp.BombCount]: 6,
+						[PowerUp.BombSize]: 6,
+						[PowerUp.MovementSpeed]: 5,
+					},
+				},
+				mapSize: 15,
+			},
+			random: {
+				blockDensity: 8,
+			},
+			size: {
+				character: 32,
+				tile: 32,
+				movement: 32,
+				bomb: 16,
+			},
+			duration: {
+				bomb: {
+					firing: 2,
+					exploding: 1,
+				},
+			},
+			keyboardConfig: {
+				P1: {
+					MoveUp: KeyCode.CODE_W,
+					MoveRight: KeyCode.CODE_D,
+					MoveDown: KeyCode.CODE_S,
+					MoveLeft: KeyCode.CODE_A,
+					DropBomb: KeyCode.CODE_SPACE,
+				},
+				P2: {
+					MoveUp: KeyCode.CODE_UP,
+					MoveRight: KeyCode.CODE_RIGHT,
+					MoveDown: KeyCode.CODE_DOWN,
+					MoveLeft: KeyCode.CODE_LEFT,
+					DropBomb: KeyCode.CODE_SEMICOLON,
+				},
+			},
+		},
+		is3D: false,
+		isSideView: false,
+		size: config.size.game,
+		animationCounter: 0,
+	};
 };
 
 /**
@@ -183,15 +308,17 @@ const handleMove = (
 		playerConfig: {
 			id: playerId,
 			coordinates: { top, left },
-			ref,
 		},
 		direction,
 		is3D,
 		gameMap,
 	}: NextMoveProps,
 	movementSpeed: number,
-	onComplete: OnMove
+	onComplete: OnMove,
+	ref: NonNullablePlayerRef
 ) => {
+	if (!direction) return;
+
 	let newTop = top;
 	let newLeft = left;
 	switch (direction) {
@@ -493,7 +620,7 @@ const generateBomb = ({
 }: PlayerConfig) => {
 	const explosionSize = getPoweredUpValue(state, PowerUp.BombSize);
 	const bomb: Bomb = {
-		id: new Date().toJSON(),
+		id: new Date().getTime().toString(),
 		explosionSize,
 		top,
 		left,
@@ -532,37 +659,15 @@ const getMoveDirectionFromKeyMap = (
 				keyMap.current[MoveRight] && Direction.RIGHT,
 				keyMap.current[MoveDown] && Direction.DOWN,
 				keyMap.current[MoveLeft] && Direction.LEFT,
-		  ].filter(Boolean)
+		  ]
 		: // handle single key down
 		  [
 				(keyMap.current[MoveUp] && Direction.UP) ||
 					(keyMap.current[MoveRight] && Direction.RIGHT) ||
 					(keyMap.current[MoveDown] && Direction.DOWN) ||
 					(keyMap.current[MoveLeft] && Direction.LEFT),
-		  ]) as Array<Direction>;
-};
-
-const playerGenerator = (
-	playerId: PlayerId,
-	top: number,
-	left: number
-): PlayerConfig => {
-	const {
-		player: { [playerId]: keyboardConfig },
-	} = config.keyboardConfig;
-	const { blockDensity, ...defaultState } = config.game;
-	return {
-		id: playerId,
-		coordinates: {
-			top: top * 32,
-			left: left * 32,
-		},
-		state: {
-			...defaultState,
-			powerUps: { ...defaultState.powerUps },
-		},
-		keyboardConfig,
-	};
+		  ]
+	).filter(Boolean) as Array<Direction>;
 };
 
 const generatePowerUpOrNull = () => {
@@ -599,6 +704,9 @@ const isPlayerDead = (playerState: PlayerState) => {
 
 export {
 	generateRandomGameMap,
+	generatePlayer,
+	generatePlayers,
+	generateDefaultGameState,
 	canMove,
 	rotateMove,
 	handleRotateMove,
@@ -608,7 +716,6 @@ export {
 	getExplosionScaleSize,
 	getExplosionResults,
 	generateBomb,
-	playerGenerator,
 	getMoveDirectionFromKeyboardCode,
 	getMoveDirectionFromKeyMap,
 	MAX_GAME_SIZE,

@@ -2,6 +2,7 @@ import {
 	GameApi,
 	KeyboardEventCode,
 	KeyMap,
+	NonNullablePlayerRef,
 	OnDropBomb,
 	PlayerId,
 	PlayerKeyboardConfig,
@@ -16,9 +17,10 @@ import {
 } from 'utils/game';
 import { npcAction } from 'utils/npc';
 import useInterval from 'hooks/useInterval';
+import usePrevious from 'hooks/usePrevious';
 import { OnTriggerMove } from '../reducers/game/types';
 
-type KeyDownAction = (id: PlayerId, keys: PlayerKeyboardConfig) => void;
+type KeyDownAction = (playerId: PlayerId, keys: PlayerKeyboardConfig) => void;
 
 type KeyAction = (keyEventCode: KeyboardEventCode) => void;
 
@@ -30,7 +32,15 @@ const usePlayerRefs = () => {
 		P4: document.getElementById('P4'),
 	});
 
-	return playerRefs;
+	const recalculate = () => {
+		Object.keys(playerRefs.current).forEach(playerId => {
+			playerRefs.current[playerId as PlayerId] = document.getElementById(
+				playerId
+			);
+		});
+	};
+
+	return { playerRefs, recalculate };
 };
 
 const useEvents = ({
@@ -38,15 +48,23 @@ const useEvents = ({
 	players,
 	timeOutRef,
 	keyMap,
+	is3D,
 }: {
 	triggerMove: OnTriggerMove;
 	players: Players;
 	keyMap: React.MutableRefObject<KeyMap>;
 	timeOutRef: React.MutableRefObject<Record<PlayerId, number>>;
+	is3D: boolean;
 }) => {
-	const playerRefs = usePlayerRefs();
+	const { playerRefs, recalculate } = usePlayerRefs();
+	const previousIs3D = usePrevious(is3D);
 
-	const move: KeyDownAction = (id, playerKeyboardConfig) => {
+	useEffect(() => {
+		if (previousIs3D === is3D) return;
+		recalculate();
+	}, [is3D, previousIs3D, recalculate]);
+
+	const move: KeyDownAction = (playerId, playerKeyboardConfig) => {
 		const directions = getMoveDirectionFromKeyMap(
 			keyMap,
 			playerKeyboardConfig
@@ -54,13 +72,19 @@ const useEvents = ({
 		if (!directions.length) return;
 
 		directions.forEach(direction => {
-			triggerMove({ playerId: id, direction });
+			triggerMove({
+				playerId,
+				direction,
+				ref: playerRefs.current[playerId] as NonNullablePlayerRef,
+			});
 		});
 	};
 
 	const handleActions = (playerId: PlayerId) => {
 		if (!keyMap.current) return;
 		if (!timeOutRef.current) return;
+		// don't do anything if no key is being pressed
+		if (!Object.values(keyMap.current).filter(Boolean).length) return;
 
 		const { keyboardConfig, state } = players[playerId]!;
 		if (!keyboardConfig) return;
@@ -171,7 +195,7 @@ const handleBombForPlayers = (players: Players, dropBomb: OnDropBomb) => (
 ) => {
 	(Object.keys(players) as Array<PlayerId>).forEach(playerId => {
 		if (canPlayerTakeAction(players, playerId)) {
-			const { DropBomb } = players[playerId]!.keyboardConfig;
+			const { DropBomb } = players[playerId]!.keyboardConfig!;
 			if (keyEventCode === DropBomb) {
 				dropBomb(playerId);
 			}
@@ -181,7 +205,9 @@ const handleBombForPlayers = (players: Players, dropBomb: OnDropBomb) => (
 
 const usePlayerEvents = ({ state, provider }: GameApi) => {
 	const { dropBomb, triggerMove } = provider;
-	const { gameMap, players } = state;
+	const { gameMap, players, is3D } = state;
+
+	const { playerRefs } = usePlayerRefs();
 
 	const keyMap = useKeyboardEvent({
 		onKeyDown: handleBombForPlayers(players, dropBomb),
@@ -192,15 +218,25 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 		players,
 		timeOutRef,
 		keyMap,
+		is3D,
 	});
 
+	// URGENT: Since this triggers a move event, if the
+	// player is on the same explosion fire, he dies
+	// multiple times
 	// TODO: In the next update, start these intervals
 	// when the keys are pressed and not continuously
 	usePlayerInterval(players, 'P1', handleActions);
 	usePlayerInterval(players, 'P2', handleActions);
 	usePlayerInterval(players, 'P3', handleActions);
 	usePlayerInterval(players, 'P4', () => {
-		npcAction({ dropBomb, gameMap, players, triggerMove });
+		npcAction({
+			dropBomb,
+			gameMap,
+			players,
+			triggerMove,
+			ref: playerRefs.current.P4 as NonNullablePlayerRef,
+		});
 	});
 };
 
