@@ -1,30 +1,35 @@
-import config from 'config';
-import {
-	makeSelectGameAnimationCounter,
-	makeSelectGameIs3D,
-	makeSelectGameIsSideView,
-	makeSelectGameMap,
-} from 'store/redux/reducers/game/selectors';
-import { useSelector } from 'react-redux';
+import { GameConfig } from 'store/redux/reducers/game/types';
 import Map from './components/Map';
+import { PickedGameState } from './types';
 
-const GameMap: React.FC = ({ children }) => {
-	const gameMap = useSelector(makeSelectGameMap());
-	const is3D = useSelector(makeSelectGameIs3D());
-	const isTopView = !useSelector(makeSelectGameIsSideView());
-	const animationCounter = useSelector(makeSelectGameAnimationCounter());
+interface Props
+	extends PickedGameState<
+		'gameMap' | 'is3D' | 'isSideView' | 'animationCounter'
+	> {
+	sizes: GameConfig['sizes'];
+}
 
+const GameMap: React.FC<Props> = ({
+	sizes: { map: mapSize, tile: tileSize },
+	children,
+	gameMap,
+	is3D,
+	isSideView,
+	animationCounter,
+}) => {
 	return (
 		<Map
-			size={config.size.game}
+			size={mapSize}
 			gameMap={gameMap}
 			is3D={is3D}
-			isTopView={isTopView}
+			isTopView={!isSideView}
 			animationCounter={animationCounter}
+			tileSize={tileSize}
 		>
 			{children}
 		</Map>
 	);
 };
 
+export type { Props as GameMapProps };
 export default GameMap;

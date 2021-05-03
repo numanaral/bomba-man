@@ -2,10 +2,8 @@ import {
 	DROP_BOMB,
 	MAKE_MOVE,
 	ON_EXPLOSION_COMPLETE,
-	REMOVE_BOMB,
 	SET_GAME_MAP,
 	SET_GAME_STATE,
-	SET_PLAYER_REF,
 	TOGGLE_GAME_DIMENSION,
 	TOGGLE_GAME_NPC,
 	TOGGLE_GAME_PERSPECTIVE,
@@ -26,11 +24,6 @@ const setGameMap: GameActionFn = payload => ({
 	payload,
 });
 
-const setPlayerRefInGame: GameActionFn = payload => ({
-	type: SET_PLAYER_REF,
-	payload,
-});
-
 // #region GAME ACTIONS
 const makeMoveInGame: GameActionFn = payload => ({
 	type: MAKE_MOVE,
@@ -44,11 +37,6 @@ const triggerMoveInGame: GameActionFn = payload => ({
 
 const dropBombInGame: GameActionFn = payload => ({
 	type: DROP_BOMB,
-	payload,
-});
-
-const removeBombFromGame: GameActionFn = payload => ({
-	type: REMOVE_BOMB,
 	payload,
 });
 
@@ -89,12 +77,10 @@ const toggleGameNPC: GameActionFn = () => ({
 export {
 	setGameState,
 	setGameMap,
-	setPlayerRefInGame,
 	// GAME ACTIONS
 	makeMoveInGame,
 	triggerMoveInGame,
 	dropBombInGame,
-	removeBombFromGame,
 	triggerExplosionInGame,
 	onExplosionCompleteInGame,
 	// GAME SETTINGS

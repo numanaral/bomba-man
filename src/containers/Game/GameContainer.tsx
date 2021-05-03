@@ -1,7 +1,5 @@
-import { makeSelectGameIs3D } from 'store/redux/reducers/game/selectors';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import config from 'config';
+import { PickedGameState } from './types';
 
 const SettingsAndMap = styled.div`
 	display: flex;
@@ -27,15 +25,16 @@ const CenteredDiv = styled.div<{ $is3D: boolean }>`
 	${({ $is3D }) => ($is3D && 'perspective: 1000') || ''}
 `;
 
-const GameContainer: React.FC = ({ children }) => {
-	const is3D = useSelector(makeSelectGameIs3D());
+interface Props extends PickedGameState<'is3D'> {}
 
+const GameContainer: React.FC<Props> = ({ children, is3D }) => {
 	return (
 		<CenteredDiv $is3D={is3D}>
-			<h1>{config.title}</h1>
+			<h1>Bomba-man - Work In Progress</h1>
 			<SettingsAndMap>{children}</SettingsAndMap>
 		</CenteredDiv>
 	);
 };
 
+export type { Props as GameContainerProps };
 export default GameContainer;
