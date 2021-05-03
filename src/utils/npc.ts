@@ -1,5 +1,10 @@
-import { GameMap, NPCActionFn, SquareCoordinates } from 'containers/Game/types';
-import { Direction, Explosive, PowerUp, Tile } from 'enums';
+import {
+	GameMap,
+	NPCActionFn,
+	Square,
+	SquareCoordinates,
+} from 'containers/Game/types';
+import { Direction, Explosive, Player, PowerUp, Tile } from 'enums';
 import { GameConfig } from 'store/redux/reducers/game/types';
 import {
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
@@ -33,6 +38,20 @@ type MovementNodeWithKey = {
 	[key: number]: MovementNode;
 };
 
+const isDifferentSquare = (
+	newCoordinates: SquareCoordinates,
+	oldCoordinates: SquareCoordinates
+) => {
+	const { ySquare: newYSquare, xSquare: newXSquare } = newCoordinates;
+	const { ySquare: oldYSquare, xSquare: oldXSquare } = oldCoordinates;
+
+	return newYSquare !== oldYSquare || newXSquare !== oldXSquare;
+};
+
+const isSquareAPlayer = (square: Square) => {
+	return Object.values<Square>(Player).includes(square);
+};
+
 const isAdjacent = (
 	{ ySquare: newYSquare, xSquare: newXSquare }: SquareCoordinates,
 	{ ySquare: oldYSquare, xSquare: oldXSquare }: SquareCoordinates
@@ -46,6 +65,36 @@ const isAdjacent = (
 		(newYSquare === oldYSquare &&
 			(newXSquare === oldXSquare + 1 || newXSquare === oldXSquare - 1))
 	);
+};
+
+const dropBombAndRunOrScoreTarget = (
+	newCoordinates: SquareCoordinates,
+	oldCoordinates: SquareCoordinates,
+	targetScore: Score,
+	runScore?: -100
+) => {
+	// TODO: is this necessary? it's already the nextSquare
+	if (isAdjacent(newCoordinates, oldCoordinates)) {
+		const currentTime = new Date().getTime();
+		if (
+			Store!.lastBombTime <=
+			currentTime -
+				Object.values(Store!.bombDuration).reduce(
+					(acc, duration) => acc + duration,
+					0
+				) *
+					1000
+		) {
+			Store!.dropBomb();
+			Store!.lastBombTime = currentTime;
+		}
+		return runScore;
+	}
+	if (isDifferentSquare(newCoordinates, oldCoordinates)) {
+		return targetScore;
+	}
+
+	return null;
 };
 
 const canBombsReach = ({ ySquare, xSquare }: SquareCoordinates): boolean => {
@@ -98,27 +147,21 @@ const generateScore = (
 	if (newSquare === Tile.Empty) {
 		return 2;
 	}
+	if (isSquareAPlayer(newSquare)) {
+		const score = dropBombAndRunOrScoreTarget(
+			newCoordinates,
+			oldCoordinates,
+			4
+		);
+		if (score !== null) return score;
+	}
 	if (newSquare === Tile.Breaking) {
-		// TODO: is this necessary? it's already the nextSquare
-		if (isAdjacent(newCoordinates, oldCoordinates)) {
-			const currentTime = new Date().getTime();
-			if (
-				Store!.lastBombTime <=
-				currentTime -
-					Object.values(Store!.bombDuration).reduce(
-						(acc, duration) => acc + duration,
-						0
-					) *
-						1000
-			) {
-				Store!.dropBomb();
-				Store!.lastBombTime = currentTime;
-			}
-			return -100;
-		}
-		if (newYSquare !== oldYSquare || newXSquare !== oldXSquare) {
-			return 3;
-		}
+		const score = dropBombAndRunOrScoreTarget(
+			newCoordinates,
+			oldCoordinates,
+			3
+		);
+		if (score !== null) return score;
 	}
 	if (newSquare === Tile.NonBreaking) {
 		// TODO: is this necessary? it's already the nextSquare
