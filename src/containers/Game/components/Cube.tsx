@@ -1,7 +1,6 @@
-import { forwardRef } from 'react';
 import './Cube.scss';
 import styled from 'styled-components';
-import { PlayerRef, TileProps } from '../types';
+import { TileProps } from '../types';
 
 const CuboidSide = styled.div``;
 
@@ -71,49 +70,43 @@ const Cuboid = styled.div<StyledProps<TileProps, 'size'>>`
 	}
 `;
 
-const Cube = forwardRef<PlayerRef, TileProps>(
-	(
-		{
-			size,
-			top,
-			left,
-			animate = false,
-			variant,
-			color: backgroundColor,
-			collisionIndex,
-			style,
-			className,
-			...rest
-		},
-		ref
-	) => {
-		const _className = `cuboid bouncy-block-${
-			(!animate && 'no-animation') || collisionIndex || 0
-		} ${variant}${(className && ` ${className}`) || ''}`;
+const Cube = ({
+	size,
+	top,
+	left,
+	animate = false,
+	variant,
+	color: backgroundColor,
+	collisionIndex,
+	style,
+	className,
+	...rest
+}: TileProps) => {
+	const _className = `cuboid bouncy-block-${
+		(!animate && 'no-animation') || collisionIndex || 0
+	} ${variant}${(className && ` ${className}`) || ''}`;
 
-		return (
-			<Cuboid
-				className={_className}
-				style={{ ...style, top, left, width: size, height: size }}
-				ref={ref}
-				$size={size}
-				{...rest}
-			>
-				{Array(6)
-					.fill(0)
-					.map((_, ind) => (
-						<CuboidSide
-							key={ind}
-							style={{
-								...(backgroundColor && { backgroundColor }),
-								width: size,
-								height: size,
-							}}
-						/>
-					))}
-			</Cuboid>
-		);
-	}
-);
+	return (
+		<Cuboid
+			className={_className}
+			style={{ ...style, top, left, width: size, height: size }}
+			$size={size}
+			{...rest}
+		>
+			{Array(6)
+				.fill(0)
+				.map((_, ind) => (
+					<CuboidSide
+						key={ind}
+						style={{
+							...(backgroundColor && { backgroundColor }),
+							width: size,
+							height: size,
+						}}
+					/>
+				))}
+		</Cuboid>
+	);
+};
 
 export default Cube;

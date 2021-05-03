@@ -1,8 +1,7 @@
 import config from 'config';
-import { forwardRef } from 'react';
 import styled from 'styled-components';
 import theme from 'theme';
-import { CharacterProps, PlayerRef } from '../types';
+import { CharacterProps } from '../types';
 
 const StyledTempCharacterName = styled.span`
 	color: ${theme.palette.color.warning};
@@ -48,30 +47,30 @@ const StyledTempCharacter = styled.div<{ $name: string }>`
 	}
 `;
 
-const CircleCharacter = forwardRef<PlayerRef, CharacterProps>(
-	(
-		{ id, name, coordinates: { top, left }, keyboardConfig: _, ...rest },
-		ref
-	) => {
-		return (
-			<StyledTempCharacter
-				$name={`${name} ${id}`}
-				style={{
-					top,
-					left,
-				}}
-				ref={ref}
-				{...rest}
-			>
-				<StyledTempCharacterName>{name}</StyledTempCharacterName>
-				<StyledTempCharacterFace>
-					<StyledTempCharacterEyes>o-o</StyledTempCharacterEyes>
-					<br />
-					<StyledTempCharacterMouth>===</StyledTempCharacterMouth>
-				</StyledTempCharacterFace>
-			</StyledTempCharacter>
-		);
-	}
-);
+const CircleCharacter = ({
+	id,
+	name,
+	coordinates: { top, left },
+	keyboardConfig: _,
+	...rest
+}: CharacterProps) => {
+	return (
+		<StyledTempCharacter
+			$name={`${name} ${id}`}
+			style={{
+				top,
+				left,
+			}}
+			{...rest}
+		>
+			<StyledTempCharacterName>{name}</StyledTempCharacterName>
+			<StyledTempCharacterFace>
+				<StyledTempCharacterEyes>o-o</StyledTempCharacterEyes>
+				<br />
+				<StyledTempCharacterMouth>===</StyledTempCharacterMouth>
+			</StyledTempCharacterFace>
+		</StyledTempCharacter>
+	);
+};
 
 export default CircleCharacter;
