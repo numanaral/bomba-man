@@ -15,7 +15,6 @@ import {
 	triggerExplosionInGame,
 } from 'store/redux/reducers/game/actions';
 import {
-	AnimatableGameMap,
 	BombFn,
 	BombId,
 	GameState,
@@ -24,7 +23,7 @@ import {
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
 import { makeSelectGameSize } from 'store/redux/reducers/game/selectors';
-import { OnDropBomb } from 'containers/Game/types';
+import { GameMap, OnDropBomb } from 'containers/Game/types';
 
 const useGameProvider = () => {
 	const dispatch = useDispatch();
@@ -36,16 +35,13 @@ const useGameProvider = () => {
 	);
 
 	const updateGameMap = useCallback(
-		(props: AnimatableGameMap) => dispatch(setGameMap(props)),
+		(newMap: GameMap, animate = false) =>
+			dispatch(setGameMap({ gameMap: newMap, animate })),
 		[dispatch]
 	);
 
 	const generateNewCollisionCoordinates = useCallback(
-		() =>
-			updateGameMap({
-				gameMap: generateRandomGameMap(gameSize),
-				animate: true,
-			}),
+		() => updateGameMap(generateRandomGameMap(gameSize), true),
 		[gameSize, updateGameMap]
 	);
 
@@ -77,8 +73,8 @@ const useGameProvider = () => {
 	);
 
 	const onExplosionComplete = useCallback(
-		(bombId: BombId) => {
-			dispatch(onExplosionCompleteInGame(bombId));
+		(props: BombId) => {
+			dispatch(onExplosionCompleteInGame(props));
 		},
 		[dispatch]
 	);

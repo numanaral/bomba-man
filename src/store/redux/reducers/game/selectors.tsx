@@ -10,42 +10,28 @@ const selectGameProps: Selector<Store, GameState> = state => {
 
 // Other specific selectors
 // #region GAME ACTION STATES
-const makeSelectGamePlayers = () => {
-	return createSelector(selectGameProps, ({ players }) => players);
-};
+const makeSelectGamePlayers = () =>
+	createSelector(selectGameProps, ({ players }) => players);
 
-const makeSelectGameBombs = () => {
-	return createSelector(selectGameProps, ({ bombs }) => bombs);
-};
+const makeSelectGameBombs = () =>
+	createSelector(selectGameProps, ({ bombs }) => bombs);
 // //#endregion
 
 // #region GAME SETTINGS
-const makeSelectGameConfig = () => {
-	return createSelector(selectGameProps, ({ config }) => config);
-};
+const makeSelectGameIs3D = () =>
+	createSelector(selectGameProps, ({ is3D }) => is3D);
 
-const makeSelectGameIs3D = () => {
-	return createSelector(selectGameProps, ({ is3D }) => is3D);
-};
+const makeSelectGameIsSideView = () =>
+	createSelector(selectGameProps, ({ isSideView }) => isSideView);
 
-const makeSelectGameIsSideView = () => {
-	return createSelector(selectGameProps, ({ isSideView }) => isSideView);
-};
+const makeSelectGameMap = () =>
+	createSelector(selectGameProps, ({ gameMap }) => gameMap);
 
-const makeSelectGameMap = () => {
-	return createSelector(selectGameProps, ({ gameMap }) => gameMap);
-};
+const makeSelectGameSize = () =>
+	createSelector(selectGameProps, ({ size }) => size);
 
-const makeSelectGameSize = () => {
-	return createSelector(selectGameProps, ({ size }) => size);
-};
-
-const makeSelectGameAnimationCounter = () => {
-	return createSelector(
-		selectGameProps,
-		({ animationCounter }) => animationCounter
-	);
-};
+const makeSelectGameAnimationCounter = () =>
+	createSelector(selectGameProps, ({ animationCounter }) => animationCounter);
 // #endregion
 
 // Default selector
@@ -59,7 +45,6 @@ export {
 	makeSelectGamePlayers,
 	makeSelectGameBombs,
 	// GAME SETTINGS
-	makeSelectGameConfig,
 	makeSelectGameIs3D,
 	makeSelectGameIsSideView,
 	makeSelectGameMap,

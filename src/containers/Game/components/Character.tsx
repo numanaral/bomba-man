@@ -53,7 +53,6 @@ const Character = ({
 	return (
 		(is3D && (
 			<Cube
-				id={id}
 				size={config.size.character}
 				top={_top}
 				left={_left}

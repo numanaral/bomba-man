@@ -65,7 +65,7 @@ const Bomb = ({
 	color: backgroundColor,
 	firingDuration,
 	explodingDuration,
-	// explosionSize,
+	explosionSize,
 	id,
 	top,
 	left,
@@ -76,16 +76,13 @@ const Bomb = ({
 	const [explosionState, setExplosionState] = useState<ExplosionState>(
 		ExplosionState.Firing
 	);
-
 	useEffect(() => {
 		const kaboom = async () => {
 			await sleep(firingDuration * 1000);
-			// if (!isMounted.current) return;
 			triggerExplosion(id, async (bombIds: Set<BombId>) => {
 				// update animation
 				setExplosionState(ExplosionState.Exploding);
 				await sleep(explodingDuration * 1000);
-
 				// complete explosion for this bomb
 				onExplosionComplete(id);
 				// then complete the explosion for all the other bombs
@@ -97,8 +94,16 @@ const Bomb = ({
 			});
 		};
 		kaboom();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [
+		explodingDuration,
+		explosionSize,
+		firingDuration,
+		triggerExplosion,
+		onExplosionComplete,
+		top,
+		left,
+		id,
+	]);
 
 	const bombSize = config.size.bomb;
 	const bombSizePadding = bombSize / 2;
@@ -112,7 +117,6 @@ const Bomb = ({
 		left: left + bombSizePadding,
 		animationDuration: `${firingDuration}s`,
 	};
-
 	return (
 		(explosionState === ExplosionState.Firing &&
 			((!is3D && <FiringBomb style={bombStyleProps} />) || (
