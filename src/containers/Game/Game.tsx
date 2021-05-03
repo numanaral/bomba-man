@@ -40,7 +40,7 @@ const useGameProps = (props: GameApi) => {
 };
 
 const Game = (props: GameApi) => {
-	usePlayerEvents(props);
+	const playerIntervals = usePlayerEvents(props);
 	const {
 		gameContainerProps,
 		gameSettingProps,
@@ -54,6 +54,7 @@ const Game = (props: GameApi) => {
 			<GameMap {...gameMapProps}>
 				<GameContent {...gameContentProps} />
 			</GameMap>
+			{playerIntervals}
 		</GameContainer>
 	);
 };

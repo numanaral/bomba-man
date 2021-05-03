@@ -18,8 +18,10 @@ import {
 import { npcAction } from 'utils/npc';
 import useInterval from 'hooks/useInterval';
 import usePrevious from 'hooks/usePrevious';
+import { CODE_SPACE } from 'keycode-js';
 import { GameConfig, OnTriggerMove } from '../reducers/game/types';
 
+type HandleActionsFn = (playerId: PlayerId) => void;
 type KeyDownAction = (playerId: PlayerId, keys: PlayerKeyboardConfig) => void;
 
 type KeyAction = (keyEventCode: KeyboardEventCode) => void;
@@ -72,9 +74,6 @@ const useEvents = ({
 			playerKeyboardConfig
 		);
 		if (!directions.length) return;
-
-		// console.log(directions);
-		console.log(new Date().getMilliseconds());
 
 		directions.forEach(direction => {
 			triggerMove({
@@ -137,6 +136,7 @@ const useKeyboardEvent = ({
 			if (!keyMap.current) return;
 
 			const isKeyDown = e.type === 'keydown';
+			if (e.code === CODE_SPACE) e.preventDefault();
 			registerKeys(e, isKeyDown);
 			if (isKeyDown) onKeyDown?.(e.code as KeyboardEventCode);
 			else onKeyUp?.(e.code as KeyboardEventCode);
@@ -202,7 +202,7 @@ const usePlayerInterval = (
 	players: Players,
 	playerId: PlayerId,
 	powerUpConfig: GameConfig['powerUps'],
-	cb: (playerId: PlayerId) => void
+	cb: HandleActionsFn
 ) => {
 	const playerActionSpeed = usePlayerActionSpeed(
 		players,
@@ -223,12 +223,30 @@ const handleBombForPlayers = (
 ) => (keyEventCode: KeyboardEventCode) => {
 	(Object.keys(players) as Array<PlayerId>).forEach(playerId => {
 		if (canPlayerTakeAction(players, playerId, powerUpConfig)) {
-			const { DropBomb } = players[playerId]!.keyboardConfig!;
-			if (keyEventCode === DropBomb) {
-				dropBomb(playerId);
+			const { keyboardConfig } = players[playerId]!;
+			if (keyboardConfig) {
+				const { DropBomb } = keyboardConfig;
+				if (keyEventCode === DropBomb) {
+					dropBomb(playerId);
+				}
 			}
 		}
 	});
+};
+
+const IntervalWrapper = ({
+	playerId,
+	players,
+	powerUpConfig,
+	cb,
+}: {
+	playerId: PlayerId;
+	players: Players;
+	powerUpConfig: GameConfig['powerUps'];
+	cb: HandleActionsFn;
+}) => {
+	usePlayerInterval(players, playerId, powerUpConfig, cb);
+	return null;
 };
 
 const usePlayerEvents = ({ state, provider }: GameApi) => {
@@ -263,18 +281,30 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 	// multiple times
 	// TODO: In the next update, start these intervals
 	// when the keys are pressed and not continuously
-	usePlayerInterval(players, 'P1', powerUpConfig, handleActions);
-	usePlayerInterval(players, 'P2', powerUpConfig, handleActions);
-	usePlayerInterval(players, 'P3', powerUpConfig, handleActions);
-	usePlayerInterval(players, 'P4', powerUpConfig, () => {
-		npcAction({
-			dropBomb,
-			gameMap,
-			players,
-			triggerMove,
-			ref: playerRefs.current.P4 as NonNullablePlayerRef,
-			movementSize,
-		});
+	return Object.keys(players).map(playerId => {
+		return (
+			<IntervalWrapper
+				key={playerId}
+				playerId={playerId as PlayerId}
+				players={players}
+				powerUpConfig={powerUpConfig}
+				cb={
+					playerId === 'P4'
+						? () => {
+								npcAction({
+									dropBomb,
+									gameMap,
+									players,
+									triggerMove,
+									ref: playerRefs.current
+										.P4 as NonNullablePlayerRef,
+									movementSize,
+								});
+						  }
+						: handleActions
+				}
+			/>
+		);
 	});
 };
 
