@@ -8,6 +8,7 @@ import {
 	AnimatableGameMap,
 	Bomb,
 	BombId,
+	Bombs,
 	GameState,
 } from 'store/redux/reducers/game/types';
 import {
@@ -122,7 +123,6 @@ class OnlineGameUpdater extends GameUpdater {
 
 	// #region 			GameState.players.[*].[*PlayerConfig].state.powerUps
 	incrementPlayerPowerUp = async (powerUp: PowerUp, playerId: PlayerId) => {
-		debugger;
 		this.updaters.update<PowerUps>(
 			{ [powerUp]: this.getPlayerState(playerId).powerUps[powerUp] + 1 },
 			`/players/${playerId}/state/powerUps`
@@ -173,11 +173,7 @@ class OnlineGameUpdater extends GameUpdater {
 	// #region 	GameState.bombs
 
 	addBomb = async (bomb: Bomb) => {
-		// debugger;
-		this.updaters.update<Record<string, Bomb>>(
-			{ [bomb.id]: bomb },
-			`/bombs`
-		);
+		this.updaters.update<Bombs>({ [bomb.id]: bomb }, `/bombs`);
 	};
 
 	removeBomb = async (bombId: BombId) => {

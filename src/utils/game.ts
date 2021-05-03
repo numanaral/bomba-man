@@ -322,29 +322,46 @@ const generateDefaultGameState = (config?: GameConfig): GameState => {
 	};
 };
 
+const isSquareAnObstacle = (
+	gameMap: GameMap,
+	{ xSquare, ySquare }: SquareCoordinates
+) => {
+	const nextSquare = gameMap[ySquare]?.[xSquare];
+
+	return (
+		nextSquare === Tile.Breaking ||
+		nextSquare === Tile.NonBreaking ||
+		nextSquare === Explosive.Bomb
+	);
+};
+
+const isSquareOutOfBoundaries = (
+	{ xSquare, ySquare }: SquareCoordinates,
+	mapSize: GameConfigRanges.MapSize
+) => {
+	const minTopLeft = 0;
+	const maxTopLeft = mapSize - 1;
+
+	const beyondHorizontalEnd = xSquare < minTopLeft || xSquare > maxTopLeft;
+	const beyondVerticalEnd = ySquare < minTopLeft || ySquare > maxTopLeft;
+
+	return beyondHorizontalEnd || beyondVerticalEnd;
+};
+
 const canMove = (
 	coordinates: Coordinates,
 	gameMap: GameMap,
 	{ map: mapSize, movement: movementSize }: GameConfig['sizes']
 ) => {
-	const minTopLeft = 0;
-	const maxTopLeft = mapSize - 1;
-
-	const {
-		xSquare,
-		ySquare,
-	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+	// eslint-disable-next-line max-len
+	const newSquareCoordinates = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
 		coordinates,
 		movementSize
 	);
-	const nextSquare = gameMap[ySquare]?.[xSquare];
-	const isObstacle =
-		nextSquare === Tile.Breaking ||
-		nextSquare === Tile.NonBreaking ||
-		nextSquare === Explosive.Bomb;
-	const isHorizontalEnd = xSquare < minTopLeft || xSquare > maxTopLeft;
-	const isVerticalEnd = ySquare < minTopLeft || ySquare > maxTopLeft;
-	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
+	return (
+		!isSquareAnObstacle(gameMap, newSquareCoordinates) &&
+		!isSquareOutOfBoundaries(newSquareCoordinates, mapSize)
+	);
 };
 
 const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) scale(1, 1)`;
@@ -823,6 +840,8 @@ export {
 	generatePlayer,
 	generatePlayers,
 	generateDefaultGameState,
+	isSquareAnObstacle,
+	isSquareOutOfBoundaries,
 	canMove,
 	rotateMove,
 	handleRotateMove,

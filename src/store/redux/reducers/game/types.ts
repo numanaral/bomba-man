@@ -106,7 +106,7 @@ type GameConfig = {
 type GameState = {
 	players: Players;
 	gameMap: GameMap;
-	bombs: Record<string, Bomb>;
+	bombs: Bombs;
 	// null for when it's picked up
 	powerUps: Record<number, Record<number, PowerUp | null>>;
 	config: GameConfig;
@@ -115,6 +115,8 @@ type GameState = {
 	animationCounter: AnimationCounter;
 };
 // }>;
+
+type Bombs = Record<string, Bomb>;
 
 type AnimatableGameMap = {
 	gameMap: GameMap;
@@ -174,6 +176,7 @@ export type {
 	OnMove,
 	BombId,
 	OnExplosionComplete,
+	Bombs,
 	AnimatableGameMap,
 	GameConfigRanges,
 	GameConfig,

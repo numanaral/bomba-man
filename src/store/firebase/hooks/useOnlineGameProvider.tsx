@@ -70,7 +70,6 @@ const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
 	}, []);
 
 	const triggerExplosion = useCallback<BombFn>((props, cb) => {
-		console.log(state.current.players.P1?.coordinates);
 		gameUtils.current.triggerExplosion(props, cb);
 	}, []);
 

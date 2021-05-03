@@ -1,7 +1,8 @@
 import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
 import {
-	GameConfigRanges,
+	Bombs,
+	GameConfig,
 	GameState,
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
@@ -108,13 +109,18 @@ type CharacterProps = {
 } & React.HTMLAttributes<HTMLDivElement>;
 
 type NPCActionProps = {
+	playerId: PlayerId;
 	players: Players;
 	gameMap: GameMap;
+	bombs: Bombs;
 	triggerMove: OnTriggerMove;
 	dropBomb: OnDropBomb;
 	ref: NonNullablePlayerRef;
-	movementSize: GameConfigRanges.MovementSize;
+	powerUpConfig: GameConfig['powerUps'];
+	sizes: GameConfig['sizes'];
+	bombDuration: GameConfig['duration']['bomb'];
 };
+type NPCActionFn = (props: NPCActionProps) => void;
 
 type PowerUpOrNull = PowerUp | null;
 
@@ -156,6 +162,7 @@ export type {
 	KeyMap,
 	CharacterProps,
 	NPCActionProps,
+	NPCActionFn,
 	Fire,
 	PowerUpOrNull,
 	FontAwesomeIconProps,
