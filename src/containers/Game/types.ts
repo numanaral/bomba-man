@@ -1,6 +1,7 @@
 import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
 import {
+	Bombs,
 	GameConfig,
 	GameState,
 	OnTriggerMove,
@@ -111,9 +112,11 @@ type NPCActionProps = {
 	playerId: PlayerId;
 	players: Players;
 	gameMap: GameMap;
+	bombs: Bombs;
 	triggerMove: OnTriggerMove;
 	dropBomb: OnDropBomb;
 	ref: NonNullablePlayerRef;
+	powerUpConfig: GameConfig['powerUps'];
 	sizes: GameConfig['sizes'];
 	bombDuration: GameConfig['duration']['bomb'];
 };

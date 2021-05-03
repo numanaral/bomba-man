@@ -1,11 +1,11 @@
 import {
 	GameMap,
 	NPCActionFn,
+	Players,
 	Square,
 	SquareCoordinates,
 } from 'containers/Game/types';
-import { Direction, Explosive, Player, PowerUp, Tile } from 'enums';
-import { GameConfig } from 'store/redux/reducers/game/types';
+import { Bombs, GameConfig } from 'store/redux/reducers/game/types';
 import {
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	isSquareOutOfBoundaries,
@@ -19,6 +19,9 @@ type NpcStore = {
 	lastBombTime: number;
 	dropBomb: () => void;
 	gameMap: GameMap;
+	players: Players;
+	bombs: Bombs;
+	powerUpConfig: GameConfig['powerUps'];
 	sizes: GameConfig['sizes'];
 	bombDuration: GameConfig['duration']['bomb'];
 } | null;
@@ -369,6 +372,9 @@ const npcAction: NPCActionFn = ({
 		lastBombTime: 0,
 		dropBomb: () => dropBomb(playerId),
 		gameMap,
+		bombs,
+		players,
+		powerUpConfig,
 		sizes,
 		bombDuration,
 	};
