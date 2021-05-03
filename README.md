@@ -26,3 +26,5 @@ To create a customizable/extendable bomberman game where any mechanic and style 
 	- [ ] 3D Perspective
 	- [ ] colors
 	- [ ] characters
+
+## Shoutout to [Pujan](https://github.com/pujaaan) for doing the NPC!
