@@ -1,3 +1,4 @@
+// TODO: This will be updated after merge
 import config from 'config';
 import {
 	GameMap,
@@ -5,7 +6,9 @@ import {
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Direction, Player, Tile } from 'enums';
-import { MAX_GAME_SIZE, MIN_GAME_SIZE } from 'utils/game';
+
+const MIN_GAME_SIZE = 0;
+const MAX_GAME_SIZE = config.size.game - 1;
 
 type Score = number | undefined;
 

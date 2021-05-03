@@ -1,10 +1,10 @@
 import usePrevious from 'hooks/usePrevious';
-import config from 'config';
 import styled from 'styled-components';
 import theme from 'theme';
 import { Explosive, Tile as TileEnum } from 'enums';
 import { isPowerUp } from 'utils/game';
 import { useEffect } from 'react';
+import { GameConfigRanges } from 'store/redux/reducers/game/types';
 import Cube from './Cube';
 import Tile from './Tile';
 import { GameMap, Square, TileProps } from '../types';
@@ -16,6 +16,7 @@ interface Props {
 	is3D: boolean;
 	isTopView: boolean;
 	animationCounter: number;
+	tileSize: GameConfigRanges.SquareSize;
 }
 
 const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
@@ -46,6 +47,7 @@ const Map: React.FC<Props> = ({
 	isTopView,
 	animationCounter,
 	children,
+	tileSize,
 }) => {
 	// we only need to animate when new collision is set using the button
 	// need to prevent explosion diff from re-animating tiles
@@ -68,9 +70,9 @@ const Map: React.FC<Props> = ({
 							square === TileEnum.Breaking;
 
 						const key = `${outerInd}_${innerInd}`;
-						const squareSize = config.size.tile;
-						const top = outerInd * config.size.tile;
-						const left = innerInd * config.size.tile;
+						const squareSize = tileSize;
+						const top = outerInd * tileSize;
+						const left = innerInd * tileSize;
 
 						// if it's a PowerUp
 						if (isPowerUp(square)) {

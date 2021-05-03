@@ -59,9 +59,9 @@ const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
 
 		/* #region GAME */
 		${({ $gameConfig }) => `
-			--character-size: ${$gameConfig.size.character}px;
-			--tile-size: ${$gameConfig.size.tile}px;
-			--game-size: ${$gameConfig.game.mapSize}px;
+			--character-size: ${$gameConfig.sizes.character}px;
+			--tile-size: ${$gameConfig.sizes.tile}px;
+			--game-size: ${$gameConfig.sizes.map}px;
 			--exploding-duration: ${$gameConfig.duration.bomb.exploding}s;
 			--firing-duration: ${$gameConfig.duration.bomb.firing}s;
 		`}

@@ -181,11 +181,6 @@ class LocalGameUpdater extends GameUpdater {
 		this.draft.isSideView = !this.state.isSideView;
 	};
 
-	// TODO: rename to gameSize
-	updateSize = async (size: RangeOf<15, 6>) => {
-		this.draft.size = size;
-	};
-
 	incrementAnimationCounter = async () => {
 		this.draft.animationCounter++;
 	};

@@ -1,6 +1,6 @@
-import config from 'config';
 import Cube from 'containers/Game/components/Cube';
 import { Player } from 'enums';
+import { GameConfigRanges } from 'store/redux/reducers/game/types';
 import theme from 'theme';
 import { CUBE_BASE_TRANSFORM } from 'utils/game';
 import {
@@ -16,8 +16,10 @@ interface Props {
 	id: PlayerId;
 	name: string;
 	// skin: Skin;
+	size: GameConfigRanges.SquareSize;
+	tileSize: GameConfigRanges.SquareSize;
 	coordinates: TopLeftCoordinates;
-	keyboardConfig: PlayerKeyboardConfig;
+	keyboardConfig?: PlayerKeyboardConfig;
 	is3D: boolean;
 	highlight?: boolean;
 }
@@ -26,14 +28,15 @@ const Character = ({
 	/* skin */
 	id,
 	name,
+	size,
+	tileSize,
 	coordinates: { top, left },
 	keyboardConfig,
 	is3D,
 	highlight = false,
 	...rest
 }: Props) => {
-	const { tile, character } = config.size;
-	const padding = (tile - character) / 2;
+	const padding = (tileSize - size) / 2;
 
 	const _top = padding + top;
 	const _left = padding + left;
@@ -54,7 +57,7 @@ const Character = ({
 		(is3D && (
 			<Cube
 				id={id}
-				size={config.size.character}
+				size={size}
 				top={_top}
 				left={_left}
 				animate

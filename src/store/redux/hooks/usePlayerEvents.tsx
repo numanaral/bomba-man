@@ -18,7 +18,7 @@ import {
 import { npcAction } from 'utils/npc';
 import useInterval from 'hooks/useInterval';
 import usePrevious from 'hooks/usePrevious';
-import { OnTriggerMove } from '../reducers/game/types';
+import { GameConfig, OnTriggerMove } from '../reducers/game/types';
 
 type KeyDownAction = (playerId: PlayerId, keys: PlayerKeyboardConfig) => void;
 
@@ -49,12 +49,14 @@ const useEvents = ({
 	timeOutRef,
 	keyMap,
 	is3D,
+	powerUpConfig,
 }: {
 	triggerMove: OnTriggerMove;
 	players: Players;
 	keyMap: React.MutableRefObject<KeyMap>;
 	timeOutRef: React.MutableRefObject<Record<PlayerId, number>>;
 	is3D: boolean;
+	powerUpConfig: GameConfig['powerUps'];
 }) => {
 	const { playerRefs, recalculate } = usePlayerRefs();
 	const previousIs3D = usePrevious(is3D);
@@ -71,6 +73,9 @@ const useEvents = ({
 		);
 		if (!directions.length) return;
 
+		// console.log(directions);
+		console.log(new Date().getMilliseconds());
+
 		directions.forEach(direction => {
 			triggerMove({
 				playerId,
@@ -86,11 +91,15 @@ const useEvents = ({
 		// don't do anything if no key is being pressed
 		if (!Object.values(keyMap.current).filter(Boolean).length) return;
 
-		const { keyboardConfig, state } = players[playerId]!;
+		const { keyboardConfig, state: playerState } = players[playerId]!;
 		if (!keyboardConfig) return;
 
 		// we only want to take this action for non-NPC players
-		const movementSpeed = getPoweredUpValue(state, PowerUp.MovementSpeed);
+		const movementSpeed = getPoweredUpValue(
+			playerState,
+			PowerUp.MovementSpeed,
+			powerUpConfig
+		);
 
 		const ref = playerRefs.current[playerId];
 		if (!ref) {
@@ -156,23 +165,35 @@ const useTimeOutRef = () => {
 	return timeOutRef;
 };
 
-const usePlayerActionSpeed = (players: Players, playerId: PlayerId) => {
-	const npcMovementSpeed = useMemo(() => {
-		const npcState = players[playerId]?.state;
+const usePlayerActionSpeed = (
+	players: Players,
+	playerId: PlayerId,
+	powerUpConfig: GameConfig['powerUps']
+) => {
+	const movementSpeed = useMemo(() => {
+		const playerState = players[playerId]?.state;
 		// if there is no NPC, lets not call this often
-		if (!npcState) return Number.MAX_SAFE_INTEGER;
-		return getPoweredUpValue(npcState, PowerUp.MovementSpeed);
-	}, [playerId, players]);
+		if (!playerState) return Number.MAX_SAFE_INTEGER;
+		return getPoweredUpValue(
+			playerState,
+			PowerUp.MovementSpeed,
+			powerUpConfig
+		);
+	}, [playerId, players, powerUpConfig]);
 
-	return npcMovementSpeed;
+	return movementSpeed;
 };
 
-const canPlayerTakeAction = (players: Players, playerId: PlayerId) => {
+const canPlayerTakeAction = (
+	players: Players,
+	playerId: PlayerId,
+	powerUpConfig: GameConfig['powerUps']
+) => {
 	const player = players[playerId];
 	// player doesn't exist
 	if (!player) return false;
 	// player is dead
-	if (isPlayerDead(player.state)) return false;
+	if (isPlayerDead(player.state, powerUpConfig)) return false;
 
 	return true;
 };
@@ -180,21 +201,28 @@ const canPlayerTakeAction = (players: Players, playerId: PlayerId) => {
 const usePlayerInterval = (
 	players: Players,
 	playerId: PlayerId,
+	powerUpConfig: GameConfig['powerUps'],
 	cb: (playerId: PlayerId) => void
 ) => {
-	const player1ActionSpeed = usePlayerActionSpeed(players, playerId);
+	const playerActionSpeed = usePlayerActionSpeed(
+		players,
+		playerId,
+		powerUpConfig
+	);
 
 	useInterval(() => {
-		if (!canPlayerTakeAction(players, playerId)) return;
+		if (!canPlayerTakeAction(players, playerId, powerUpConfig)) return;
 		cb(playerId);
-	}, player1ActionSpeed);
+	}, playerActionSpeed);
 };
 
-const handleBombForPlayers = (players: Players, dropBomb: OnDropBomb) => (
-	keyEventCode: KeyboardEventCode
-) => {
+const handleBombForPlayers = (
+	players: Players,
+	dropBomb: OnDropBomb,
+	powerUpConfig: GameConfig['powerUps']
+) => (keyEventCode: KeyboardEventCode) => {
 	(Object.keys(players) as Array<PlayerId>).forEach(playerId => {
-		if (canPlayerTakeAction(players, playerId)) {
+		if (canPlayerTakeAction(players, playerId, powerUpConfig)) {
 			const { DropBomb } = players[playerId]!.keyboardConfig!;
 			if (keyEventCode === DropBomb) {
 				dropBomb(playerId);
@@ -205,12 +233,20 @@ const handleBombForPlayers = (players: Players, dropBomb: OnDropBomb) => (
 
 const usePlayerEvents = ({ state, provider }: GameApi) => {
 	const { dropBomb, triggerMove } = provider;
-	const { gameMap, players, is3D } = state;
+	const {
+		gameMap,
+		players,
+		is3D,
+		config: {
+			powerUps: powerUpConfig,
+			sizes: { movement: movementSize },
+		},
+	} = state;
 
 	const { playerRefs } = usePlayerRefs();
 
 	const keyMap = useKeyboardEvent({
-		onKeyDown: handleBombForPlayers(players, dropBomb),
+		onKeyDown: handleBombForPlayers(players, dropBomb, powerUpConfig),
 	});
 	const timeOutRef = useTimeOutRef();
 	const { handleActions } = useEvents({
@@ -219,6 +255,7 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 		timeOutRef,
 		keyMap,
 		is3D,
+		powerUpConfig,
 	});
 
 	// URGENT: Since this triggers a move event, if the
@@ -226,16 +263,17 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 	// multiple times
 	// TODO: In the next update, start these intervals
 	// when the keys are pressed and not continuously
-	usePlayerInterval(players, 'P1', handleActions);
-	usePlayerInterval(players, 'P2', handleActions);
-	usePlayerInterval(players, 'P3', handleActions);
-	usePlayerInterval(players, 'P4', () => {
+	usePlayerInterval(players, 'P1', powerUpConfig, handleActions);
+	usePlayerInterval(players, 'P2', powerUpConfig, handleActions);
+	usePlayerInterval(players, 'P3', powerUpConfig, handleActions);
+	usePlayerInterval(players, 'P4', powerUpConfig, () => {
 		npcAction({
 			dropBomb,
 			gameMap,
 			players,
 			triggerMove,
 			ref: playerRefs.current.P4 as NonNullablePlayerRef,
+			movementSize,
 		});
 	});
 };

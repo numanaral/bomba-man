@@ -231,13 +231,6 @@ class OnlineGameUpdater extends GameUpdater {
 		});
 	};
 
-	// TODO: rename to gameSize
-	updateSize = async (size: RangeOf<15, 6>) => {
-		this.updaters.update({
-			size,
-		});
-	};
-
 	incrementAnimationCounter = async () => {
 		this.updaters.update({
 			animationCounter: this.state.animationCounter + 1,

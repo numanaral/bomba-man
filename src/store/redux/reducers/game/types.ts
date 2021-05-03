@@ -33,57 +33,58 @@ type BombFn = (bombId: BombId, cb?: CallableFunction) => void;
 type BombExplosionSquareCoordinates = Array<SquareCoordinates>;
 
 namespace GameConfigRanges {
+	// #region Shared
+	export type MovementSpedDefaultValue = 200 | 150 | 100;
+	export type MovementSpedIncreaseValue = -10 | -15 | -20 | -25 | -30;
+	// #endregion
+	// #region GameConfig.powerUps
+	export type PowerUpChance = RangeOf<5, 1>;
+	export type PowerUpDefaults = Record<
+		Exclude<PowerUp, PowerUp.MovementSpeed>,
+		RangeOf<5, 1>
+	> &
+		Record<PowerUp.MovementSpeed, MovementSpedDefaultValue>;
+	export type PowerUpIncreaseValues = Record<
+		Exclude<PowerUp, PowerUp.MovementSpeed>,
+		RangeOf<3, 1>
+	> &
+		Record<PowerUp.MovementSpeed, MovementSpedIncreaseValue>;
+	export type PowerUpMaxDropCount = Record<PowerUp, RangeOf<6, 1>>;
+	// #endregion
+	// #region GameConfig.tiles
+	export type BlockTileChance = RangeOf<10, 1>;
+	// #endregion
+	// #region GameConfig.sizes
+	export type MapSize = RangeOf<15, 6>;
 	export type SquareSize = 32; // | 64 ?
 	// TODO: This wont' be a square movement in the future
 	export type MovementSize = 32; // will be pixellated
-	export type MovementSpedDefaultValue = 200 | 150 | 100;
-	export type MovementSpedIncreaseValue = -10 | -15 | -20 | -25 | -30;
+	export type BombSize = 16;
+	// #endregion
+	// #region GameConfig.duration
 	export type FiringDuration = 0.5 | 0.75 | 1.5 | 2.5 | RangeOf<3, 1>;
 	export type ExplodingDuration = 0.5 | 1 | 1.5;
-	export type MapSize = RangeOf<15, 6>;
+	// #endregion
 }
-// const a: GameConfig = {
-// 	game: {
-// 		powerUps: {
-// 			increaseValues: {},
-// 		},
-// 	},
-// };
 
 type GameConfig = {
-	game: {
-		powerUps: {
-			/** Chance of getting a PowerUp */
-			chance: RangeOf<5, 1>;
-			/** Default values each player start with */
-			defaults: Record<
-				Exclude<PowerUp, PowerUp.MovementSpeed>,
-				RangeOf<5, 1>
-			> &
-				Record<
-					PowerUp.MovementSpeed,
-					GameConfigRanges.MovementSpedDefaultValue
-				>;
-			/** Increase in value per PowerUp */
-			increaseValues: Record<
-				Exclude<PowerUp, PowerUp.MovementSpeed>,
-				RangeOf<3, 1>
-			> &
-				Record<
-					PowerUp.MovementSpeed,
-					GameConfigRanges.MovementSpedIncreaseValue
-				>;
-			/** Maximum number of times a PowerUp can drop */
-			maxDropCount: Record<PowerUp, RangeOf<6, 1>>;
-		};
-		/** Edge length of the square map */
-		mapSize: GameConfigRanges.MapSize; // squares
+	powerUps: {
+		/** Chance of getting a PowerUp */
+		chance: GameConfigRanges.PowerUpChance;
+		/** Default values each player start with */
+		defaults: GameConfigRanges.PowerUpDefaults;
+		/** Increase in value per PowerUp */
+		increaseValues: GameConfigRanges.PowerUpIncreaseValues;
+		/** Maximum number of times a PowerUp can drop */
+		maxDropCount: GameConfigRanges.PowerUpMaxDropCount;
 	};
-	random: {
+	tiles: {
 		/** Chance of getting Tile.Breaking or Tile.NonBreaking  */
-		blockDensity: RangeOf<10, 1>;
+		blockTileChance: GameConfigRanges.BlockTileChance;
 	};
-	size: {
+	sizes: {
+		/** Edge length of the square map */
+		map: GameConfigRanges.MapSize; // squares
 		/** Size of the character, should be < size.tile */
 		character: GameConfigRanges.SquareSize; // px
 		/** Size of the tile */
@@ -91,7 +92,7 @@ type GameConfig = {
 		/** Movement size */
 		movement: GameConfigRanges.MovementSize; // px
 		/** Bomb size */
-		readonly bomb: 16; // px
+		bomb: GameConfigRanges.BombSize; // px
 	};
 	duration: {
 		bomb: {
@@ -114,8 +115,6 @@ type GameState = {
 	config: GameConfig;
 	is3D: boolean;
 	isSideView: boolean;
-	// TODO: rename to gameSize
-	size: RangeOf<15, 6>;
 	animationCounter: AnimationCounter;
 };
 // }>;
