@@ -1,4 +1,4 @@
-import config from 'config';
+import { GameConfig } from 'store/redux/reducers/game/types';
 import { createGlobalStyle } from 'styled-components';
 
 const theme = {
@@ -31,7 +31,7 @@ const theme = {
 	},
 };
 
-const GlobalStyles = createGlobalStyle`
+const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
 	:root {
 		/* #region COLORS */
 		--primary-background: #13141b;
@@ -58,11 +58,13 @@ const GlobalStyles = createGlobalStyle`
 		/* #endregion */
 
 		/* #region GAME */
-		--character-size: ${config.size.character}px;
-		--tile-size: ${config.size.tile}px;
-		--game-size: ${config.size.game}px;
-		--exploding-duration: ${config.duration.bomb.exploding}s;
-		--firing-duration: ${config.duration.bomb.firing}s;
+		${({ $gameConfig }) => `
+			--character-size: ${$gameConfig.sizes.character}px;
+			--tile-size: ${$gameConfig.sizes.tile}px;
+			--game-size: ${$gameConfig.sizes.map}px;
+			--exploding-duration: ${$gameConfig.duration.bomb.exploding}s;
+			--firing-duration: ${$gameConfig.duration.bomb.firing}s;
+		`}
 		/* #endregion */
 		
 		/* #region ANIMATIONS */

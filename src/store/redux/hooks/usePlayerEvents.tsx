@@ -1,117 +1,145 @@
-import config from 'config';
 import {
+	GameApi,
 	KeyboardEventCode,
 	KeyMap,
+	NonNullablePlayerRef,
+	OnDropBomb,
 	PlayerId,
 	PlayerKeyboardConfig,
+	Players,
 } from 'containers/Game/types';
 import { PowerUp } from 'enums';
 import { useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { getMoveDirectionFromKeyMap, getPoweredUpValue } from 'utils/game';
-import { npcAction } from 'utils/npc';
-import useInterval from '../../../hooks/useInterval';
 import {
-	makeSelectGameIs3D,
-	makeSelectGameMap,
-	makeSelectGamePlayers,
-} from '../reducers/game/selectors';
-import useGameProvider from './useGameProvider';
+	getMoveDirectionFromKeyMap,
+	getPoweredUpValue,
+	isPlayerDead,
+} from 'utils/game';
+import { npcAction } from 'utils/npc';
+import useInterval from 'hooks/useInterval';
+import usePrevious from 'hooks/usePrevious';
+import { CODE_SPACE } from 'keycode-js';
+import { GameConfig, OnTriggerMove } from '../reducers/game/types';
 
-type KeyDownAction = (id: PlayerId, keys: PlayerKeyboardConfig) => void;
+type HandleActionsFn = (playerId: PlayerId) => void;
+type KeyDownAction = (playerId: PlayerId, keys: PlayerKeyboardConfig) => void;
 
-const usePlayerEvents = () => {
-	const { dropBomb, triggerMove } = useGameProvider();
-	const gameMap = useSelector(makeSelectGameMap());
-	const is3D = useSelector(makeSelectGameIs3D());
-	const players = useSelector(makeSelectGamePlayers());
+type KeyAction = (keyEventCode: KeyboardEventCode) => void;
 
-	const timeOutRef = useRef<{ [key in PlayerId]?: number }>({
-		P1: new Date().getTime(),
-		P2: new Date().getTime(),
-		P3: new Date().getTime(),
-		P4: new Date().getTime(),
+const usePlayerRefs = () => {
+	const playerRefs = useRef<{ [key in PlayerId]?: HTMLElement | null }>({
+		P1: document.getElementById('P1'),
+		P2: document.getElementById('P2'),
+		P3: document.getElementById('P3'),
+		P4: document.getElementById('P4'),
 	});
-	const keyMap = useRef<KeyMap>({});
 
-	const npcMovementSpeed = useMemo(() => {
-		const npcState = players.P4?.state;
-		// if there is no NPC, lets not call this often
-		if (!npcState) return Number.MAX_SAFE_INTEGER;
-		return getPoweredUpValue(npcState, PowerUp.MovementSpeed);
-	}, [players.P4]);
+	const recalculate = () => {
+		Object.keys(playerRefs.current).forEach(playerId => {
+			playerRefs.current[playerId as PlayerId] = document.getElementById(
+				playerId
+			);
+		});
+	};
 
-	useInterval(() => {
-		// TODO: Make this dynamic as well
-		if (!players.P4) return;
-		npcAction({ players, gameMap, triggerMove, dropBomb });
-	}, npcMovementSpeed);
+	return { playerRefs, recalculate };
+};
+
+const useEvents = ({
+	triggerMove,
+	players,
+	timeOutRef,
+	keyMap,
+	is3D,
+	powerUpConfig,
+}: {
+	triggerMove: OnTriggerMove;
+	players: Players;
+	keyMap: React.MutableRefObject<KeyMap>;
+	timeOutRef: React.MutableRefObject<Record<PlayerId, number>>;
+	is3D: boolean;
+	powerUpConfig: GameConfig['powerUps'];
+}) => {
+	const { playerRefs, recalculate } = usePlayerRefs();
+	const previousIs3D = usePrevious(is3D);
 
 	useEffect(() => {
-		const move: KeyDownAction = (id, playerKeyboardConfig) => {
-			// reset rotation to 0 so the animations are consistent
-			// if (is3D) resetRotation(ref);
-			const directions = getMoveDirectionFromKeyMap(
-				keyMap,
-				playerKeyboardConfig
-			);
-			if (!directions.length) return;
+		if (previousIs3D === is3D) return;
+		recalculate();
+	}, [is3D, previousIs3D, recalculate]);
 
-			directions.forEach(direction => {
-				triggerMove({ playerId: id, direction });
+	const move: KeyDownAction = (playerId, playerKeyboardConfig) => {
+		const directions = getMoveDirectionFromKeyMap(
+			keyMap,
+			playerKeyboardConfig
+		);
+		if (!directions.length) return;
+
+		directions.forEach(direction => {
+			triggerMove({
+				playerId,
+				direction,
+				ref: playerRefs.current[playerId] as NonNullablePlayerRef,
 			});
-		};
+		});
+	};
 
-		const bomb: KeyDownAction = (id, { DropBomb }) => {
-			if (keyMap.current[DropBomb]) {
-				dropBomb(id);
+	const handleActions = (playerId: PlayerId) => {
+		if (!keyMap.current) return;
+		if (!timeOutRef.current) return;
+		// don't do anything if no key is being pressed
+		if (!Object.values(keyMap.current).filter(Boolean).length) return;
+
+		const { keyboardConfig, state: playerState } = players[playerId]!;
+		if (!keyboardConfig) return;
+
+		// we only want to take this action for non-NPC players
+		const movementSpeed = getPoweredUpValue(
+			playerState,
+			PowerUp.MovementSpeed,
+			powerUpConfig
+		);
+
+		const ref = playerRefs.current[playerId];
+		if (!ref) {
+			playerRefs.current[playerId] = document.getElementById(playerId);
+		}
+
+		if (ref) {
+			const newTime = new Date().getTime();
+			if (newTime - timeOutRef.current[playerId]! > movementSpeed) {
+				timeOutRef.current[playerId] = newTime;
+				move(playerId, keyboardConfig);
 			}
-		};
+		}
+	};
 
+	return { move, handleActions };
+};
+
+const useKeyboardEvent = ({
+	onKeyDown,
+	onKeyUp,
+}: {
+	onKeyDown?: KeyAction;
+	onKeyUp?: KeyAction;
+} = {}) => {
+	const keyMap = useRef<KeyMap>({});
+
+	useEffect(() => {
 		const registerKeys = (e: KeyboardEvent, isKeyDown: boolean) => {
 			/** @see https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript#answer-12444641 */
 			keyMap.current[e.code as KeyboardEventCode] = isKeyDown;
 		};
 
-		const handleActions = () => {
-			if (!keyMap.current) return;
-
-			// TODO: Do not account for NPCs here
-			// Instead of Array<PlayerId> it will be Array<PlayerConfig> ??
-			// This will include player type, player options etc.
-			(Object.keys(players) as Array<PlayerId>).forEach(id => {
-				const { [id]: keys } = config.keyboardConfig.player;
-				// we only want to take this action for non-NPC players
-				const playerState = players[id]!.state;
-				const movementSpeed = getPoweredUpValue(
-					playerState,
-					PowerUp.MovementSpeed
-				);
-
-				if (keys) {
-					const { ref } = players[id]!;
-
-					if (ref) {
-						const newTime = new Date().getTime();
-						if (newTime - timeOutRef.current[id]! > movementSpeed) {
-							timeOutRef.current[id] = newTime;
-							move(id, keys);
-						}
-					}
-					bomb(id, keys);
-				}
-			});
-		};
-
 		const handleKeyEvent = (e: KeyboardEvent) => {
 			if (!keyMap.current) return;
-			if (!timeOutRef.current) return;
 
 			const isKeyDown = e.type === 'keydown';
+			if (e.code === CODE_SPACE) e.preventDefault();
 			registerKeys(e, isKeyDown);
-
-			if (!isKeyDown) return;
-			handleActions();
+			if (isKeyDown) onKeyDown?.(e.code as KeyboardEventCode);
+			else onKeyUp?.(e.code as KeyboardEventCode);
 		};
 
 		window.addEventListener('keyup', handleKeyEvent);
@@ -121,9 +149,163 @@ const usePlayerEvents = () => {
 			window.removeEventListener('keyup', handleKeyEvent);
 			window.removeEventListener('keydown', handleKeyEvent);
 		};
-	}, [dropBomb, gameMap, is3D, players, triggerMove]);
+	}, [onKeyDown, onKeyUp]);
 
-	return {};
+	return keyMap;
+};
+
+const useTimeOutRef = () => {
+	const timeOutRef = useRef<Record<PlayerId, number>>({
+		P1: new Date().getTime(),
+		P2: new Date().getTime(),
+		P3: new Date().getTime(),
+		P4: new Date().getTime(),
+	});
+
+	return timeOutRef;
+};
+
+const usePlayerActionSpeed = (
+	players: Players,
+	playerId: PlayerId,
+	powerUpConfig: GameConfig['powerUps']
+) => {
+	const movementSpeed = useMemo(() => {
+		const playerState = players[playerId]?.state;
+		// if there is no NPC, lets not call this often
+		if (!playerState) return Number.MAX_SAFE_INTEGER;
+		return getPoweredUpValue(
+			playerState,
+			PowerUp.MovementSpeed,
+			powerUpConfig
+		);
+	}, [playerId, players, powerUpConfig]);
+
+	return movementSpeed;
+};
+
+const canPlayerTakeAction = (
+	players: Players,
+	playerId: PlayerId,
+	powerUpConfig: GameConfig['powerUps']
+) => {
+	const player = players[playerId];
+	// player doesn't exist
+	if (!player) return false;
+	// player is dead
+	if (isPlayerDead(player.state, powerUpConfig)) return false;
+
+	return true;
+};
+
+const usePlayerInterval = (
+	players: Players,
+	playerId: PlayerId,
+	powerUpConfig: GameConfig['powerUps'],
+	cb: HandleActionsFn
+) => {
+	const playerActionSpeed = usePlayerActionSpeed(
+		players,
+		playerId,
+		powerUpConfig
+	);
+
+	useInterval(() => {
+		if (!canPlayerTakeAction(players, playerId, powerUpConfig)) return;
+		cb(playerId);
+	}, playerActionSpeed);
+};
+
+const handleBombForPlayers = (
+	players: Players,
+	dropBomb: OnDropBomb,
+	powerUpConfig: GameConfig['powerUps']
+) => (keyEventCode: KeyboardEventCode) => {
+	(Object.keys(players) as Array<PlayerId>).forEach(playerId => {
+		if (canPlayerTakeAction(players, playerId, powerUpConfig)) {
+			const { keyboardConfig } = players[playerId]!;
+			if (keyboardConfig) {
+				const { DropBomb } = keyboardConfig;
+				if (keyEventCode === DropBomb) {
+					dropBomb(playerId);
+				}
+			}
+		}
+	});
+};
+
+const IntervalWrapper = ({
+	playerId,
+	players,
+	powerUpConfig,
+	cb,
+}: {
+	playerId: PlayerId;
+	players: Players;
+	powerUpConfig: GameConfig['powerUps'];
+	cb: HandleActionsFn;
+}) => {
+	usePlayerInterval(players, playerId, powerUpConfig, cb);
+	return null;
+};
+
+const usePlayerEvents = ({ state, provider }: GameApi) => {
+	const { dropBomb, triggerMove } = provider;
+	const {
+		gameMap,
+		players,
+		is3D,
+		config: {
+			powerUps: powerUpConfig,
+			sizes: { movement: movementSize },
+		},
+	} = state;
+
+	const { playerRefs } = usePlayerRefs();
+
+	const keyMap = useKeyboardEvent({
+		onKeyDown: handleBombForPlayers(players, dropBomb, powerUpConfig),
+	});
+	const timeOutRef = useTimeOutRef();
+	const { handleActions } = useEvents({
+		triggerMove,
+		players,
+		timeOutRef,
+		keyMap,
+		is3D,
+		powerUpConfig,
+	});
+
+	// URGENT: Since this triggers a move event, if the
+	// player is on the same explosion fire, he dies
+	// multiple times
+	// TODO: In the next update, start these intervals
+	// when the keys are pressed and not continuously
+	return Object.keys(players).map(playerId => {
+		return (
+			<IntervalWrapper
+				key={playerId}
+				playerId={playerId as PlayerId}
+				players={players}
+				powerUpConfig={powerUpConfig}
+				cb={
+					playerId === 'P4'
+						? () => {
+								npcAction({
+									dropBomb,
+									gameMap,
+									players,
+									triggerMove,
+									ref: playerRefs.current
+										.P4 as NonNullablePlayerRef,
+									movementSize,
+								});
+						  }
+						: handleActions
+				}
+			/>
+		);
+	});
 };
 
 export default usePlayerEvents;

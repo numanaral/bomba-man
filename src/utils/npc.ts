@@ -1,3 +1,4 @@
+// TODO: This will be updated after merge
 import config from 'config';
 import {
 	GameMap,
@@ -5,7 +6,9 @@ import {
 	TopLeftCoordinates,
 } from 'containers/Game/types';
 import { Direction, Player, Tile } from 'enums';
-import { MAX_GAME_SIZE, MIN_GAME_SIZE } from 'utils/game';
+
+const MIN_GAME_SIZE = 0;
+const MAX_GAME_SIZE = config.size.game - 1;
 
 type Score = number | undefined;
 
@@ -148,7 +151,6 @@ const findBestMove = (
 		leftCoordinate,
 		gameMap
 	);
-	console.log(movementTree);
 
 	let bestMovementNode: MovementNode | null = null;
 	let bestMovementDirection: Direction;
@@ -175,7 +177,7 @@ const findBestMove = (
 };
 
 type NPCAction = (props: NPCActionProps) => void;
-const npcAction: NPCAction = ({ players, gameMap, triggerMove }) => {
+const npcAction: NPCAction = ({ players, gameMap, triggerMove, ref }) => {
 	const playerId = Player.P4;
 	const currentPlayer = players[playerId];
 
@@ -194,9 +196,8 @@ const npcAction: NPCAction = ({ players, gameMap, triggerMove }) => {
 		gameMap
 	);
 
-	console.log(bestMovementDirection);
 	if (bestMovementDirection) {
-		triggerMove({ playerId, direction: bestMovementDirection });
+		triggerMove({ playerId, direction: bestMovementDirection, ref });
 	}
 
 	// TODO: Move to another file later

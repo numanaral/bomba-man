@@ -18,7 +18,7 @@
 	width: var(--character-size);
 	height: var(--character-size);
 	position: absolute;
-	transition-duration: 0.3s;
+	transition-duration: 450ms;
 
 	& .name {
 		z-index: 9999;

@@ -1,4 +1,3 @@
-import config from 'config';
 import {
 	Coordinates,
 	GameMap,
@@ -12,61 +11,29 @@ import {
 	Players,
 	PlayerState,
 	PowerUpOrNull,
+	PowerUps,
 	Square,
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { Axis, Direction, PowerUp, Tile, Explosive, FIRE_VALUES } from 'enums';
-import { OnMove, Bomb } from 'store/redux/reducers/game/types';
+import {
+	Axis,
+	Direction,
+	PowerUp,
+	Tile,
+	Explosive,
+	FIRE_VALUES,
+	Player,
+} from 'enums';
+import {
+	OnMove,
+	Bomb,
+	GameConfigRanges,
+	GameState,
+	GameConfig,
+} from 'store/redux/reducers/game/types';
+import * as KeyCode from 'keycode-js';
 import { getRandomInt } from './math';
-
-const MIN_GAME_SIZE = 0;
-const MAX_GAME_SIZE = config.size.game - 1;
-const FORBIDDEN_COORDINATES = [
-	// TOP-LEFT
-	[MIN_GAME_SIZE, MIN_GAME_SIZE],
-	[MIN_GAME_SIZE, MIN_GAME_SIZE + 1],
-	[MIN_GAME_SIZE + 1, MIN_GAME_SIZE],
-	// TOP-RIGHT
-	[MIN_GAME_SIZE, MAX_GAME_SIZE],
-	[MIN_GAME_SIZE, MAX_GAME_SIZE - 1],
-	[MIN_GAME_SIZE + 1, MAX_GAME_SIZE],
-	// BOTTOM-RIGHT
-	[MAX_GAME_SIZE, MAX_GAME_SIZE],
-	[MAX_GAME_SIZE, MAX_GAME_SIZE - 1],
-	[MAX_GAME_SIZE - 1, MAX_GAME_SIZE],
-	// BOTTOM-LEFT
-	[MAX_GAME_SIZE, MIN_GAME_SIZE],
-	[MAX_GAME_SIZE, MIN_GAME_SIZE + 1],
-	[MAX_GAME_SIZE - 1, MIN_GAME_SIZE],
-];
-
-const generateRandomGameMap = (
-	size: number,
-	// TODO: characterCoordinates,
-	forbiddenCoordinates = FORBIDDEN_COORDINATES
-): GameMap => {
-	const tiles: Array<KeysOf<typeof Tile>> = [
-		...Object.keys(Tile),
-		// reverse block density, we want that many Emptys
-		...Array(11 - config.game.blockDensity).fill('Empty'),
-	];
-	const randomMap = Array(size)
-		.fill(0)
-		.map(() =>
-			Array(size)
-				.fill(0)
-				.map(() => Tile[tiles[getRandomInt(tiles.length)]])
-		);
-	// ensure we don't fill the char beginning squares with blocks
-	forbiddenCoordinates.forEach(([y, x]) => {
-		if (randomMap[y][x] !== Tile.Empty) {
-			randomMap[y][x] = Tile.Empty;
-		}
-	});
-
-	return randomMap;
-};
 
 /**
  * Converts from pixel to square.
@@ -74,13 +41,13 @@ const generateRandomGameMap = (
  * @param coordinates Top Left Coordinates.
  * @returns Square version of the coordinates.
  */
-const topLeftCoordinatesToSquareCoordinates = ({
-	top,
-	left,
-}: TopLeftCoordinates) => {
+const topLeftCoordinatesToSquareCoordinates = (
+	{ top, left }: TopLeftCoordinates,
+	movementSize: GameConfigRanges.MovementSize
+) => {
 	return {
-		ySquare: top / config.size.movement,
-		xSquare: left / config.size.movement,
+		ySquare: top / movementSize,
+		xSquare: left / movementSize,
 	};
 };
 
@@ -90,30 +57,293 @@ const topLeftCoordinatesToSquareCoordinates = ({
  * @param coordinates Square Coordinates.
  * @returns Pixel (top, left) version of the coordinates.
  */
-const squareCoordinatesToTopLeftCoordinates = ({
-	xSquare,
-	ySquare,
-}: SquareCoordinates) => {
+const squareCoordinatesToTopLeftCoordinates = (
+	{ xSquare, ySquare }: SquareCoordinates,
+	movementSize: GameConfigRanges.MovementSize
+): TopLeftCoordinates => {
 	return {
-		top: ySquare * config.size.movement,
-		left: xSquare * config.size.movement,
+		top: ySquare * movementSize,
+		left: xSquare * movementSize,
 	};
 };
 
-const BOUNDARY_MIN = 0;
-const BOUNDARY_MAX = config.size.movement * (config.size.game - 1);
-const canMove = (top: number, left: number, map: GameMap) => {
-	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates({
-		top,
-		left,
+const getTopLeftCoordinatesFromSquareOrSquareCoordinates = (
+	coordinates: Coordinates,
+	movementSize: GameConfigRanges.MovementSize
+) => {
+	let top;
+	let left;
+
+	if ((coordinates as SquareCoordinates).xSquare !== undefined) {
+		const _coordinates = squareCoordinatesToTopLeftCoordinates(
+			coordinates as SquareCoordinates,
+			movementSize
+		);
+		top = _coordinates.top;
+		left = _coordinates.left;
+	} else {
+		top = (coordinates as TopLeftCoordinates).top;
+		left = (coordinates as TopLeftCoordinates).left;
+	}
+	return { top, left };
+};
+
+const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
+	coordinates: Coordinates,
+	movementSize: GameConfigRanges.MovementSize
+) => {
+	let xSquare;
+	let ySquare;
+
+	if ((coordinates as SquareCoordinates).xSquare !== undefined) {
+		xSquare = (coordinates as SquareCoordinates).xSquare;
+		ySquare = (coordinates as SquareCoordinates).ySquare;
+	} else {
+		const _coordinates = topLeftCoordinatesToSquareCoordinates(
+			coordinates as TopLeftCoordinates,
+			movementSize
+		);
+		xSquare = _coordinates.xSquare;
+		ySquare = _coordinates.ySquare;
+	}
+	return { xSquare, ySquare };
+};
+
+const getDefaultPlayerStartSquareCoordinates = (
+	mapSize: GameConfigRanges.MapSize
+): Record<PlayerId, SquareCoordinates> => {
+	const minSize = 0;
+	const maxSize = mapSize - 1;
+	return {
+		P1: { ySquare: minSize, xSquare: minSize },
+		P2: { ySquare: minSize, xSquare: maxSize },
+		P3: { ySquare: maxSize, xSquare: maxSize },
+		P4: { ySquare: maxSize, xSquare: minSize },
+	};
+};
+
+const getForbiddenStartCoordinates = (
+	mapSize: GameConfigRanges.MapSize
+): SquareCoordinateArray => {
+	const defaultSquareCoordinates = getDefaultPlayerStartSquareCoordinates(
+		mapSize
+	);
+
+	// used to calculate the next square
+	// value to add to currentX and currentY square coordinates
+	const xyDiff = [
+		[1, 1], // TopLeft
+		[-1, 1], // TopRight
+		[-1, -1], // BottomRight
+		[1, -1], // BottomLeft
+	];
+
+	return Object.values(
+		defaultSquareCoordinates
+	).reduce<SquareCoordinateArray>((acc, squareCoordinates, ind) => {
+		const { xSquare, ySquare } = squareCoordinates;
+		const currentDiff = xyDiff[ind];
+		// player's coordinate
+		acc.push(squareCoordinates);
+		for (let i = 0; i < 2; i++) {
+			// horizontal adjacent square coordinate
+			if (i === 0) {
+				acc.push({
+					xSquare: xSquare + currentDiff[i],
+					ySquare,
+				});
+				// vertical adjacent square coordinate
+			} else {
+				acc.push({
+					xSquare,
+					ySquare: ySquare + currentDiff[i],
+				});
+			}
+		}
+		return acc;
+	}, []);
+};
+
+const generateRandomGameMap = (
+	mapSize: GameConfigRanges.MapSize,
+	blockTileChance: GameConfigRanges.BlockTileChance,
+	forbiddenCoordinates?: SquareCoordinateArray
+): GameMap => {
+	const _forbiddenCoordinates =
+		forbiddenCoordinates || getForbiddenStartCoordinates(mapSize);
+	const tiles: Array<KeysOf<typeof Tile>> = [
+		...Object.keys(Tile),
+		// reverse block density, we want that many Emptys
+		...Array(11 - blockTileChance).fill('Empty'),
+	];
+	const sizedArray = Array(mapSize).fill(0);
+
+	const randomMap = sizedArray.reduce((accOuter, _, indOuter) => {
+		accOuter[indOuter] = sizedArray.reduce((accInner, __, indInner) => {
+			accInner[indInner] = Tile[tiles[getRandomInt(tiles.length)]];
+			return accInner;
+		}, {});
+		return accOuter;
+	}, {});
+	// ensure we don't fill the char beginning squares with blocks
+	_forbiddenCoordinates.forEach(({ ySquare, xSquare }) => {
+		if (randomMap[ySquare][xSquare] !== Tile.Empty) {
+			randomMap[ySquare][xSquare] = Tile.Empty;
+		}
 	});
-	const nextSquare = map[ySquare]?.[xSquare];
+
+	return randomMap;
+};
+
+const getDefaultPowerUps = () => {
+	return Object.values(PowerUp).reduce<DynamicObject>((acc, powerUpKey) => {
+		acc[powerUpKey] = 0;
+		return acc;
+	}, {}) as PowerUps;
+};
+
+const generatePlayer = (
+	playerId: PlayerId,
+	config: GameConfig,
+	coordinates?: Coordinates
+): PlayerConfig => {
+	const {
+		keyboardConfig: { [playerId]: defaultKeyboardConfig },
+		sizes: { map: mapSize, movement: movementSize },
+	} = config;
+
+	// eslint-disable-next-line max-len
+	const topLeftCoordinates = getTopLeftCoordinatesFromSquareOrSquareCoordinates(
+		coordinates ||
+			getDefaultPlayerStartSquareCoordinates(mapSize)[playerId],
+		movementSize
+	);
+
+	return {
+		id: playerId,
+		coordinates: topLeftCoordinates,
+		state: {
+			deathCount: 0,
+			powerUps: getDefaultPowerUps(),
+		},
+		keyboardConfig: defaultKeyboardConfig,
+	};
+};
+
+const generatePlayers = (
+	config: GameConfig
+): Record<PlayerId, PlayerConfig> => {
+	const defaultCoordinates = getDefaultPlayerStartSquareCoordinates(
+		config.sizes.map
+	);
+
+	return {
+		P1: generatePlayer(Player.P1, config, defaultCoordinates.P1),
+		P2: generatePlayer(Player.P2, config, defaultCoordinates.P2),
+		P3: generatePlayer(Player.P3, config, defaultCoordinates.P3),
+		P4: generatePlayer(Player.P4, config, defaultCoordinates.P4),
+	};
+};
+
+const generateDefaultGameConfig = (): GameConfig => {
+	return {
+		powerUps: {
+			chance: 5,
+			defaults: {
+				[PowerUp.Life]: 1,
+				[PowerUp.BombCount]: 1,
+				[PowerUp.BombSize]: 1,
+				[PowerUp.MovementSpeed]: 200,
+			},
+			increaseValues: {
+				[PowerUp.Life]: 1,
+				[PowerUp.BombCount]: 1,
+				[PowerUp.BombSize]: 1,
+				[PowerUp.MovementSpeed]: -15,
+			},
+			maxDropCount: {
+				[PowerUp.Life]: 4,
+				[PowerUp.BombCount]: 6,
+				[PowerUp.BombSize]: 6,
+				[PowerUp.MovementSpeed]: 5,
+			},
+		},
+		tiles: {
+			blockTileChance: 1,
+		},
+		sizes: {
+			map: 15,
+			character: 32,
+			tile: 32,
+			movement: 32,
+		},
+		duration: {
+			bomb: {
+				firing: 2,
+				exploding: 1,
+			},
+		},
+		keyboardConfig: {
+			P1: {
+				MoveUp: KeyCode.CODE_W,
+				MoveRight: KeyCode.CODE_D,
+				MoveDown: KeyCode.CODE_S,
+				MoveLeft: KeyCode.CODE_A,
+				DropBomb: KeyCode.CODE_SPACE,
+			},
+			P2: {
+				MoveUp: KeyCode.CODE_UP,
+				MoveRight: KeyCode.CODE_RIGHT,
+				MoveDown: KeyCode.CODE_DOWN,
+				MoveLeft: KeyCode.CODE_LEFT,
+				DropBomb: KeyCode.CODE_SEMICOLON,
+			},
+		},
+	};
+};
+
+const generateDefaultGameState = (config?: GameConfig): GameState => {
+	const _config = config || generateDefaultGameConfig();
+	const {
+		sizes: { map: mapSize },
+		tiles: { blockTileChance: blockDensity },
+	} = _config;
+	return {
+		players: {
+			P1: generatePlayer(Player.P1, _config),
+		},
+		gameMap: generateRandomGameMap(mapSize, blockDensity),
+		bombs: {},
+		powerUps: {},
+		config: generateDefaultGameConfig(),
+		is3D: false,
+		isSideView: false,
+		animationCounter: 0,
+	};
+};
+
+const canMove = (
+	coordinates: Coordinates,
+	gameMap: GameMap,
+	{ map: mapSize, movement: movementSize }: GameConfig['sizes']
+) => {
+	const minTopLeft = 0;
+	const maxTopLeft = mapSize - 1;
+
+	const {
+		xSquare,
+		ySquare,
+	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+		coordinates,
+		movementSize
+	);
+	const nextSquare = gameMap[ySquare]?.[xSquare];
 	const isObstacle =
 		nextSquare === Tile.Breaking ||
 		nextSquare === Tile.NonBreaking ||
 		nextSquare === Explosive.Bomb;
-	const isHorizontalEnd = left < BOUNDARY_MIN || left > BOUNDARY_MAX;
-	const isVerticalEnd = top < BOUNDARY_MIN || top > BOUNDARY_MAX;
+	const isHorizontalEnd = xSquare < minTopLeft || xSquare > maxTopLeft;
+	const isVerticalEnd = ySquare < minTopLeft || ySquare > maxTopLeft;
 	return !isObstacle && !isHorizontalEnd && !isVerticalEnd;
 };
 
@@ -183,36 +413,41 @@ const handleMove = (
 		playerConfig: {
 			id: playerId,
 			coordinates: { top, left },
-			ref,
 		},
 		direction,
 		is3D,
 		gameMap,
 	}: NextMoveProps,
 	movementSpeed: number,
-	onComplete: OnMove
+	onComplete: OnMove,
+	ref: NonNullablePlayerRef,
+	sizes: GameConfig['sizes']
 ) => {
+	if (!direction) return;
+
+	const { movement } = sizes;
+
 	let newTop = top;
 	let newLeft = left;
 	switch (direction) {
 		case Direction.UP:
-			newTop = top - config.size.movement;
+			newTop = top - movement;
 			break;
 		case Direction.RIGHT:
-			newLeft = left + config.size.movement;
+			newLeft = left + movement;
 			break;
 		case Direction.DOWN:
-			newTop = top + config.size.movement;
+			newTop = top + movement;
 			break;
 		case Direction.LEFT:
-			newLeft = left - config.size.movement;
+			newLeft = left - movement;
 			break;
 		default:
 			// do nothing
 			break;
 	}
 
-	if (!canMove(newTop, newLeft, gameMap)) return;
+	if (!canMove({ top: newTop, left: newLeft }, gameMap, sizes)) return;
 
 	if (is3D) resetRotation(ref);
 	// TODO: Do a write-up on this
@@ -268,33 +503,18 @@ const getTilesToBreak = (
 	return tilesToBreak;
 };
 
-const getSquareCoordinatesFromSquareOrTopLeftCoordinates = (
-	coordinates: Coordinates
+const isSquareOutsideBoundaries = (
+	squareCoordinate: number,
+	mapSize: GameConfigRanges.MapSize
 ) => {
-	let xSquare;
-	let ySquare;
-
-	if ((coordinates as SquareCoordinates).xSquare !== undefined) {
-		xSquare = (coordinates as SquareCoordinates).xSquare;
-		ySquare = (coordinates as SquareCoordinates).ySquare;
-	} else {
-		const _coordinates = topLeftCoordinatesToSquareCoordinates(
-			coordinates as TopLeftCoordinates
-		);
-		xSquare = _coordinates.xSquare;
-		ySquare = _coordinates.ySquare;
-	}
-	return { xSquare, ySquare };
-};
-
-const isSquareOutsideBoundaries = (squareCoordinate: number) => {
-	return squareCoordinate < 0 || squareCoordinate >= config.size.game;
+	return squareCoordinate < 0 || squareCoordinate >= mapSize;
 };
 
 const getExplosionSquareCoordinatesFromBomb = (
 	gameMap: GameMap,
 	coordinates: Coordinates,
 	explosionSize: number,
+	{ map: mapSize, movement: movementSize }: GameConfig['sizes'],
 	/** only returns fire locations */
 	checkOnlyFire = false
 ) => {
@@ -330,7 +550,10 @@ const getExplosionSquareCoordinatesFromBomb = (
 	const {
 		xSquare: bombX,
 		ySquare: bombY,
-	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+	} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+		coordinates,
+		movementSize
+	);
 	const bombSquareCoordinates = { xSquare: bombX, ySquare: bombY };
 	const explosionCoordinates: CoordinatesToSetOnFire = {
 		[ExplosionDirection.HORIZONTAL]: [],
@@ -384,8 +607,8 @@ const getExplosionSquareCoordinatesFromBomb = (
 
 			// don't go out of boundaries
 			if (
-				isSquareOutsideBoundaries(currentX) ||
-				isSquareOutsideBoundaries(currentY)
+				isSquareOutsideBoundaries(currentX, mapSize) ||
+				isSquareOutsideBoundaries(currentY, mapSize)
 			) {
 				continue;
 			}
@@ -442,6 +665,7 @@ const getExplosionResults = (
 	players: Players,
 	bombCoordinates: TopLeftCoordinates,
 	explosionSize: number,
+	sizes: GameConfig['sizes'],
 	/** only returns fire locations */
 	checkOnlyFire = false
 ) => {
@@ -456,6 +680,7 @@ const getExplosionResults = (
 		gameMap,
 		bombCoordinates,
 		explosionSize,
+		sizes,
 		checkOnlyFire
 	);
 	// { horizontal, vertical }
@@ -478,22 +703,32 @@ const getExplosionResults = (
 	return { coordinatesToSetOnFire, tilesToBreak };
 };
 
-const getPoweredUpValue = (playerState: PlayerState, powerUp: PowerUp) => {
+const getPoweredUpValue = (
+	playerState: PlayerState,
+	type: PowerUp,
+	powerUpConfig: GameConfig['powerUps']
+) => {
 	return (
-		playerState[powerUp] +
-		playerState.powerUps[powerUp] *
-			config.game.powerUpIncreaseValue[powerUp]
+		powerUpConfig.defaults[type] +
+		playerState.powerUps[type] * powerUpConfig.increaseValues[type]
 	);
 };
 
-const generateBomb = ({
-	id: playerId,
-	coordinates: { top, left },
-	state,
-}: PlayerConfig) => {
-	const explosionSize = getPoweredUpValue(state, PowerUp.BombSize);
+const generateBomb = (
+	{
+		id: playerId,
+		coordinates: { top, left },
+		state: playerState,
+	}: PlayerConfig,
+	powerUpConfig: GameConfig['powerUps']
+) => {
+	const explosionSize = getPoweredUpValue(
+		playerState,
+		PowerUp.BombSize,
+		powerUpConfig
+	);
 	const bomb: Bomb = {
-		id: new Date().toJSON(),
+		id: new Date().getTime().toString(),
 		explosionSize,
 		top,
 		left,
@@ -522,41 +757,34 @@ const getMoveDirectionFromKeyboardCode = (
 
 const getMoveDirectionFromKeyMap = (
 	keyMap: React.MutableRefObject<KeyMap>,
-	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
+	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig,
+	multi = false
 ) => {
-	return [
-		keyMap.current[MoveUp] && Direction.UP,
-		keyMap.current[MoveRight] && Direction.RIGHT,
-		keyMap.current[MoveDown] && Direction.DOWN,
-		keyMap.current[MoveLeft] && Direction.LEFT,
-	].filter(Boolean) as Array<Direction>;
+	return (multi
+		? // record and play all keys that being held
+		  [
+				keyMap.current[MoveUp] && Direction.UP,
+				keyMap.current[MoveRight] && Direction.RIGHT,
+				keyMap.current[MoveDown] && Direction.DOWN,
+				keyMap.current[MoveLeft] && Direction.LEFT,
+		  ]
+		: // handle single key down
+		  [
+				(keyMap.current[MoveUp] && Direction.UP) ||
+					(keyMap.current[MoveRight] && Direction.RIGHT) ||
+					(keyMap.current[MoveDown] && Direction.DOWN) ||
+					(keyMap.current[MoveLeft] && Direction.LEFT),
+		  ]
+	).filter(Boolean) as Array<Direction>;
 };
 
-const playerGenerator = (
-	playerId: PlayerId,
-	top: number,
-	left: number
-): PlayerConfig => {
-	const { blockDensity, ...defaultState } = config.game;
-	return {
-		id: playerId,
-		coordinates: {
-			top: top * 32,
-			left: left * 32,
-		},
-		ref: null,
-		state: {
-			...defaultState,
-			powerUps: { ...defaultState.powerUps },
-		},
-	};
-};
-
-const generatePowerUpOrNull = () => {
+const generatePowerUpOrNull = (
+	powerUpChance: GameConfigRanges.PowerUpChance
+) => {
 	const possiblePowerUpOrNulls: Array<KeysOf<KeysOf<PowerUpOrNull>>> = [
 		...Object.values(PowerUp),
 		// reverse block density, we want that many nulls
-		...Array(6 - config.game.powerUpChance).fill(null),
+		...Array(6 - powerUpChance).fill(null),
 	];
 
 	return possiblePowerUpOrNulls[getRandomInt(possiblePowerUpOrNulls.length)];
@@ -568,18 +796,33 @@ const isPowerUp = (square: Square) => {
 
 const isPlayerSteppingOnFire = (
 	gameMap: GameMap,
-	playerCoordinates: TopLeftCoordinates
+	playerCoordinates: TopLeftCoordinates,
+	movementSize: GameConfigRanges.MovementSize
 ) => {
 	const { xSquare, ySquare } = topLeftCoordinatesToSquareCoordinates(
-		playerCoordinates
+		playerCoordinates,
+		movementSize
 	);
 	const currentSquare = gameMap[ySquare][xSquare];
 
 	return FIRE_VALUES.includes(currentSquare as Explosive);
 };
 
+const isPlayerDead = (
+	playerState: PlayerState,
+	powerUpConfig: GameConfig['powerUps']
+) => {
+	return (
+		playerState.deathCount >=
+		getPoweredUpValue(playerState, PowerUp.Life, powerUpConfig)
+	);
+};
+
 export {
 	generateRandomGameMap,
+	generatePlayer,
+	generatePlayers,
+	generateDefaultGameState,
 	canMove,
 	rotateMove,
 	handleRotateMove,
@@ -589,16 +832,15 @@ export {
 	getExplosionScaleSize,
 	getExplosionResults,
 	generateBomb,
-	playerGenerator,
 	getMoveDirectionFromKeyboardCode,
 	getMoveDirectionFromKeyMap,
-	MAX_GAME_SIZE,
-	MIN_GAME_SIZE,
 	topLeftCoordinatesToSquareCoordinates,
 	squareCoordinatesToTopLeftCoordinates,
+	getTopLeftCoordinatesFromSquareOrSquareCoordinates,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	generatePowerUpOrNull,
 	isPowerUp,
 	getPoweredUpValue,
 	isPlayerSteppingOnFire,
+	isPlayerDead,
 };
