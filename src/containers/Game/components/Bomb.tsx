@@ -54,7 +54,7 @@ const FiringCubeBomb = styled(Cube)`
 interface Props extends BombType {
 	// skin: Skin;
 	color: string;
-	size: GameConfigRanges.BombSize;
+	tileSize: GameConfigRanges.SquareSize;
 	firingDuration: number;
 	explodingDuration: number;
 	triggerExplosion: BombFn;
@@ -67,7 +67,7 @@ const Bomb = ({
 	firingDuration,
 	explodingDuration,
 	// explosionSize,
-	size,
+	tileSize,
 	id,
 	top,
 	left,
@@ -102,15 +102,16 @@ const Bomb = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const bombSizePadding = size / 2;
+	const bombSize = tileSize / 2;
+	const bombPadding = bombSize / 2;
 
 	const bombStyleProps: React.CSSProperties = {
 		position: 'absolute',
 		backgroundColor,
-		width: size,
-		height: size,
-		top: top + bombSizePadding,
-		left: left + bombSizePadding,
+		width: bombSize,
+		height: bombSize,
+		top: top + bombPadding,
+		left: left + bombPadding,
 		animationDuration: `${firingDuration}s`,
 	};
 
@@ -118,7 +119,7 @@ const Bomb = ({
 		(explosionState === ExplosionState.Firing &&
 			((!is3D && <FiringBomb style={bombStyleProps} />) || (
 				<FiringCubeBomb
-					size={size}
+					size={bombSize}
 					top={Number(bombStyleProps.top)}
 					left={Number(bombStyleProps.left)}
 					animate={false}

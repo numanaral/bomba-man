@@ -59,7 +59,6 @@ namespace GameConfigRanges {
 	export type SquareSize = 32; // | 64 ?
 	// TODO: This wont' be a square movement in the future
 	export type MovementSize = 32; // will be pixellated
-	export type BombSize = 16;
 	// #endregion
 	// #region GameConfig.duration
 	export type FiringDuration = 0.5 | 0.75 | 1.5 | 2.5 | RangeOf<3, 1>;
@@ -91,8 +90,6 @@ type GameConfig = {
 		tile: GameConfigRanges.SquareSize; // px
 		/** Movement size */
 		movement: GameConfigRanges.MovementSize; // px
-		/** Bomb size */
-		bomb: GameConfigRanges.BombSize; // px
 	};
 	duration: {
 		bomb: {

@@ -276,7 +276,6 @@ const generateDefaultGameConfig = (): GameConfig => {
 			character: 32,
 			tile: 32,
 			movement: 32,
-			bomb: 16,
 		},
 		duration: {
 			bomb: {

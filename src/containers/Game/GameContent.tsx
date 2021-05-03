@@ -76,7 +76,7 @@ const GameContent = ({ state, provider }: Props) => {
 						playerId={playerId}
 						{...bombProps}
 						color={theme.palette.color.error}
-						size={config.sizes.bomb}
+						tileSize={config.sizes.tile}
 						explosionSize={explosionSize}
 						firingDuration={config.duration.bomb.firing}
 						explodingDuration={config.duration.bomb.exploding}
