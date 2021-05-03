@@ -36,10 +36,6 @@ const makeSelectGameMap = () => {
 	return createSelector(selectGameProps, ({ gameMap }) => gameMap);
 };
 
-const makeSelectGameSize = () => {
-	return createSelector(selectGameProps, ({ size }) => size);
-};
-
 const makeSelectGameAnimationCounter = () => {
 	return createSelector(
 		selectGameProps,
@@ -63,7 +59,6 @@ export {
 	makeSelectGameIs3D,
 	makeSelectGameIsSideView,
 	makeSelectGameMap,
-	makeSelectGameSize,
 	makeSelectGameAnimationCounter,
 };
 export default makeSelectGameState;

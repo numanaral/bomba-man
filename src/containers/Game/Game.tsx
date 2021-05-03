@@ -7,7 +7,7 @@ import { GameApi } from './types';
 
 const useGameProps = (props: GameApi) => {
 	const {
-		state: { is3D, gameMap, isSideView, animationCounter },
+		state: { is3D, gameMap, isSideView, animationCounter, config },
 		// provider,
 	} = props;
 
@@ -20,6 +20,7 @@ const useGameProps = (props: GameApi) => {
 	};
 
 	const gameMapProps = {
+		sizes: config.sizes,
 		gameMap,
 		is3D,
 		isSideView,
@@ -39,7 +40,7 @@ const useGameProps = (props: GameApi) => {
 };
 
 const Game = (props: GameApi) => {
-	usePlayerEvents(props);
+	const playerIntervals = usePlayerEvents(props);
 	const {
 		gameContainerProps,
 		gameSettingProps,
@@ -53,6 +54,7 @@ const Game = (props: GameApi) => {
 			<GameMap {...gameMapProps}>
 				<GameContent {...gameContentProps} />
 			</GameMap>
+			{playerIntervals}
 		</GameContainer>
 	);
 };

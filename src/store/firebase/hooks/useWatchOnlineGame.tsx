@@ -11,8 +11,6 @@ import { fromFirestore, toFirestore } from 'store/firebase/utils';
 import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
 import { GameState } from 'store/redux/reducers/game/types';
 import { generateDefaultGameState } from 'utils/game';
-// import { generateRandomGameMap } from 'utils/game';
-// import config from 'config';
 // TODO: react-router
 // import LoadingIndicator from 'components/LoadingIndicator';
 // import NoAccess from 'components/NoAccess';
@@ -70,15 +68,14 @@ const useWatchOnlineGame = (id: string) => {
 	};
 
 	const gameState: GameState = {
-		players: onlineGame.players || {},
-		// gameMap: onlineGame.gameMap || generateRandomGameMap(config.size.game),
-		gameMap: onlineGame.gameMap || {},
-		bombs: onlineGame.bombs || {},
-		powerUps: onlineGame.powerUps || {},
-		is3D: onlineGame.is3D || false,
-		isSideView: onlineGame.isSideView || false,
-		size: onlineGame.size || 15,
-		animationCounter: onlineGame.animationCounter || 0,
+		players: onlineGame.players || defaultGameState.players,
+		gameMap: onlineGame.gameMap || defaultGameState.gameMap,
+		bombs: onlineGame.bombs || defaultGameState.bombs,
+		powerUps: onlineGame.powerUps || defaultGameState.powerUps,
+		is3D: onlineGame.is3D || defaultGameState.is3D,
+		isSideView: onlineGame.isSideView || defaultGameState.isSideView,
+		animationCounter:
+			onlineGame.animationCounter || defaultGameState.animationCounter,
 		config: defaultGameState.config,
 	};
 

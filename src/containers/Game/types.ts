@@ -1,6 +1,10 @@
 import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
-import { GameState, OnTriggerMove } from 'store/redux/reducers/game/types';
+import {
+	GameConfigRanges,
+	GameState,
+	OnTriggerMove,
+} from 'store/redux/reducers/game/types';
 import { FontAwesomeIconProps as FontAwesomeBaseIconProps } from '@fortawesome/react-fontawesome';
 import { GameProvider } from 'store/redux/hooks/useGameProvider';
 
@@ -73,13 +77,13 @@ type PlayerState = {
 	deathCount: number;
 	/** How many power-ups have been collected */
 	powerUps: PowerUps;
-} & PowerUps;
+};
 
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
 	state: PlayerState;
-	keyboardConfig: PlayerKeyboardConfig | null;
+	keyboardConfig: PlayerKeyboardConfig | undefined;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
@@ -99,7 +103,7 @@ type CharacterProps = {
 	id: PlayerId;
 	name: string;
 	coordinates: TopLeftCoordinates;
-	keyboardConfig: PlayerKeyboardConfig;
+	keyboardConfig?: PlayerKeyboardConfig;
 	highlight?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
@@ -109,6 +113,7 @@ type NPCActionProps = {
 	triggerMove: OnTriggerMove;
 	dropBomb: OnDropBomb;
 	ref: NonNullablePlayerRef;
+	movementSize: GameConfigRanges.MovementSize;
 };
 
 type PowerUpOrNull = PowerUp | null;

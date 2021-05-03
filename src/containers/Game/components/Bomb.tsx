@@ -1,10 +1,10 @@
-import config from 'config';
 import { ExplosionState, Explosive } from 'enums';
 import { useEffect, useState } from 'react';
 import {
 	Bomb as BombType,
 	BombFn,
 	BombId,
+	GameConfigRanges,
 } from 'store/redux/reducers/game/types';
 import styled, { keyframes } from 'styled-components';
 import theme from 'theme';
@@ -54,6 +54,7 @@ const FiringCubeBomb = styled(Cube)`
 interface Props extends BombType {
 	// skin: Skin;
 	color: string;
+	tileSize: GameConfigRanges.SquareSize;
 	firingDuration: number;
 	explodingDuration: number;
 	triggerExplosion: BombFn;
@@ -66,6 +67,7 @@ const Bomb = ({
 	firingDuration,
 	explodingDuration,
 	// explosionSize,
+	tileSize,
 	id,
 	top,
 	left,
@@ -100,16 +102,16 @@ const Bomb = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const bombSize = config.size.bomb;
-	const bombSizePadding = bombSize / 2;
+	const bombSize = tileSize / 2;
+	const bombPadding = bombSize / 2;
 
 	const bombStyleProps: React.CSSProperties = {
 		position: 'absolute',
 		backgroundColor,
 		width: bombSize,
 		height: bombSize,
-		top: top + bombSizePadding,
-		left: left + bombSizePadding,
+		top: top + bombPadding,
+		left: left + bombPadding,
 		animationDuration: `${firingDuration}s`,
 	};
 

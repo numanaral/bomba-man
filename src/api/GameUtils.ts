@@ -4,7 +4,6 @@ import {
 	PlayerId,
 	SquareCoordinates,
 	PlayerConfig,
-	Players,
 } from 'containers/Game/types';
 import { Tile, PowerUp, Explosive, FIRE_VALUES, Player } from 'enums';
 import {
@@ -24,20 +23,16 @@ import {
 	handleMove,
 	isPowerUp,
 	generateBomb,
-	generatePlayers,
+	generatePlayer,
 } from 'utils/game';
 import LocalGameUpdater from './LocalGameUpdater';
 import OnlineGameUpdater from './OnlineGameUpdater';
 
 class GameUtils {
-	defaultPlayers: Players;
-
 	constructor(
 		public state: GameState,
 		public updaters: OnlineGameUpdater | LocalGameUpdater
-	) {
-		this.defaultPlayers = generatePlayers(state.config.game.mapSize);
-	}
+	) {}
 
 	// #region STATE UTILITIES
 	getPlayerState = (playerId: PlayerId) => {
@@ -48,19 +43,31 @@ class GameUtils {
 		const playerState = this.getPlayerState(playerId);
 		const { deathCount } = playerState;
 		// < 1 to prevent instant double explosion
-		return deathCount >= getPoweredUpValue(playerState, PowerUp.Life);
+		return (
+			deathCount >=
+			getPoweredUpValue(
+				playerState,
+				PowerUp.Life,
+				this.state.config.powerUps
+			)
+		);
 	};
 
 	getPowerUpOrNull = (coordinates: Coordinates) => {
 		const {
 			xSquare,
 			ySquare,
-		} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+		} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+			coordinates,
+			this.state.config.sizes.movement
+		);
 
 		try {
 			const currentSquare = this.state.gameMap[ySquare][xSquare];
 			if (currentSquare !== Tile.Breaking) return null;
-			const powerUpOrNull = generatePowerUpOrNull();
+			const powerUpOrNull = generatePowerUpOrNull(
+				this.state.config.powerUps.chance
+			);
 			if (!powerUpOrNull) return null;
 			return currentSquare === Tile.Breaking
 				? {
@@ -81,21 +88,24 @@ class GameUtils {
 	getBombCountForPlayer = (playerId: PlayerId) => {
 		return getPoweredUpValue(
 			this.getPlayerState(playerId),
-			PowerUp.BombCount
+			PowerUp.BombCount,
+			this.state.config.powerUps
 		);
 	};
 
 	getBombSizeForPlayer = (playerId: PlayerId) => {
 		return getPoweredUpValue(
 			this.getPlayerState(playerId),
-			PowerUp.BombSize
+			PowerUp.BombSize,
+			this.state.config.powerUps
 		);
 	};
 
 	getMovementSpeedForPlayer = (playerId: PlayerId) => {
 		return getPoweredUpValue(
 			this.getPlayerState(playerId),
-			PowerUp.MovementSpeed
+			PowerUp.MovementSpeed,
+			this.state.config.powerUps
 		);
 	};
 
@@ -109,7 +119,8 @@ class GameUtils {
 		if (this.state.gameMap[ySquare][xSquare] !== Explosive.Bomb)
 			return null;
 		const { top, left } = squareCoordinatesToTopLeftCoordinates(
-			coordinates
+			coordinates,
+			this.state.config.sizes.movement
 		);
 		const bombToTrigger = Object.values(this.state.bombs).find(
 			({ top: t, left: l }) => top === t && left === l
@@ -128,7 +139,8 @@ class GameUtils {
 	setSquare = (coordinates: Coordinates, newSquare: Square) => {
 		// eslint-disable-next-line max-len
 		const squareCoordinates = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
-			coordinates
+			coordinates,
+			this.state.config.sizes.movement
 		);
 
 		try {
@@ -157,7 +169,10 @@ class GameUtils {
 				const {
 					xSquare: playerXSquare,
 					ySquare: playerYSquare,
-				} = topLeftCoordinatesToSquareCoordinates(coordinates);
+				} = topLeftCoordinatesToSquareCoordinates(
+					coordinates,
+					this.state.config.sizes.movement
+				);
 				if (playerXSquare === xSquare && playerYSquare === ySquare) {
 					this.updaters.incrementPlayerDeathCount(playerId);
 				}
@@ -187,7 +202,8 @@ class GameUtils {
 			this.state.gameMap,
 			this.state.players,
 			bombCoordinates,
-			bombSize
+			bombSize,
+			this.state.config.sizes
 		);
 
 		const { horizontal, vertical, core } = coordinatesToSetOnFire;
@@ -279,7 +295,8 @@ class GameUtils {
 			},
 			this.getMovementSpeedForPlayer(playerId),
 			onComplete,
-			ref
+			ref,
+			this.state.config.sizes
 		);
 	};
 
@@ -290,7 +307,10 @@ class GameUtils {
 		const {
 			ySquare: newCoordinateYSquare,
 			xSquare: newCoordinateXSquare,
-		} = topLeftCoordinatesToSquareCoordinates(newCoordinates);
+		} = topLeftCoordinatesToSquareCoordinates(
+			newCoordinates,
+			this.state.config.sizes.movement
+		);
 
 		const newSquare = this.state.gameMap[newCoordinateYSquare][
 			newCoordinateXSquare
@@ -325,7 +345,10 @@ class GameUtils {
 		const {
 			ySquare: lastCoordinateYSquare,
 			xSquare: lastCoordinateXSquare,
-		} = topLeftCoordinatesToSquareCoordinates(lastCoordinates);
+		} = topLeftCoordinatesToSquareCoordinates(
+			lastCoordinates,
+			this.state.config.sizes.movement
+		);
 		// this can also be a bomb, we don't want to just clear it
 		const lastSquare = this.state.gameMap[lastCoordinateYSquare][
 			lastCoordinateXSquare
@@ -361,7 +384,10 @@ class GameUtils {
 		const {
 			xSquare,
 			ySquare,
-		} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(coordinates);
+		} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+			coordinates,
+			this.state.config.sizes.movement
+		);
 		// prevent double bomb in one spot
 		if (this.state.gameMap[ySquare][xSquare] === Explosive.Bomb) {
 			return;
@@ -375,7 +401,7 @@ class GameUtils {
 		if (playerBombCountOnMap >= this.getBombCountForPlayer(playerId)) {
 			return;
 		}
-		const bomb = generateBomb(playerConfig);
+		const bomb = generateBomb(playerConfig, this.state.config.powerUps);
 		this.updaters.addBomb(bomb);
 
 		// URGENT: This block will contain both the player and the bomb
@@ -414,6 +440,7 @@ class GameUtils {
 			this.state.players,
 			bombCoordinates,
 			bombSize,
+			this.state.config.sizes,
 			true
 		);
 
@@ -425,7 +452,8 @@ class GameUtils {
 					xSquare,
 					ySquare,
 				} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
-					coordinates
+					coordinates,
+					this.state.config.sizes.movement
 				);
 				// if there is a powerUp, put it on the map
 				const powerUpOrNull = this.state.powerUps[ySquare]?.[xSquare];
@@ -458,7 +486,7 @@ class GameUtils {
 		}
 
 		this.updaters.addPlayer(
-			this.defaultPlayers.P2 as PlayerConfig,
+			generatePlayer(Player.P2, this.state.config),
 			Player.P2
 		);
 	};
@@ -470,7 +498,7 @@ class GameUtils {
 		}
 
 		this.updaters.addPlayer(
-			this.defaultPlayers.P4 as PlayerConfig,
+			generatePlayer(Player.P4, this.state.config),
 			Player.P4
 		);
 	};

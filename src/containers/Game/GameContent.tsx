@@ -1,4 +1,3 @@
-import config from 'config';
 import theme from 'theme';
 import { PowerUp } from 'enums';
 import {
@@ -23,7 +22,7 @@ interface Props extends GameApi {}
 
 const GameContent = ({ state, provider }: Props) => {
 	const { triggerExplosion, onExplosionComplete } = provider;
-	const { gameMap, players, bombs, is3D } = state;
+	const { gameMap, players, bombs, is3D, config } = state;
 
 	return (
 		<>
@@ -32,13 +31,14 @@ const GameContent = ({ state, provider }: Props) => {
 					// TODO: Put this in the store
 					const {
 						[playerId]: keyboardConfig,
-					} = config.keyboardConfig.player;
+					} = config.keyboardConfig;
 					const { coordinates, state: playerState } = playerConfig;
 
-					const isAlive = !isPlayerDead(playerState);
+					const isAlive = !isPlayerDead(playerState, config.powerUps);
 					const isSteppingOnFire = isPlayerSteppingOnFire(
 						gameMap,
-						coordinates
+						coordinates,
+						config.sizes.movement
 					);
 
 					return (
@@ -47,6 +47,8 @@ const GameContent = ({ state, provider }: Props) => {
 								id={playerId}
 								key={playerId}
 								name="Bomber"
+								size={config.sizes.character}
+								tileSize={config.sizes.tile}
 								coordinates={coordinates!}
 								keyboardConfig={keyboardConfig}
 								is3D={is3D}
@@ -56,6 +58,10 @@ const GameContent = ({ state, provider }: Props) => {
 							<DeadCharacter
 								key={playerId}
 								coordinates={coordinates!}
+								size={config.sizes.character}
+								explodingDuration={
+									config.duration.bomb.exploding
+								}
 							/>
 						)
 					);
@@ -65,7 +71,8 @@ const GameContent = ({ state, provider }: Props) => {
 				const playerState = players[playerId]!.state;
 				const explosionSize = getPoweredUpValue(
 					playerState,
-					PowerUp.BombSize
+					PowerUp.BombSize,
+					config.powerUps
 				);
 
 				return (
@@ -75,6 +82,7 @@ const GameContent = ({ state, provider }: Props) => {
 						playerId={playerId}
 						{...bombProps}
 						color={theme.palette.color.error}
+						tileSize={config.sizes.tile}
 						explosionSize={explosionSize}
 						firingDuration={config.duration.bomb.firing}
 						explodingDuration={config.duration.bomb.exploding}

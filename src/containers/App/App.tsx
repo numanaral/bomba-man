@@ -24,8 +24,8 @@ const OnlineGame = () => {
 	return pending || error || <Game {...gameProps} />;
 };
 
-const ONLINE = true;
-// const ONLINE = false;
+// const ONLINE = true;
+const ONLINE = false;
 
 const App = () => {
 	return (

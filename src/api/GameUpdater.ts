@@ -113,9 +113,6 @@ abstract class GameUpdater {
 
 	abstract toggleIsSideView(): void;
 
-	// TODO: rename to gameSize
-	abstract updateSize(size: RangeOf<15, 6>): void;
-
 	abstract incrementAnimationCounter(): void;
 
 	// #endregion
