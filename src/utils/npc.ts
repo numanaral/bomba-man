@@ -5,8 +5,11 @@ import {
 	Square,
 	SquareCoordinates,
 } from 'containers/Game/types';
+import { Direction, Player, PowerUp, Tile } from 'enums';
 import { Bombs, GameConfig } from 'store/redux/reducers/game/types';
 import {
+	getExplosionResults,
+	getPoweredUpValue,
 	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
 	isSquareOutOfBoundaries,
 } from './game';
@@ -15,7 +18,6 @@ import { getRandomInt } from './math';
 type NpcStore = {
 	id: number;
 	parentNodes: MovementNode[];
-	bombCoordinates: SquareCoordinates[];
 	lastBombTime: number;
 	dropBomb: () => void;
 	gameMap: GameMap;
@@ -66,6 +68,42 @@ const isSquareAPlayer = (square: Square) => {
 	return Object.values<Square>(Player).includes(square);
 };
 
+const isSquareAPossibleFire = (currentSquareCoordinates: SquareCoordinates) => {
+	const bombs = Object.values(Store!.bombs);
+	if (!bombs.length) return false;
+
+	const _fireCoordinates: Array<SquareCoordinates> = [];
+
+	bombs.forEach(({ playerId, top, left }) => {
+		const { players } = Store!;
+		const { coordinatesToSetOnFire } = getExplosionResults(
+			Store!.gameMap,
+			players,
+			{ top, left },
+			getPoweredUpValue(
+				players[playerId]!.state,
+				PowerUp.BombSize,
+				Store!.powerUpConfig
+			),
+			Store!.sizes
+		);
+		Object.values(coordinatesToSetOnFire)
+			.flat()
+			.forEach(squareCoordinates => {
+				_fireCoordinates.push(squareCoordinates);
+			});
+	});
+
+	return (
+		_fireCoordinates.findIndex(fireSquareCoordinates => {
+			return !isDifferentSquare(
+				fireSquareCoordinates,
+				currentSquareCoordinates
+			);
+		}) >= 0
+	);
+};
+
 const isAdjacent = (
 	{ ySquare: newYSquare, xSquare: newXSquare }: SquareCoordinates,
 	{ ySquare: oldYSquare, xSquare: oldXSquare }: SquareCoordinates
@@ -111,27 +149,6 @@ const dropBombAndRunOrScoreTarget = (
 	return null;
 };
 
-const canBombsReach = ({ ySquare, xSquare }: SquareCoordinates): boolean => {
-	if (Store!.bombCoordinates.length === 0) {
-		return false;
-	}
-
-	let canBombExplosionReach = false;
-	Store!.bombCoordinates.forEach(bombCoordinate => {
-		canBombExplosionReach =
-			canBombExplosionReach ||
-			(xSquare === bombCoordinate.xSquare &&
-				(ySquare <= bombCoordinate.ySquare + 2 ||
-					ySquare >= bombCoordinate.ySquare - 2)) ||
-			// directly left or right. Same idea as above but for +1 left coordinate
-			(ySquare === bombCoordinate.ySquare &&
-				(xSquare <= bombCoordinate.xSquare + 2 ||
-					xSquare >= bombCoordinate.xSquare - 2));
-	});
-
-	return canBombExplosionReach;
-};
-
 const generateScore = (
 	newCoordinates: SquareCoordinates,
 	oldCoordinates: SquareCoordinates,
@@ -142,19 +159,16 @@ const generateScore = (
 	if (isSquareOutOfBoundaries(newCoordinates, Store!.sizes.map)) {
 		return undefined;
 	}
-
+	debugger;
 	const newSquare = Store!.gameMap[newYSquare][newXSquare];
 	// TODO: Please comment
-	if (newSquare === Explosive.Bomb) {
-		Store!.bombCoordinates.push(newCoordinates);
-	}
-	if (canBombsReach(newCoordinates)) {
+	if (isSquareAPossibleFire(newCoordinates)) {
 		return NPCScore.IsDanger;
 	}
 	if (Object.values(PowerUp).includes(newSquare as PowerUp)) {
 		return NPCScore.IsPowerUp * level;
 	}
-	if (isDifferentSquare(newCoordinates, oldCoordinates)) {
+	if (!isDifferentSquare(newCoordinates, oldCoordinates)) {
 		return NPCScore.IsStuck;
 	}
 	if (newSquare === Tile.Empty) {
@@ -342,7 +356,6 @@ const findBestMove = (
 ): MovementNode | null => {
 	Store!.id = 0;
 	Store!.parentNodes = [];
-	Store!.bombCoordinates = [];
 
 	const movementTree = generateMovementTree(
 		currentCoordinates,
@@ -358,9 +371,11 @@ const npcAction: NPCActionFn = ({
 	playerId,
 	players,
 	gameMap,
+	bombs,
 	triggerMove,
 	dropBomb,
 	ref,
+	powerUpConfig,
 	sizes,
 	bombDuration,
 }) => {
@@ -368,7 +383,6 @@ const npcAction: NPCActionFn = ({
 	Store = {
 		id: 0,
 		parentNodes: [],
-		bombCoordinates: [],
 		lastBombTime: 0,
 		dropBomb: () => dropBomb(playerId),
 		gameMap,
