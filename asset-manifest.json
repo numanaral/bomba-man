@@ -1,17 +1,22 @@
 {
   "files": {
-    "main.css": "/bomba-man/static/css/main.b541f34d.chunk.css",
-    "main.js": "/bomba-man/static/js/main.7a2a28c5.chunk.js",
-    "runtime-main.js": "/bomba-man/static/js/runtime-main.e3724b2a.js",
-    "static/js/2.c312d102.chunk.js": "/bomba-man/static/js/2.c312d102.chunk.js",
-    "static/js/3.87bfa8dc.chunk.js": "/bomba-man/static/js/3.87bfa8dc.chunk.js",
+    "main.css": "/bomba-man/static/css/main.96c73073.chunk.css",
+    "main.js": "/bomba-man/static/js/main.39c979d9.chunk.js",
+    "main.js.map": "/bomba-man/static/js/main.39c979d9.chunk.js.map",
+    "runtime-main.js": "/bomba-man/static/js/runtime-main.17ecedea.js",
+    "runtime-main.js.map": "/bomba-man/static/js/runtime-main.17ecedea.js.map",
+    "static/js/2.15e33ce4.chunk.js": "/bomba-man/static/js/2.15e33ce4.chunk.js",
+    "static/js/2.15e33ce4.chunk.js.map": "/bomba-man/static/js/2.15e33ce4.chunk.js.map",
+    "static/js/3.130187ce.chunk.js": "/bomba-man/static/js/3.130187ce.chunk.js",
+    "static/js/3.130187ce.chunk.js.map": "/bomba-man/static/js/3.130187ce.chunk.js.map",
     "index.html": "/bomba-man/index.html",
-    "static/js/2.c312d102.chunk.js.LICENSE.txt": "/bomba-man/static/js/2.c312d102.chunk.js.LICENSE.txt"
+    "static/css/main.96c73073.chunk.css.map": "/bomba-man/static/css/main.96c73073.chunk.css.map",
+    "static/js/2.15e33ce4.chunk.js.LICENSE.txt": "/bomba-man/static/js/2.15e33ce4.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.e3724b2a.js",
-    "static/js/2.c312d102.chunk.js",
-    "static/css/main.b541f34d.chunk.css",
-    "static/js/main.7a2a28c5.chunk.js"
+    "static/js/runtime-main.17ecedea.js",
+    "static/js/2.15e33ce4.chunk.js",
+    "static/css/main.96c73073.chunk.css",
+    "static/js/main.39c979d9.chunk.js"
   ]
 }
