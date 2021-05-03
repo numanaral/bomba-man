@@ -1,25 +1,23 @@
-import config from 'config';
+import { GameMap, NPCActionFn, SquareCoordinates } from 'containers/Game/types';
+import { Direction, Explosive, PowerUp, Tile } from 'enums';
+import { GameConfig } from 'store/redux/reducers/game/types';
 import {
-	GameMap,
-	NPCActionProps,
-	OnDropBomb,
-	TopLeftCoordinates,
-} from 'containers/Game/types';
-import { Direction, Explosive, Player, PowerUp, Tile } from 'enums';
-import { MAX_GAME_SIZE, MIN_GAME_SIZE } from 'utils/game';
+	getSquareCoordinatesFromSquareOrTopLeftCoordinates,
+	isSquareOutOfBoundaries,
+} from './game';
 import { getRandomInt } from './math';
 
-let id: number = 0;
-let parentNodes: MovementNode[] = [];
-let dropBombTest: OnDropBomb;
-
-let bombCoordinates: TopLeftCoordinates[] = [];
-
-let lastBombTime = 0;
-const BOMB_DURATION =
-	config.duration.bomb.firing + config.duration.bomb.exploding;
-
-// let immediateStop = false;
+type NpcStore = {
+	id: number;
+	parentNodes: MovementNode[];
+	bombCoordinates: SquareCoordinates[];
+	lastBombTime: number;
+	dropBomb: () => void;
+	gameMap: GameMap;
+	sizes: GameConfig['sizes'];
+	bombDuration: GameConfig['duration']['bomb'];
+} | null;
+let Store: NpcStore;
 
 type Score = number | undefined;
 
@@ -36,121 +34,95 @@ type MovementNodeWithKey = {
 };
 
 const isAdjacent = (
-	{ top: newTopCoordinate, left: newLeftCoordinate }: TopLeftCoordinates,
-	{
-		top: originalTopCoordinate,
-		left: originalLeftCoordinate,
-	}: TopLeftCoordinates
+	{ ySquare: newYSquare, xSquare: newXSquare }: SquareCoordinates,
+	{ ySquare: oldYSquare, xSquare: oldXSquare }: SquareCoordinates
 ) => {
 	return (
 		// Directly top or below. If left coordinate is the same and it is +-1 top coordinate
 		// Place a bomb
-		(newLeftCoordinate === originalLeftCoordinate &&
-			(newTopCoordinate === originalTopCoordinate + 1 ||
-				newTopCoordinate === originalTopCoordinate - 1)) ||
+		(newXSquare === oldXSquare &&
+			(newYSquare === oldYSquare + 1 || newYSquare === oldYSquare - 1)) ||
 		// directly left or right. Same idea as above but for +1 left coordinate
-		(newTopCoordinate === originalTopCoordinate &&
-			(newLeftCoordinate === originalLeftCoordinate + 1 ||
-				newLeftCoordinate === originalLeftCoordinate - 1))
+		(newYSquare === oldYSquare &&
+			(newXSquare === oldXSquare + 1 || newXSquare === oldXSquare - 1))
 	);
 };
 
-const canBombsReach = ({
-	top: newTopCoordinate,
-	left: newLeftCoordinate,
-}: TopLeftCoordinates): boolean => {
-	if (bombCoordinates.length === 0) {
+const canBombsReach = ({ ySquare, xSquare }: SquareCoordinates): boolean => {
+	if (Store!.bombCoordinates.length === 0) {
 		return false;
 	}
 
-	console.log(bombCoordinates);
 	let canBombExplosionReach = false;
-	bombCoordinates.forEach(bombCoordinate => {
+	Store!.bombCoordinates.forEach(bombCoordinate => {
 		canBombExplosionReach =
 			canBombExplosionReach ||
-			(newLeftCoordinate === bombCoordinate.left &&
-				(newTopCoordinate <= bombCoordinate.top + 2 ||
-					newTopCoordinate >= bombCoordinate.top - 2)) ||
+			(xSquare === bombCoordinate.xSquare &&
+				(ySquare <= bombCoordinate.ySquare + 2 ||
+					ySquare >= bombCoordinate.ySquare - 2)) ||
 			// directly left or right. Same idea as above but for +1 left coordinate
-			(newTopCoordinate === bombCoordinate.top &&
-				(newLeftCoordinate <= bombCoordinate.left + 2 ||
-					newLeftCoordinate >= bombCoordinate.left - 2));
+			(ySquare === bombCoordinate.ySquare &&
+				(xSquare <= bombCoordinate.xSquare + 2 ||
+					xSquare >= bombCoordinate.xSquare - 2));
 	});
 
-	console.log({
-		top: newTopCoordinate,
-		left: newLeftCoordinate,
-	});
-	console.log(canBombExplosionReach);
 	return canBombExplosionReach;
 };
 
 const generateScore = (
-	{ top: topCoordinate, left: leftCoordinate }: TopLeftCoordinates,
-	originalCoordinates: TopLeftCoordinates,
-	gameMap: GameMap,
+	newCoordinates: SquareCoordinates,
+	oldCoordinates: SquareCoordinates,
 	level: number
 ): number | undefined => {
-	if (
-		topCoordinate > MAX_GAME_SIZE ||
-		leftCoordinate > MAX_GAME_SIZE ||
-		topCoordinate < MIN_GAME_SIZE ||
-		leftCoordinate < MIN_GAME_SIZE
-	) {
+	const { ySquare: newYSquare, xSquare: newXSquare } = newCoordinates;
+	const { ySquare: oldYSquare, xSquare: oldXSquare } = oldCoordinates;
+
+	if (isSquareOutOfBoundaries(newCoordinates, Store!.sizes.map)) {
 		return undefined;
 	}
-	const square = gameMap[topCoordinate][leftCoordinate];
 
-	if (square === Explosive.Bomb) {
-		bombCoordinates.push({ top: topCoordinate, left: leftCoordinate });
+	const newSquare = Store!.gameMap[newYSquare][newXSquare];
+	// TODO: Please comment
+	if (newSquare === Explosive.Bomb) {
+		Store!.bombCoordinates.push(newCoordinates);
 	}
-
-	if (canBombsReach({ top: topCoordinate, left: leftCoordinate })) {
+	if (canBombsReach(newCoordinates)) {
 		return -10000;
 	}
-
-	if (Object.values(PowerUp).includes(square as PowerUp)) {
+	if (Object.values(PowerUp).includes(newSquare as PowerUp)) {
 		return 1000 * level;
 	}
-
-	if (
-		topCoordinate === originalCoordinates.top &&
-		leftCoordinate === originalCoordinates.left
-	) {
+	if (newYSquare === oldYSquare && newXSquare === oldXSquare) {
 		return 0;
 	}
-
-	if (square === Tile.Empty) {
+	if (newSquare === Tile.Empty) {
 		return 2;
 	}
-	if (square === Tile.Breaking) {
-		if (
-			isAdjacent(
-				{ top: topCoordinate, left: leftCoordinate },
-				originalCoordinates
-			)
-		) {
+	if (newSquare === Tile.Breaking) {
+		// TODO: is this necessary? it's already the nextSquare
+		if (isAdjacent(newCoordinates, oldCoordinates)) {
 			const currentTime = new Date().getTime();
-			if (lastBombTime <= currentTime - BOMB_DURATION * 1000) {
-				dropBombTest(Player.P4);
-				lastBombTime = currentTime;
+			if (
+				Store!.lastBombTime <=
+				currentTime -
+					Object.values(Store!.bombDuration).reduce(
+						(acc, duration) => acc + duration,
+						0
+					) *
+						1000
+			) {
+				Store!.dropBomb();
+				Store!.lastBombTime = currentTime;
 			}
 			return -100;
 		}
-		if (
-			topCoordinate !== originalCoordinates.top ||
-			leftCoordinate !== originalCoordinates.left
-		) {
+		if (newYSquare !== oldYSquare || newXSquare !== oldXSquare) {
 			return 3;
 		}
 	}
-	if (square === Tile.NonBreaking) {
-		if (
-			isAdjacent(
-				{ top: topCoordinate, left: leftCoordinate },
-				originalCoordinates
-			)
-		) {
+	if (newSquare === Tile.NonBreaking) {
+		// TODO: is this necessary? it's already the nextSquare
+		if (isAdjacent(newCoordinates, oldCoordinates)) {
 			return -100;
 		}
 		return -5;
@@ -160,44 +132,43 @@ const generateScore = (
 };
 
 const generateMovementTree = (
-	topLeftCoordinates: TopLeftCoordinates,
-	gameMap: GameMap,
+	newCoordinates: SquareCoordinates,
+	oldCoordinates: SquareCoordinates,
 	level: number = 2,
-	originalCoordinates: TopLeftCoordinates,
 	parentId: number | null = null
 ) => {
+	const { ySquare: newYSquare, xSquare: newXSquare } = newCoordinates;
 	let playerMovementTree: MovementNodeWithKey = {};
 
 	Object.values(Direction).forEach(direction => {
-		let newTopCoordinate = topLeftCoordinates.top;
-		let newLeftCoordinate = topLeftCoordinates.left;
+		let _newYSquare = newYSquare;
+		let _newXSquare = newXSquare;
 
-		id += 1;
+		Store!.id++;
 
 		switch (direction) {
 			case Direction.LEFT:
-				newLeftCoordinate -= 1;
+				_newXSquare--;
 				break;
 			case Direction.UP:
-				newTopCoordinate -= 1;
+				_newYSquare--;
 				break;
 			case Direction.RIGHT:
-				newLeftCoordinate += 1;
+				_newXSquare++;
 				break;
 			case Direction.DOWN:
-				newTopCoordinate += 1;
+				_newYSquare++;
 				break;
 			default:
 				break;
 		}
 		const score = generateScore(
-			{ top: newTopCoordinate, left: newLeftCoordinate },
-			{ top: originalCoordinates.top, left: originalCoordinates.left },
-			gameMap,
+			{ ySquare: _newYSquare, xSquare: _newXSquare },
+			oldCoordinates,
 			level
 		);
 
-		playerMovementTree[id] = {
+		playerMovementTree[Store!.id] = {
 			score,
 			hasChildren: level > 0 && score !== undefined,
 			parentId,
@@ -208,11 +179,10 @@ const generateMovementTree = (
 			playerMovementTree = {
 				...playerMovementTree,
 				...generateMovementTree(
-					{ top: newTopCoordinate, left: newLeftCoordinate },
-					gameMap,
+					{ ySquare: _newYSquare, xSquare: _newXSquare },
+					oldCoordinates,
 					level - 1,
-					originalCoordinates,
-					id
+					Store!.id
 				),
 			};
 		}
@@ -227,7 +197,6 @@ const findNodeWithHighestScore = (movementNodes: MovementNode[]) => {
 		if (current.score === undefined) {
 			retVal = acc;
 		}
-
 		if (acc.score! > current.score!) {
 			retVal = acc;
 		}
@@ -256,6 +225,7 @@ const groupMovementNodesByParentId = (movementNodes: MovementNode[]) => {
 	});
 	return movementNodesGroupedById;
 };
+
 const getTotalScoreOfAllNodes = (
 	movementTree: MovementNodeWithKey,
 	parentId: number | undefined | null = undefined
@@ -289,13 +259,14 @@ const getTotalScoreOfAllNodes = (
 
 				if (!_groupParentId) {
 					if (
-						!parentNodes.some(
+						!Store!.parentNodes.some(
 							parentNode =>
 								parentNode.direction ===
 								nodeWithHighestScore.direction
 						)
-					)
-						parentNodes.push(nodeWithHighestScore);
+					) {
+						Store!.parentNodes.push(nodeWithHighestScore);
+					}
 				} else {
 					// eslint-disable-next-line no-param-reassign
 					movementTree[_groupParentId].score =
@@ -311,56 +282,57 @@ const getTotalScoreOfAllNodes = (
 };
 
 const findBestMove = (
-	topLeftCoordinates: TopLeftCoordinates,
-	gameMap: GameMap
+	currentCoordinates: SquareCoordinates
 ): MovementNode | null => {
-	id = 0;
-	parentNodes = [];
-	bombCoordinates = [];
+	Store!.id = 0;
+	Store!.parentNodes = [];
+	Store!.bombCoordinates = [];
+
 	const movementTree = generateMovementTree(
-		topLeftCoordinates,
-		gameMap,
-		undefined,
-		{ top: topLeftCoordinates.top, left: topLeftCoordinates.left }
+		currentCoordinates,
+		currentCoordinates,
+		undefined
 	);
-
 	getTotalScoreOfAllNodes(movementTree);
-	console.log(movementTree);
-	console.log(parentNodes);
 
-	return findNodeWithHighestScore(parentNodes);
+	return findNodeWithHighestScore(Store!.parentNodes);
 };
 
-type NPCAction = (props: NPCActionProps) => void;
-const npcAction: NPCAction = ({ players, gameMap, triggerMove, dropBomb }) => {
-	const playerId = Player.P4;
+const npcAction: NPCActionFn = ({
+	playerId,
+	players,
+	gameMap,
+	triggerMove,
+	dropBomb,
+	ref,
+	sizes,
+	bombDuration,
+}) => {
 	const currentPlayer = players[playerId];
+	Store = {
+		id: 0,
+		parentNodes: [],
+		bombCoordinates: [],
+		lastBombTime: 0,
+		dropBomb: () => dropBomb(playerId),
+		gameMap,
+		sizes,
+		bombDuration,
+	};
 
-	dropBombTest = dropBomb;
+	if (!currentPlayer) return;
 
-	if (!currentPlayer) {
-		return;
-	}
-
-	const currentPlayerTop: number =
-		currentPlayer.coordinates.top / config.size.character;
-	const currentPlayerLeft: number =
-		currentPlayer.coordinates.left / config.size.character;
-
-	const bestMovementNode = findBestMove(
-		{ top: currentPlayerTop, left: currentPlayerLeft },
-		gameMap
+	// eslint-disable-next-line max-len
+	const currentSquareCoordinates = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+		currentPlayer.coordinates,
+		sizes.movement
 	);
 
-	if (
-		bestMovementNode &&
-		bestMovementNode.score &&
-		bestMovementNode.score > 0
-	) {
-		triggerMove({ playerId, direction: bestMovementNode.direction });
+	const bestMovementNode = findBestMove(currentSquareCoordinates);
+
+	if ((bestMovementNode?.score || 0) > 0) {
+		triggerMove({ playerId, direction: bestMovementNode!.direction, ref });
 	}
-	debugger;
 };
 
-export type { NPCAction };
 export { npcAction };

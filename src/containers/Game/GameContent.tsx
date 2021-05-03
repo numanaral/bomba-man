@@ -7,13 +7,7 @@ import {
 } from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
-import {
-	PlayerId,
-	PlayerConfig,
-	GameApi,
-	PlayerConfig,
-	PlayerId,
-} from './types';
+import { GameApi, PlayerConfig, PlayerId } from './types';
 import DeadCharacter from './components/DeadCharacter';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;

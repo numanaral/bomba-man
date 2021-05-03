@@ -257,7 +257,8 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 		is3D,
 		config: {
 			powerUps: powerUpConfig,
-			sizes: { movement: movementSize },
+			sizes,
+			duration: { bomb: bombDuration },
 		},
 	} = state;
 
@@ -292,13 +293,15 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 					playerId === 'P4'
 						? () => {
 								npcAction({
+									playerId,
 									dropBomb,
 									gameMap,
 									players,
 									triggerMove,
 									ref: playerRefs.current
 										.P4 as NonNullablePlayerRef,
-									movementSize,
+									sizes,
+									bombDuration,
 								});
 						  }
 						: handleActions
