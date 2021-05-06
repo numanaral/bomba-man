@@ -1,4 +1,3 @@
-// import { LoadableComponent } from '@loadable/component';
 import { Redirect } from 'react-router-dom';
 import loadable from 'utils/loadable';
 import { BASE_PATH } from './constants';

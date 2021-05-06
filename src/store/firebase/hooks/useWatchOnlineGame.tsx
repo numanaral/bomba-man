@@ -5,20 +5,18 @@ import {
 	useFirebaseConnect,
 } from 'react-redux-firebase';
 import { useSelector } from 'react-redux';
-
 import useAuth from 'store/firebase/hooks/useAuth';
 import { fromFirestore, toFirestore } from 'store/firebase/utils';
 import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
 import { GameState } from 'store/redux/reducers/game/types';
 import { generateDefaultGameState } from 'utils/game';
-// TODO: react-router
-// import LoadingIndicator from 'components/LoadingIndicator';
-// import NoAccess from 'components/NoAccess';
+import LoadingIndicator from 'components/LoadingIndicator';
+import NoAccess from 'components/NoAccess';
+import loadable from 'utils/loadable';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 
-const LoadingIndicator = () => <>LoadingIndicator</>;
-const NoAccess = () => <>NoAccess</>;
+const LazyJoin = loadable(() => import(`routes/pages/Join`));
 
 const defaultGameState = generateDefaultGameState();
 
@@ -31,7 +29,11 @@ const useWatchOnlineGame = (id: string) => {
 	const onlineGameFromFirebase = useSelector(makeSelectOnlineGame(id));
 
 	const pending = !isLoaded(onlineGameFromFirebase) && <LoadingIndicator />;
-	const error = isEmpty(onlineGameFromFirebase) && <NoAccess />;
+	const error = isEmpty(onlineGameFromFirebase) && (
+		<NoAccess>
+			<LazyJoin />
+		</NoAccess>
+	);
 
 	const onlineGame =
 		(onlineGameFromFirebase && fromFirestore(onlineGameFromFirebase)) || [];

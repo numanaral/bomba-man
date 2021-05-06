@@ -1,7 +1,4 @@
 // import useAuth from 'store/firebase/hooks/useAuth';
-// TODO: react-router
-// import LoadingIndicator from 'components/LoadingIndicator';
-// import NoAccess from 'components/NoAccess';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 import {

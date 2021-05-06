@@ -269,7 +269,7 @@ const generateDefaultGameConfig = (): GameConfig => {
 			},
 		},
 		tiles: {
-			blockTileChance: 1,
+			blockTileChance: 7,
 		},
 		sizes: {
 			map: 15,

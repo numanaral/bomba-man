@@ -1,3 +1,5 @@
+import LoadingIndicator from 'components/LoadingIndicator';
+import NoAccess from 'components/NoAccess';
 import {
 	isEmpty,
 	isLoaded,
@@ -9,9 +11,6 @@ import { FirebaseUtils } from '../types';
 // import { fromFirestore } from '../utils';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
-
-const LoadingIndicator = () => <h1>Loading...</h1>;
-const NoAccess = () => <h1>No Access</h1>;
 
 const useFirebaseUtils = <RootSchema extends FirebaseUtils.UpdateableValue>(
 	baseRefPath: string
