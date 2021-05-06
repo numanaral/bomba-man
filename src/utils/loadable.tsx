@@ -50,8 +50,8 @@ import LoadingIndicator, { HexColor } from 'components/LoadingIndicator';
  * - Or pass in one of the following:
  * 	- 'small' | 'medium' | 'large' | cacheKey
  */
-const loadable = <T,>(
-	loadFn: LoadableFunction<T>,
+const loadable = <Props extends DynamicObject = {}>(
+	loadFn: LoadableFunction<Props>,
 	{ fallback, cacheKey, color, noFallback }: LoadableCustomOptions = {}
 ) => {
 	const fallbackOption: LoadableOptions = {
@@ -69,7 +69,7 @@ const loadable = <T,>(
 		...fallbackOption,
 	};
 
-	return baseLoadable(loadFn, options);
+	return baseLoadable<Props>(loadFn, options);
 };
 
 type LoadableFunction<T> = (props: T) => Promise<DefaultComponent<T>>;
