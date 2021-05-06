@@ -1,9 +1,12 @@
-import { createStore, applyMiddleware, PreloadedState } from 'redux';
+import { createStore, applyMiddleware, PreloadedState, Store } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import rootReducer from './reducers';
+import { Store as GameStore } from './types';
 
-const configureStore = <Store>(initialState: PreloadedState<Store>) => {
+const configureStore = <S>(
+	initialState?: PreloadedState<S>
+): Store<GameStore> => {
 	// Create the store with two middlewares
 	// thunkMiddleware: Handle async calls
 	const middleware = [thunkMiddleware];

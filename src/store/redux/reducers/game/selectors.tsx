@@ -10,33 +10,43 @@ const selectGameProps: Selector<Store, GameState> = state => {
 
 // Other specific selectors
 // #region GAME ACTION STATES
-const makeSelectGamePlayers = () =>
-	createSelector(selectGameProps, ({ players }) => players);
+const makeSelectGamePlayers = () => {
+	return createSelector(selectGameProps, ({ players }) => players);
+};
 
-const makeSelectGameBombs = () =>
-	createSelector(selectGameProps, ({ bombs }) => bombs);
+const makeSelectGameBombs = () => {
+	return createSelector(selectGameProps, ({ bombs }) => bombs);
+};
 // //#endregion
 
 // #region GAME SETTINGS
-const makeSelectGameIs3D = () =>
-	createSelector(selectGameProps, ({ is3D }) => is3D);
+const makeSelectGameConfig = () => {
+	return createSelector(selectGameProps, ({ config }) => config);
+};
 
-const makeSelectGameIsSideView = () =>
-	createSelector(selectGameProps, ({ isSideView }) => isSideView);
+const makeSelectGameIs3D = () => {
+	return createSelector(selectGameProps, ({ is3D }) => is3D);
+};
 
-const makeSelectGameMap = () =>
-	createSelector(selectGameProps, ({ gameMap }) => gameMap);
+const makeSelectGameIsSideView = () => {
+	return createSelector(selectGameProps, ({ isSideView }) => isSideView);
+};
 
-const makeSelectGameSize = () =>
-	createSelector(selectGameProps, ({ size }) => size);
+const makeSelectGameMap = () => {
+	return createSelector(selectGameProps, ({ gameMap }) => gameMap);
+};
 
-const makeSelectGameAnimationCounter = () =>
-	createSelector(selectGameProps, ({ animationCounter }) => animationCounter);
+const makeSelectGameAnimationCounter = () => {
+	return createSelector(
+		selectGameProps,
+		({ animationCounter }) => animationCounter
+	);
+};
 // #endregion
 
 // Default selector
-const makeSelectDialogProps = () => {
-	return createSelector(selectGameProps, modalPropsState => modalPropsState);
+const makeSelectGameState = () => {
+	return createSelector(selectGameProps, state => state);
 };
 
 export {
@@ -45,10 +55,10 @@ export {
 	makeSelectGamePlayers,
 	makeSelectGameBombs,
 	// GAME SETTINGS
+	makeSelectGameConfig,
 	makeSelectGameIs3D,
 	makeSelectGameIsSideView,
 	makeSelectGameMap,
-	makeSelectGameSize,
 	makeSelectGameAnimationCounter,
 };
-export default makeSelectDialogProps;
+export default makeSelectGameState;

@@ -57,7 +57,7 @@ module.exports = {
 			{
 				props: true,
 				ignorePropertyModificationsFor: ['draft', 'acc'],
-				ignorePropertyModificationsForRegex: ['[Rr]ef$'],
+				ignorePropertyModificationsForRegex: ['[Rr]ef$', '^acc'],
 			},
 		],
 		'import/no-named-as-default': OFF,
@@ -129,7 +129,11 @@ module.exports = {
 		'@typescript-eslint/no-use-before-define': [ERROR],
 		'no-redeclare': OFF,
 		'@typescript-eslint/no-redeclare': [ERROR],
-		'no-shadow': 'off',
+		'no-shadow': OFF,
 		'@typescript-eslint/no-shadow': [ERROR],
+		'no-useless-constructor': OFF,
+		'@typescript-eslint/no-useless-constructor': [ERROR],
+		'no-empty-function': OFF,
+		'@typescript-eslint/no-empty-function': [ERROR],
 	},
 };

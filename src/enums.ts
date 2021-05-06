@@ -33,9 +33,10 @@ enum Tile {
 }
 
 enum PowerUp {
-	BombSize = 'PU1',
-	MovementSpeed = 'PU2',
-	// Invincibility = 'PU3',
+	Life = 'PU1',
+	BombCount = 'PU2',
+	BombSize = 'PU3',
+	MovementSpeed = 'PU4',
 }
 
 enum Explosive {
@@ -49,6 +50,7 @@ enum RoomType {
 	Local = 'Local',
 	Online = 'Online',
 }
+const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
 
 export {
 	Direction,
@@ -59,4 +61,5 @@ export {
 	PowerUp,
 	Explosive,
 	RoomType,
+	FIRE_VALUES,
 };

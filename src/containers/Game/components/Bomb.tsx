@@ -1,7 +1,11 @@
-import config from 'config';
 import { ExplosionState, Explosive } from 'enums';
 import { useEffect, useState } from 'react';
-import { Bomb as BombType, BombFn } from 'store/redux/reducers/game/types';
+import {
+	Bomb as BombType,
+	BombFn,
+	BombId,
+	GameConfigRanges,
+} from 'store/redux/reducers/game/types';
 import styled, { keyframes } from 'styled-components';
 import theme from 'theme';
 import { sleep } from 'utils';
@@ -50,6 +54,7 @@ const FiringCubeBomb = styled(Cube)`
 interface Props extends BombType {
 	// skin: Skin;
 	color: string;
+	tileSize: GameConfigRanges.SquareSize;
 	firingDuration: number;
 	explodingDuration: number;
 	triggerExplosion: BombFn;
@@ -61,7 +66,8 @@ const Bomb = ({
 	color: backgroundColor,
 	firingDuration,
 	explodingDuration,
-	explosionSize,
+	// explosionSize,
+	tileSize,
 	id,
 	top,
 	left,
@@ -72,40 +78,43 @@ const Bomb = ({
 	const [explosionState, setExplosionState] = useState<ExplosionState>(
 		ExplosionState.Firing
 	);
+
 	useEffect(() => {
 		const kaboom = async () => {
 			await sleep(firingDuration * 1000);
-			triggerExplosion(id);
-			setExplosionState(ExplosionState.Exploding);
-			await sleep((explodingDuration / 2) * 1000);
-			onExplosionComplete(id);
-			// await sleep((300 / 2) * 1000);
-			// setExplosionState(ExplosionState.Exploded);
+			// if (!isMounted.current) return;
+			triggerExplosion(id, async (bombIds: Set<BombId>) => {
+				// update animation
+				setExplosionState(ExplosionState.Exploding);
+				await sleep(explodingDuration * 1000);
+
+				// complete explosion for this bomb
+				onExplosionComplete(id);
+				// then complete the explosion for all the other bombs
+				// that got caught in the fire complete their explosion
+				// as the trigger was already handled in the reducer
+				bombIds.forEach(bId => {
+					onExplosionComplete(bId);
+				});
+			});
 		};
 		kaboom();
-	}, [
-		explodingDuration,
-		explosionSize,
-		firingDuration,
-		triggerExplosion,
-		onExplosionComplete,
-		top,
-		left,
-		id,
-	]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
-	const bombSize = config.size.bomb;
-	const bombSizePadding = bombSize / 2;
+	const bombSize = tileSize / 2;
+	const bombPadding = bombSize / 2;
 
 	const bombStyleProps: React.CSSProperties = {
 		position: 'absolute',
 		backgroundColor,
 		width: bombSize,
 		height: bombSize,
-		top: top + bombSizePadding,
-		left: left + bombSizePadding,
+		top: top + bombPadding,
+		left: left + bombPadding,
 		animationDuration: `${firingDuration}s`,
 	};
+
 	return (
 		(explosionState === ExplosionState.Firing &&
 			((!is3D && <FiringBomb style={bombStyleProps} />) || (

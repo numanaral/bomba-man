@@ -1,6 +1,14 @@
 import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
 import * as KeyCode from 'keycode-js';
-import { OnTriggerMove } from 'store/redux/reducers/game/types';
+import {
+	Bombs,
+	GameConfig,
+	GameState,
+	OnTriggerMove,
+} from 'store/redux/reducers/game/types';
+import { FontAwesomeIconProps as FontAwesomeBaseIconProps } from '@fortawesome/react-fontawesome';
+import { GameProvider } from 'store/redux/hooks/useGameProvider';
+
 // import { Immutable } from 'immer';
 
 type CollisionCoordinates = {
@@ -40,7 +48,7 @@ type OnDropBomb = (playerId: PlayerId) => void;
 type Square = Player | Tile | PowerUp | Explosive;
 
 // type GameMap = Immutable<Array<Array<Square>>>;
-type GameMap = Array<Array<Square>>;
+type GameMap = Record<string, Record<string, Square>>;
 
 type KeyboardEventCode = ValuesOf<typeof KeyCode>;
 
@@ -67,9 +75,7 @@ type PlayerRef = HTMLDivElement | null;
 type PowerUps = Record<PowerUp, number>;
 
 type PlayerState = {
-	lives: number;
-	[PowerUp.BombSize]: number;
-	[PowerUp.MovementSpeed]: number;
+	deathCount: number;
 	/** How many power-ups have been collected */
 	powerUps: PowerUps;
 };
@@ -77,18 +83,14 @@ type PlayerState = {
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
-	ref: PlayerRef;
 	state: PlayerState;
+	keyboardConfig: PlayerKeyboardConfig | undefined;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
 
-type NonNullablePlayer = NonNullable<PlayerConfig> & {
-	ref: NonNullablePlayerRef;
-};
-
 type NextMoveProps = {
-	playerConfig: NonNullablePlayer;
+	playerConfig: PlayerConfig;
 	direction: Direction;
 	is3D: boolean;
 	gameMap: GameMap;
@@ -102,17 +104,41 @@ type CharacterProps = {
 	id: PlayerId;
 	name: string;
 	coordinates: TopLeftCoordinates;
-	keyboardConfig: PlayerKeyboardConfig;
+	keyboardConfig?: PlayerKeyboardConfig;
+	highlight?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 type NPCActionProps = {
+	playerId: PlayerId;
 	players: Players;
 	gameMap: GameMap;
+	bombs: Bombs;
 	triggerMove: OnTriggerMove;
 	dropBomb: OnDropBomb;
+	ref: NonNullablePlayerRef;
+	powerUpConfig: GameConfig['powerUps'];
+	sizes: GameConfig['sizes'];
+	bombDuration: GameConfig['duration']['bomb'];
 };
+type NPCActionFn = (props: NPCActionProps) => void;
 
 type PowerUpOrNull = PowerUp | null;
+
+type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
+
+type GameApi = {
+	provider: GameProvider;
+	state: GameState;
+} & {
+	pending?: false | JSX.Element;
+	error?: false | JSX.Element;
+};
+
+type GameApiHook = (gameId?: string) => GameApi;
+
+type PickedGameState<K extends keyof GameState> = {
+	[P in K]: GameState[P];
+};
 
 export type {
 	CollisionCoordinates,
@@ -132,11 +158,15 @@ export type {
 	PlayerConfig,
 	PowerUps,
 	NonNullablePlayerRef,
-	NonNullablePlayer,
 	NextMoveProps,
 	KeyMap,
 	CharacterProps,
 	NPCActionProps,
+	NPCActionFn,
 	Fire,
 	PowerUpOrNull,
+	FontAwesomeIconProps,
+	GameApi,
+	GameApiHook,
+	PickedGameState,
 };

@@ -1,42 +1,22 @@
-import { useSelector } from 'react-redux';
-import config from 'config';
-import {
-	makeSelectGameBombs,
-	makeSelectGameIs3D,
-	makeSelectGamePlayers,
-} from 'store/redux/reducers/game/selectors';
-import useGameProvider from 'store/redux/hooks/useGameProvider';
 import theme from 'theme';
-import { useCallback } from 'react';
-import usePrevious from 'hooks/usePrevious';
 import { PowerUp } from 'enums';
-import { getPoweredUpValue } from 'utils/game';
+import {
+	getPoweredUpValue,
+	isPlayerDead,
+	isPlayerSteppingOnFire,
+} from 'utils/game';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
-import { PlayerId, PlayerConfig } from './types';
+import { GameApi, PlayerConfig, PlayerId } from './types';
+import DeadCharacter from './components/DeadCharacter';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
-const GameContent = () => {
-	const { setPlayerRef } = useGameProvider();
-	const players = useSelector(makeSelectGamePlayers());
-	const bombs = useSelector(makeSelectGameBombs());
-	const is3D = useSelector(makeSelectGameIs3D());
-	const previousIs3D = usePrevious(is3D);
+interface Props extends GameApi {}
 
-	const { triggerExplosion, onExplosionComplete } = useGameProvider();
-
-	const refFunc = useCallback(
-		({ id: playerId, ref }: PlayerConfig) => (newRef: any) => {
-			// if we already have a ref, don't try setting it again
-			if (previousIs3D === is3D && ref) return;
-			setPlayerRef({
-				playerId,
-				newRef,
-			});
-		},
-		[is3D, previousIs3D, setPlayerRef]
-	);
+const GameContent = ({ state, provider }: Props) => {
+	const { triggerExplosion, onExplosionComplete } = provider;
+	const { gameMap, players, bombs, is3D, config } = state;
 
 	return (
 		<>
@@ -45,25 +25,48 @@ const GameContent = () => {
 					// TODO: Put this in the store
 					const {
 						[playerId]: keyboardConfig,
-					} = config.keyboardConfig.player;
+					} = config.keyboardConfig;
+					const { coordinates, state: playerState } = playerConfig;
+
+					const isAlive = !isPlayerDead(playerState, config.powerUps);
+					const isSteppingOnFire = isPlayerSteppingOnFire(
+						gameMap,
+						coordinates,
+						config.sizes.movement
+					);
+
 					return (
-						<Character
-							id={playerId}
-							key={playerId}
-							name="Bomber"
-							coordinates={playerConfig.coordinates!}
-							keyboardConfig={keyboardConfig}
-							is3D={is3D}
-							ref={refFunc(playerConfig)}
-						/>
+						(isAlive && (
+							<Character
+								id={playerId}
+								key={playerId}
+								name="Bomber"
+								size={config.sizes.character}
+								tileSize={config.sizes.tile}
+								coordinates={coordinates!}
+								keyboardConfig={keyboardConfig}
+								is3D={is3D}
+								highlight={isSteppingOnFire}
+							/>
+						)) || (
+							<DeadCharacter
+								key={playerId}
+								coordinates={coordinates!}
+								size={config.sizes.character}
+								explodingDuration={
+									config.duration.bomb.exploding
+								}
+							/>
+						)
 					);
 				}
 			)}
-			{bombs.map(({ id, playerId, ...bombProps }) => {
+			{Object.values(bombs).map(({ id, playerId, ...bombProps }) => {
 				const playerState = players[playerId]!.state;
 				const explosionSize = getPoweredUpValue(
 					playerState,
-					PowerUp.BombSize
+					PowerUp.BombSize,
+					config.powerUps
 				);
 
 				return (
@@ -73,6 +76,7 @@ const GameContent = () => {
 						playerId={playerId}
 						{...bombProps}
 						color={theme.palette.color.error}
+						tileSize={config.sizes.tile}
 						explosionSize={explosionSize}
 						firingDuration={config.duration.bomb.firing}
 						explodingDuration={config.duration.bomb.exploding}
@@ -86,4 +90,5 @@ const GameContent = () => {
 	);
 };
 
+export type { Props as GameContentProps };
 export default GameContent;

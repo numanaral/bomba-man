@@ -1,4 +1,6 @@
 import { PowerUp as PowerUpEnum } from 'enums';
+import TileIcon from '../TileIcon';
+import icons from './icons';
 
 interface Props {
 	variant: PowerUpEnum;
@@ -8,18 +10,11 @@ interface Props {
 }
 
 const PowerUp = ({ variant, top, left, size }: Props) => {
+	const { icon: Icon, color } = icons[variant];
 	return (
-		<div
-			style={{
-				position: 'absolute',
-				top,
-				left,
-				width: size,
-				height: size,
-			}}
-		>
-			{variant}
-		</div>
+		<TileIcon $top={top} $left={left} $size={size}>
+			<Icon color={color} />
+		</TileIcon>
 	);
 };
 
