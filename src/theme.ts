@@ -93,6 +93,13 @@ const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
 		/* #endregion */
 	}
 
+	/* TODO: These will be removed once a proper UI is in place */
+	/* #region OVERRIDES */
+	div {
+		color: white;
+	}
+	/* #endregion */
+
 	/* #region GENERICS */
 	*, ::before, ::after {
 		box-sizing: border-box;
