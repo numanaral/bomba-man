@@ -13,6 +13,8 @@ declare type StyledProps<T, Keys> = {
 	[Property in keyof Pick<T, Keys> as `$${string & Property}`]: T[Property];
 };
 
+declare type ReactElementOrElementType = React.ReactElement | React.ElementType;
+
 /**
  * Get the keys of the object as a type
  *

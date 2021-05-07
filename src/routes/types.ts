@@ -12,7 +12,7 @@ type Route = {
 	title: string;
 	description: string;
 	path: string;
-	component: JSX.Element;
+	component: ReactElementOrElementType;
 	roles?: Roles;
 };
 

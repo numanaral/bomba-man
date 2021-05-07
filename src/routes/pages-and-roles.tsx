@@ -38,7 +38,7 @@ const PRIVATE_ROUTES = [
 		title: 'Profile',
 		description: `Adjust your app profile.`,
 		path: '/profile',
-		component: <LazyProfile />,
+		component: LazyProfile,
 	},
 	// {
 	// 	title: 'Room Creator',
@@ -50,13 +50,13 @@ const PRIVATE_ROUTES = [
 		title: 'Online Multiplayer',
 		description: `Invite friends to play alongside you in this room.`,
 		path: '/online/:id',
-		component: <LazyOnline />,
+		component: LazyOnline,
 	},
 	{
 		title: 'Join a Game',
 		description: `Join a game room to play with your friend.`,
 		path: '/join',
-		component: <LazyJoin />,
+		component: LazyJoin,
 	},
 ].map(mapRoles(PAGE_ROLES.LOGGED_IN)) as Array<Route>;
 
@@ -65,7 +65,7 @@ const ROUTE_LIST = [
 		title: 'Home | Bomberman',
 		description: `Welcome to the bomberman, here you can find settings and create a room to play online with friends`,
 		path: '',
-		component: <LazyHome />,
+		component: LazyHome,
 	},
 	{
 		path: '/',
@@ -76,7 +76,7 @@ const ROUTE_LIST = [
 		title: 'Local Game',
 		description: `Local game, multiplayer and/or with NPCs.`,
 		path: '/local',
-		component: <LazyLocal />,
+		component: LazyLocal,
 	},
 	{
 		title: 'Login',
@@ -88,19 +88,19 @@ const ROUTE_LIST = [
 		title: 'SignUp',
 		description: `Sign up for an account.`,
 		path: '/signup',
-		component: <LazySignUp />,
+		component: LazySignUp,
 	},
 	{
 		title: 'Unauthorized',
 		description: `User does not have access to the following page.`,
 		path: '/unauthorized',
-		component: <LazyUnauthorized />,
+		component: LazyUnauthorized,
 	},
 	{
 		title: 'Not Found',
 		description: `The page you are looking for might have been removed had its name changed or is temporarily unavailable.`,
 		path: '/not-found',
-		component: <LazyNotFound />,
+		component: LazyNotFound,
 	},
 ].map(mapBasePathForRoutes);
 

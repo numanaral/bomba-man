@@ -6,6 +6,7 @@ import ErrorBoundary from 'components/ErrorBoundary';
 import loadable from 'utils/loadable';
 // import useAuth from 'store/firebase/hooks/useAuth';
 // import useProfile from 'store/firebase/hooks/useProfile';
+import { getElementFromElementOrType } from 'utils/react';
 import { hasAnyFrom } from './utils';
 import { BASE_PATH } from './constants';
 import {
@@ -38,7 +39,7 @@ const LazyLogin = loadable<RouteComponentPropsWithLocationState & LoginProps>(
 
 // @ts-expect-error
 interface Props extends React.ComponentProps<typeof Route> {
-	component: JSX.Element;
+	component: ReactElementOrElementType;
 	roles?: Roles;
 	title?: string;
 	description?: string;
@@ -140,14 +141,15 @@ const RouteWrapper = ({
 						<meta name="description" content={description} />
 					</Helmet>
 				)}
-				{cloneElement<
-					RouteComponentPropsWithLocationState,
-					// @ts-expect-error
-					JSX.Element
-				>(Component, {
-					...renderProps,
-					user,
-				})}
+				{cloneElement<RouteComponentPropsWithLocationState>(
+					// eslint-disable-next-line max-len
+					getElementFromElementOrType<RouteComponentPropsWithLocationState>(
+						Component
+					),
+					{
+						...renderProps,
+					}
+				)}
 			</>
 		);
 	};
