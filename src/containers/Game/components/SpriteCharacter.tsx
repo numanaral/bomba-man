@@ -12,6 +12,7 @@ const SpriteCharacter = ({
 	style,
 	keyboardConfig,
 	highlight,
+	isWalking = false,
 	...rest
 }: CharacterProps) => {
 	/** Direction being faced */
@@ -20,7 +21,7 @@ const SpriteCharacter = ({
 	const [currentKeyDirection, setCurrentKeyDirection] = useState('');
 	const lastMovementTime = useRef(new Date().getTime());
 
-	const isWalking = !!currentKeyDirection;
+	const _isWalking = isWalking || !!currentKeyDirection;
 
 	useEffect(() => {
 		// ignore the npc action
@@ -77,7 +78,7 @@ const SpriteCharacter = ({
 			id={id}
 			className="character"
 			data-facing={direction}
-			data-walking={isWalking.toString()}
+			data-walking={_isWalking.toString()}
 			data-highlight={highlight}
 			style={{ ...style, top, left, position: 'absolute', zIndex: 9999 }}
 			{...rest}

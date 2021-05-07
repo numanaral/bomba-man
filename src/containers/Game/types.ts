@@ -106,6 +106,7 @@ type CharacterProps = {
 	coordinates: TopLeftCoordinates;
 	keyboardConfig?: PlayerKeyboardConfig;
 	highlight?: boolean;
+	isWalking?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 type NPCActionProps = {
