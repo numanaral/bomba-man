@@ -91,70 +91,70 @@ const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
 		--block-animation-duration: 0.5s;
 		--hover-animation-duration: 0.3s;
 		/* #endregion */
-
-		/* #region GENERICS */
-		*, ::before, ::after {
-			box-sizing: border-box;
-		}
-
-		html,
-		body,
-		#root {
-			width: 100%;
-			height: 100%;
-			margin: 0;
-			padding: 0;
-		}
-
-		html {
-			background-color: ${theme.palette.background.primary};
-			/* color: #fff; */
-		}
-
-		#root {
-			position: relative;
-		}
-
-		pre {
-			white-space: pre-wrap;
-			word-wrap: break-word;
-		}
-
-		a {
-			text-decoration: none;
-		}
-		/* #endregion */
-
-		/* #region SCROLLBARS */
-		*, ::before, ::after {
-			scroll-behavior: smooth;
-			scrollbar-color: black transparent;
-			scrollbar-width: thin;
-		}
-
-		/* width */
-		::-webkit-scrollbar {
-			width: 5px;
-			height: 6px;
-		}
-
-		/* Track */
-		::-webkit-scrollbar-track {
-			background: #bfbfbf;
-		}
-
-		/* Handle */
-		::-webkit-scrollbar-thumb {
-			background: black;
-			border-radius: 10px;
-		}
-
-		/* Handle on hover */
-		::-webkit-scrollbar-thumb:hover {
-			background: rgba(0, 0, 0, 0.7);
-		}
-		/* #endregion */
 	}
+
+	/* #region GENERICS */
+	*, ::before, ::after {
+		box-sizing: border-box;
+	}
+
+	html,
+	body,
+	#root {
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
+	html {
+		background-color: ${theme.palette.background.primary};
+		/* color: #fff; */
+	}
+
+	#root {
+		position: relative;
+	}
+
+	pre {
+		white-space: pre-wrap;
+		word-wrap: break-word;
+	}
+
+	a {
+		text-decoration: none;
+	}
+	/* #endregion */
+
+	/* #region SCROLLBARS */
+	*, ::before, ::after {
+		scroll-behavior: smooth;
+		scrollbar-color: black transparent;
+		scrollbar-width: thin;
+	}
+
+	/* width */
+	::-webkit-scrollbar {
+		width: 5px;
+		height: 6px;
+	}
+
+	/* Track */
+	::-webkit-scrollbar-track {
+		background: #bfbfbf;
+	}
+
+	/* Handle */
+	::-webkit-scrollbar-thumb {
+		background: black;
+		border-radius: 10px;
+	}
+
+	/* Handle on hover */
+	::-webkit-scrollbar-thumb:hover {
+		background: rgba(0, 0, 0, 0.7);
+	}
+	/* #endregion */
 `;
 
 export { GlobalStyles };
