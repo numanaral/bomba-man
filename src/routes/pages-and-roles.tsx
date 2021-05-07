@@ -11,7 +11,7 @@ import {
 	mapRoles,
 	mapBasePathForRoutes,
 	mapBasePathForLinks,
-	mapRouteToLink,
+	// mapRouteToLink,
 } from './utils';
 
 const PAGE_ROLES = {
@@ -24,10 +24,11 @@ const PAGE_ROLES = {
 // Public routes
 const LazyHome = loadable(() => import(`routes/pages/Home`));
 const LazyLocal = loadable(() => import(`routes/pages/Local`));
+const LazyInstructions = loadable(() => import(`routes/pages/Instructions`));
 
 // Private routes
 const LazyProfile = loadable(() => import(`routes/pages/Profile`));
-// const LazyRoomCreator = loadable(() => import(`routes/pages/RoomCreator`));
+const LazyRoomCreator = loadable(() => import(`routes/pages/RoomCreator`));
 const LazyOnline = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/Online`));
 const LazyJoin = loadable(() => import(`routes/pages/Join`));
 
@@ -45,12 +46,12 @@ const PRIVATE_ROUTES = [
 		path: '/profile',
 		component: LazyProfile,
 	},
-	// {
-	// 	title: 'Room Creator',
-	// 	description: `Build a room to play with friends online.`,
-	// 	path: '/room-creator',
-	// 	component: <LazyRoomCreator />,
-	// },
+	{
+		title: 'Room Creator',
+		description: `Build a room to play with friends online.`,
+		path: '/room-creator/:type',
+		component: LazyRoomCreator,
+	},
 	{
 		title: 'Online Multiplayer',
 		description: `Invite friends to play alongside you in this room.`,
@@ -82,6 +83,12 @@ const ROUTE_LIST = [
 		description: `Local game, multiplayer and/or with NPCs.`,
 		path: '/local',
 		component: LazyLocal,
+	},
+	{
+		title: 'Instructions',
+		description: `How to play.`,
+		path: '/instructions',
+		component: LazyInstructions,
 	},
 	{
 		title: 'Login',
@@ -127,11 +134,23 @@ const SHARED_DISPLAY_PAGES = ([
 			text: 'Local Game',
 			to: '/local',
 		},
+		{
+			label: 'Online Game',
+			tooltip: 'Online Game',
+			text: 'Online Game',
+			to: '/room-creator/online',
+		},
+		{
+			label: 'Instructions',
+			tooltip: 'Instructions',
+			text: 'Instructions',
+			to: '/instructions',
+		},
 	],
 	// Private Paths
-	...PRIVATE_ROUTES.filter(({ path }) => path !== '/profile')
-		.map(mapRouteToLink)
-		.map(mapRoles(PAGE_ROLES.LOGGED_IN)),
+	// ...PRIVATE_ROUTES.filter(({ path }) => path !== '/profile')
+	// 	.map(mapRouteToLink)
+	// 	.map(mapRoles(PAGE_ROLES.LOGGED_IN)),
 ] as Array<Link>).map(mapBasePathForLinks);
 
 const NAV_LIST = [...SHARED_DISPLAY_PAGES];
