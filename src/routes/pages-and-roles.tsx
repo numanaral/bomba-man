@@ -1,7 +1,12 @@
 import { Redirect } from 'react-router-dom';
 import loadable from 'utils/loadable';
 import { BASE_PATH } from './constants';
-import { UserRoles, Route, Link } from './types';
+import {
+	UserRoles,
+	Route,
+	Link,
+	RouteComponentPropsWithLocationState,
+} from './types';
 import {
 	mapRoles,
 	mapBasePathForRoutes,
@@ -23,7 +28,7 @@ const LazyLocal = loadable(() => import(`routes/pages/Local`));
 // Private routes
 const LazyProfile = loadable(() => import(`routes/pages/Profile`));
 // const LazyRoomCreator = loadable(() => import(`routes/pages/RoomCreator`));
-const LazyOnline = loadable(() => import(`routes/pages/Online`));
+const LazyOnline = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/Online`));
 const LazyJoin = loadable(() => import(`routes/pages/Join`));
 
 // Handler Pages
