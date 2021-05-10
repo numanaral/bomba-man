@@ -43,13 +43,15 @@ const Character = ({
 
 	const props: CharacterProps = {
 		id,
-		name: `${name} ${id}`,
+		// name: `${name}${id}`,
+		name: id,
 		coordinates: {
 			top: _top,
 			left: _left,
 		},
 		keyboardConfig,
 		highlight,
+		size,
 		...rest,
 	};
 
