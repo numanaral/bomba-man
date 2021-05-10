@@ -3,7 +3,7 @@ import theme from 'theme';
 import { MarginDirection } from './types';
 
 interface Props {
-	direction: MarginDirection;
+	direction?: MarginDirection;
 	spacing?: NumberOrString;
 }
 
@@ -27,7 +27,7 @@ const Wrapper = styled.span<StyledProps<Props, 'direction' | 'spacing'>>`
  *
  * @component
  */
-const Spacer = ({ direction, spacing = 1 }: Props) => (
+const Spacer = ({ direction = 'bottom', spacing = 1 }: Props) => (
 	<Wrapper
 		$direction={direction}
 		$spacing={

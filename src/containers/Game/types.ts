@@ -103,6 +103,7 @@ type KeyMap = {
 type CharacterProps = {
 	id: PlayerId;
 	name: string;
+	size: number;
 	coordinates: TopLeftCoordinates;
 	keyboardConfig?: PlayerKeyboardConfig;
 	highlight?: boolean;

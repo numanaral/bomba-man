@@ -31,7 +31,7 @@ const useWatchOnlineGame = (id: string) => {
 	const pending = !isLoaded(onlineGameFromFirebase) && <LoadingIndicator />;
 	const error = isEmpty(onlineGameFromFirebase) && (
 		<NoAccess>
-			<LazyJoin />
+			<LazyJoin noWrapper />
 		</NoAccess>
 	);
 

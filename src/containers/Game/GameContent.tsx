@@ -62,7 +62,9 @@ const GameContent = ({ state, provider }: Props) => {
 				}
 			)}
 			{Object.values(bombs).map(({ id, playerId, ...bombProps }) => {
-				const playerState = players[playerId]!.state;
+				const playerState = players[playerId]?.state;
+				if (!playerState) return null;
+
 				const explosionSize = getPoweredUpValue(
 					playerState,
 					PowerUp.BombSize,
