@@ -1,28 +1,50 @@
+// TODO: replace polished with material ui's colorManipulator?
+// but lighten of mui is not pleasant, darken of polished is the same..
 import { lighten } from 'polished';
+import { fade } from '@material-ui/core/styles/colorManipulator';
 import { GameConfig } from 'store/redux/reducers/game/types';
 import { createGlobalStyle } from 'styled-components';
+import {
+	responsiveFontSizes,
+	createMuiTheme,
+	// eslint-disable-next-line camelcase
+	unstable_createMuiStrictModeTheme,
+	ThemeOptions,
+} from '@material-ui/core/styles';
+import { __IS_DEV__ } from 'app';
 
 const theme = {
 	palette: {
 		background: {
 			primary: 'var(--primary-background)',
+			'primary-lighter': 'var(--primary-background-lighter)',
+			'primary-darker': 'var(--primary-background-darker)',
 			secondary: 'var(--secondary-background)',
+			'secondary-lighter': 'var(--secondary-background-lighter)',
+			'secondary-darker': 'var(--secondary-background-darker)',
 		},
 		color: {
 			primary: 'var(--primary-color)',
 			'primary-lighter': 'var(--primary-color-lighter)',
+			'primary-darker': 'var(--primary-color-darker)',
 			secondary: 'var(--secondary-color)',
 			'secondary-lighter': 'var(--secondary-color-lighter)',
+			'secondary-darker': 'var(--secondary-color-darker)',
 			error: 'var(--error-color)',
 			'error-lighter': 'var(--error-color-lighter)',
+			'error-darker': 'var(--error-color-darker)',
 			warning: 'var(--warning-color)',
 			'warning-lighter': 'var(--warning-color-lighter)',
+			'warning-darker': 'var(--warning-color-darker)',
 			success: 'var(--success-color)',
 			'success-lighter': 'var(--success-color-lighter)',
+			'success-darker': 'var(--success-color-darker)',
 			info: 'var(--info-color)',
 			'info-lighter': 'var(--info-color-lighter)',
+			'info-darker': 'var(--info-color-darker)',
 			default: 'var(--default-color)',
 			'default-lighter': 'var(--default-color-lighter)',
+			'default-darker': 'var(--default-color-darker)',
 		},
 	},
 	shape: {
@@ -45,6 +67,13 @@ const theme = {
 	},
 };
 
+const THEME_CONFIG: ThemeOptions = { palette: { type: 'dark' } };
+// eslint-disable-next-line camelcase
+const themeFn = __IS_DEV__ ? unstable_createMuiStrictModeTheme : createMuiTheme;
+const getMuiTheme = () => {
+	return responsiveFontSizes(themeFn(THEME_CONFIG));
+};
+
 const COLORS = {
 	'--primary-background': '#13141b',
 	'--secondary-background': '#1a1d28',
@@ -61,10 +90,11 @@ const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
 	:root {
 		/* #region COLORS */
 		${Object.entries(COLORS).reduce((acc, [colorKey, colorValue]) => {
-			return `${acc}${colorKey}: ${colorValue};${colorKey}-lighter: ${lighten(
-				0.1,
-				colorValue
-			)};`;
+			return `
+				${acc}${colorKey}: ${colorValue};
+				${colorKey}-lighter: ${lighten(0.15, colorValue)};
+				${colorKey}-darker: ${fade(colorValue, 0.05)};
+			`;
 		}, '')}
 		/* #endregion */
 
@@ -164,5 +194,5 @@ const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
 	/* #endregion */
 `;
 
-export { GlobalStyles };
+export { getMuiTheme, GlobalStyles };
 export default theme;
