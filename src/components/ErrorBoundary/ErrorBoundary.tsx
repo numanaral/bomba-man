@@ -54,10 +54,10 @@ class ErrorBoundary extends React.Component<Props, State> {
 
 		return (
 			(hasError && (
-				<>
+				<div style={{ padding: 20, color: 'white' }}>
 					<h1> {title} </h1>
 					<pre> {message} </pre>
-				</>
+				</div>
 			)) ||
 			children
 		);

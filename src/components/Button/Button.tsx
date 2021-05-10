@@ -22,6 +22,7 @@ const Container = styled.button<StyledProps<Props, 'variant' | 'size'>>`
 	}
 `;
 
+// TODO: Remove this component as we got mui now, use TooltipButton
 const Button = forwardRef<HTMLButtonElement, Props>(
 	({ variant = 'default', size = 'medium', children, ...rest }, ref) => {
 		return (
