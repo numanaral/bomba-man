@@ -18,11 +18,12 @@ import {
 	AnimatableGameMap,
 	BombFn,
 	BombId,
+	GameConfig,
 	GameState,
 	OnMoveProps,
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
-import { generateRandomGameMap } from 'utils/game';
+import { generateDefaultGameState, generateRandomGameMap } from 'utils/game';
 import { makeSelectGameConfig } from 'store/redux/reducers/game/selectors';
 import { OnDropBomb } from 'containers/Game/types';
 
@@ -36,6 +37,16 @@ const useGameProvider = () => {
 	const updateGameSettings = useCallback(
 		(payload: GameState) => dispatch(setGameState(payload)),
 		[dispatch]
+	);
+
+	const startGame = useCallback(
+		(payload: GameConfig) => {
+			console.log('payload', payload);
+			const gameState = generateDefaultGameState(payload);
+			console.log('gameState', gameState);
+			updateGameSettings(gameState);
+		},
+		[updateGameSettings]
 	);
 
 	const updateGameMap = useCallback(
@@ -110,6 +121,7 @@ const useGameProvider = () => {
 	// #endregion
 
 	return {
+		startGame,
 		updateGameSettings,
 		generateNewCollisionCoordinates,
 		// GAME ACTIONS

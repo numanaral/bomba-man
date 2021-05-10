@@ -1,8 +1,8 @@
-import { GameApiHook } from 'containers/Game/types';
+import { GameApiHookOnline } from 'containers/Game/types';
 import useOnlineGameProvider from 'store/firebase/hooks/useOnlineGameProvider';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 
-const useOnlineGame: GameApiHook = gameId => {
+const useOnlineGame: GameApiHookOnline = gameId => {
 	const { pending, error, gameState: state } = useWatchOnlineGame(
 		gameId as string
 	);

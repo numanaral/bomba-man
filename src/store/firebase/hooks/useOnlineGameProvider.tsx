@@ -94,7 +94,10 @@ const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
 		gameUtils.current.toggleGameNpc();
 	}, []);
 
+	const startGame = () => null;
+
 	return {
+		startGame,
 		updateGameSettings,
 		generateNewCollisionCoordinates,
 		// GAME ACTIONS

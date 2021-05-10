@@ -135,7 +135,8 @@ type GameApi = {
 	error?: false | JSX.Element;
 };
 
-type GameApiHook = (gameId?: string) => GameApi;
+type GameApiHookOnline = (gameId?: string) => GameApi;
+type GameApiHookLocal = (gameConfig?: GameConfig) => GameApi | null;
 
 type PickedGameState<K extends keyof GameState> = {
 	[P in K]: GameState[P];
@@ -168,6 +169,7 @@ export type {
 	PowerUpOrNull,
 	FontAwesomeIconProps,
 	GameApi,
-	GameApiHook,
+	GameApiHookOnline,
+	GameApiHookLocal,
 	PickedGameState,
 };
