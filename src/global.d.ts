@@ -9,7 +9,7 @@
  * // }
  * StyledProps<Props, 'variant' | 'size'>
  */
-declare type StyledProps<T, Keys> = {
+declare type StyledProps<T, Keys = KeysOf<T>> = {
 	[Property in keyof Pick<T, Keys> as `$${string & Property}`]: T[Property];
 };
 
@@ -91,6 +91,10 @@ declare type NumberOrString = number | string;
 declare type ReactOnClick<Extends = void> = (
 	e: React.MouseEvent<HTMLButtonElement, MouseEvent> & Extends
 ) => void;
+
+declare type ReactOnButtonClick = React.MouseEventHandler<
+	HTMLAnchorElement | HTMLButtonElement
+>;
 
 declare type BaseColorVariant = 'primary' | 'secondary';
 declare type AlertColorVariant = 'error' | 'success' | 'warning' | 'info';
