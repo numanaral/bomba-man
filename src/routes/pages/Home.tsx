@@ -2,22 +2,34 @@ import Container from 'components/Container';
 import { NAV_LIST } from 'routes/pages-and-roles';
 import styled from 'styled-components';
 import LinkButton from 'components/LinkButton';
-import { Fragment } from 'react';
+import { Fragment, useMemo, useEffect } from 'react';
 import Spacer from 'components/Spacer';
-import SpriteCharacter from 'containers/Game/components/SpriteCharacter';
+// import SpriteCharacter from 'containers/Game/components/SpriteCharacter';
+import { CharacterIcon } from 'containers/RoomCreator/icons';
+import useInterval from 'hooks/useInterval';
+import TooltipButton from 'components/TooltipButton';
+import useLocalStorage from 'hooks/useLocalStorage';
+import * as colors from '@material-ui/core/colors';
 
-const CharacterWrapper = styled.div`
-	position: relative;
-	width: 100%;
-	height: 100px;
+// const size = 8;
 
-	& > div {
-		transform: scale(4);
-		/* Gotta override as char is taking coordinates by default */
-		top: 32px !important;
-		left: calc(50% - 32px / 2) !important;
-	}
-`;
+// const CharacterWrapper = styled.div`
+// 	position: relative;
+// 	width: ${size * 32}px;
+// 	height: ${size * 32}px;
+
+// 	.character {
+// 		.spritesheet-wrapper {
+// 			width: calc(32px * ${size}) !important;
+// 			height: calc(32px * ${size}) !important;
+
+// 			& .spritesheet {
+// 				width: calc(32px * ${size * 4}) !important;
+// 				height: calc(32px * ${size * 4}) !important;
+// 			}
+// 		}
+// 	}
+// `;
 
 const Menu = styled(Container)`
 	flex-direction: column;
@@ -26,28 +38,112 @@ const Menu = styled(Container)`
 	}
 `;
 
+const getColor = (colorMap: Array<string>, ind: number) => {
+	return {
+		style: {
+			backgroundColor: colorMap[ind % 4],
+		},
+	};
+};
+
+const colorKeys = Array.from({ length: 9 }, (_, i) => `${(i + 1) * 100}`);
+const getAndMapMuiColors = () => {
+	return Object.values(colors)
+		.map(color => {
+			return colorKeys.map(key => color[key as KeysOf<typeof color>]);
+		})
+		.flat();
+};
+
+const RAINBOW_COLORS_LSK = 'RAINBOW_COLORS';
+const useRainbowColors = (stopIt: boolean) => {
+	const [colorMap, setColorMap] = useLocalStorage(
+		RAINBOW_COLORS_LSK,
+		getAndMapMuiColors()
+	);
+
+	const reOrderColors = () => {
+		setColorMap(v => {
+			return [...v.slice(1), v[0]];
+		});
+	};
+
+	/** We don't want to keep calling so often it if it's stopped */
+	const intervalSpeed = useMemo(() => {
+		return stopIt ? Number.MAX_SAFE_INTEGER : 100;
+	}, [stopIt]);
+
+	const clearLastInterval = useInterval(reOrderColors, intervalSpeed);
+
+	useEffect(() => {
+		if (stopIt) clearLastInterval();
+	}, [stopIt, clearLastInterval]);
+
+	return colorMap;
+};
+
+const STOP_COLOR_ROTATION_LSK = 'STOP_COLOR_ROTATION';
+const DONT_SHOW_AGAIN_LSK = 'DONT_SHOW_AGAIN';
 const Home = () => {
+	const [stopIt, setStopIt] = useLocalStorage(STOP_COLOR_ROTATION_LSK, false);
+	const [dontShowAgain, setDontShowAgain] = useLocalStorage(
+		DONT_SHOW_AGAIN_LSK,
+		false
+	);
+
+	const colorMap = useRainbowColors(dontShowAgain || stopIt);
+
+	const toggleColorRotation = () => {
+		setStopIt(v => !v);
+	};
+
+	const dontYouShowMeThisRandomStuff = () => {
+		setDontShowAgain(true);
+	};
+
 	return (
 		<Container>
-			<Spacer direction="top" spacing="10" />
-			<CharacterWrapper>
+			<Spacer spacing="5" />
+			<CharacterIcon size={100} isWalking />
+			<Spacer spacing="5" />
+			{/* <CharacterWrapper>
 				<SpriteCharacter
 					coordinates={{ top: 0, left: 0 }}
 					id="P1"
 					name="Bomba-man"
 					isWalking
+					size={100}
 				/>
-			</CharacterWrapper>
+			</CharacterWrapper> */}
 			<Menu>
 				{NAV_LIST.filter(link => link.label !== 'Home').map(
-					({ to, text }) => (
+					({ to, text }, ind) => (
 						<Fragment key={to}>
-							<LinkButton to={to}>{text}</LinkButton>
-							<Spacer direction="bottom" />
+							<LinkButton to={to} {...getColor(colorMap, ind)}>
+								{text}
+							</LinkButton>
+							<Spacer />
 						</Fragment>
 					)
 				)}
 			</Menu>
+			{!dontShowAgain && (
+				<TooltipButton
+					text={stopIt ? 'Maybe do it one more time' : 'Please stop!'}
+					variant="outlined"
+					onClick={toggleColorRotation}
+				/>
+			)}
+			{stopIt && !dontShowAgain && (
+				<>
+					<Spacer />
+					<TooltipButton
+						text="No, just get rid of this"
+						variant="outlined"
+						onClick={dontYouShowMeThisRandomStuff}
+					/>
+				</>
+			)}
 		</Container>
 	);
 };

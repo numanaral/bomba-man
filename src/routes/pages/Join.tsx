@@ -1,73 +1,59 @@
-import Button from 'components/Button';
-import Container from 'components/Container';
-import Spacer from 'components/Spacer';
-import { useState } from 'react';
+import { Fragment, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
-import theme from 'theme';
+import PageContainer from 'components/PageContainer';
+import Form from 'components/Form';
+import * as yup from 'yup';
+import { FormComponent } from 'components/Form/types';
+import { H1 } from 'components/typography';
+import { Grid } from '@material-ui/core';
+import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
 
-import styled from 'styled-components';
+const onlineRoomSchema = yup.object().shape({
+	roomId: yup.string().required(),
+});
 
-const Wrapper = styled(Container)`
-	form {
-		text-align: center;
-	}
+type OnlineRoomSchema = {
+	roomId: string;
+};
 
-	label + span {
-		color: ${theme.palette.color.error};
-	}
-`;
+interface Props {
+	noWrapper?: boolean;
+}
 
-const Join = () => {
-	const [searchKeyword, setSearchKeyword] = useState('');
-	const [error, setError] = useState('');
+const Join = ({ noWrapper = false }: Props) => {
 	const { push } = useHistory();
 
-	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		if (!searchKeyword) {
-			setError('Please enter a room id');
-			return;
-		}
-		push(`${BASE_PATH}/online/${searchKeyword}`);
-	};
+	const onSubmit = useCallback(
+		(data: OnlineRoomSchema) => {
+			push(`${BASE_PATH}/online/${data.roomId}`);
+		},
+		[push]
+	);
 
-	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const keyword = e.target.value.trim();
-		if (!keyword) return;
-		setSearchKeyword(keyword);
-	};
+	const Wrapper = noWrapper ? Fragment : PageContainer;
 
 	return (
 		<Wrapper>
-			<form onSubmit={onSubmit}>
-				<h1
-					style={{
-						width: '100%',
-						color: theme.palette.color.primary,
-					}}
-				>
-					Join a room
-				</h1>
-				<label htmlFor="room-id">
-					<input
-						type="text"
-						id="room-id"
-						style={{ width: '100%' }}
-						value={searchKeyword}
-						onChange={onChange}
+			<H1> Join a room</H1>
+			<ContainerWithCenteredItems container>
+				<Grid container justify="center" item xs={12} sm={8}>
+					<Form<OnlineRoomSchema>
+						fullWidth
+						onSubmit={onSubmit}
+						submitText="Join"
+						focusOnFirstElement
+						schema={onlineRoomSchema}
+						items={[
+							{
+								type: FormComponent.Text,
+								name: 'roomId',
+								label: 'RoomId',
+							},
+						]}
 					/>
-				</label>
-				{error && <span>Error: {error}</span>}
-				<Spacer direction="bottom" />
-				<Button
-					style={{ width: '100%' }}
-					variant="primary"
-					type="submit"
-				>
-					Join
-				</Button>
-			</form>
+				</Grid>
+			</ContainerWithCenteredItems>
 		</Wrapper>
 	);
 };
