@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { RouteComponentProps, StaticContext } from 'react-router';
+import { GameConfig } from 'store/redux/reducers/game/types';
 
 enum UserRoles {
 	DEV = 'Developer',
@@ -24,7 +25,12 @@ type Link = {
 	icon?: JSX.Element | React.ComponentType;
 };
 
-type ReactRouterState = { referrer?: string; to?: string; roles?: Roles };
+type ReactRouterState = {
+	referrer?: string;
+	to?: string;
+	roles?: Roles;
+	gameConfig?: GameConfig;
+};
 
 type RouteComponentPropsWithLocationState<
 	Params extends { [K in keyof Params]?: string } = {},

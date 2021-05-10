@@ -1,3 +1,4 @@
+import { RoomType } from 'enums';
 import { Redirect } from 'react-router-dom';
 import loadable from 'utils/loadable';
 import { BASE_PATH } from './constants';
@@ -28,7 +29,7 @@ const LazyInstructions = loadable(() => import(`routes/pages/Instructions`));
 
 // Private routes
 const LazyProfile = loadable(() => import(`routes/pages/Profile`));
-const LazyRoomCreator = loadable(() => import(`routes/pages/RoomCreator`));
+const LazyRoomCreator = loadable<RouteComponentPropsWithLocationState<{ type: RoomType }>>(() => import(`routes/pages/RoomCreator`));
 const LazyOnline = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/Online`));
 const LazyJoin = loadable(() => import(`routes/pages/Join`));
 
@@ -46,11 +47,32 @@ const PRIVATE_ROUTES = [
 		path: '/profile',
 		component: LazyProfile,
 	},
+].map(mapRoles(PAGE_ROLES.LOGGED_IN)) as Array<Route>;
+
+const ROUTE_LIST = [
+	{
+		title: 'Home | Bomba-man',
+		description: `Welcome to the bomberman, here you can find settings and create a room to play online with friends`,
+		path: '',
+		component: LazyHome,
+	},
+	{
+		path: '/',
+		component: <Redirect to={BASE_PATH} />,
+	} as Route,
+	...PRIVATE_ROUTES,
+	// TODO make online version private
 	{
 		title: 'Room Creator',
 		description: `Build a room to play with friends online.`,
 		path: '/room-creator/:type',
 		component: LazyRoomCreator,
+	},
+	{
+		title: 'Local Game',
+		description: `Local game, multiplayer and/or with NPCs.`,
+		path: '/local',
+		component: LazyLocal,
 	},
 	{
 		title: 'Online Multiplayer',
@@ -63,26 +85,6 @@ const PRIVATE_ROUTES = [
 		description: `Join a game room to play with your friend.`,
 		path: '/join',
 		component: LazyJoin,
-	},
-].map(mapRoles(PAGE_ROLES.LOGGED_IN)) as Array<Route>;
-
-const ROUTE_LIST = [
-	{
-		title: 'Home | Bomberman',
-		description: `Welcome to the bomberman, here you can find settings and create a room to play online with friends`,
-		path: '',
-		component: LazyHome,
-	},
-	{
-		path: '/',
-		component: <Redirect to={BASE_PATH} />,
-	} as Route,
-	...PRIVATE_ROUTES,
-	{
-		title: 'Local Game',
-		description: `Local game, multiplayer and/or with NPCs.`,
-		path: '/local',
-		component: LazyLocal,
 	},
 	{
 		title: 'Instructions',
@@ -135,10 +137,16 @@ const SHARED_DISPLAY_PAGES = ([
 			to: '/local',
 		},
 		{
-			label: 'Online Game',
-			tooltip: 'Online Game',
-			text: 'Online Game',
+			label: 'Create Online Game',
+			tooltip: 'Create Online Game',
+			text: 'Create Online Game',
 			to: '/room-creator/online',
+		},
+		{
+			label: 'Join Online Game',
+			tooltip: 'Join Online Game',
+			text: 'Join Online Game',
+			to: '/join',
 		},
 		{
 			label: 'Instructions',
