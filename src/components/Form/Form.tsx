@@ -1,0 +1,66 @@
+import { SubmitHandler, DeepPartial, UnpackNestedValue } from 'react-hook-form';
+import { ObjectSchema } from 'yup';
+import { FormItem } from './types';
+import useForm from './useForm';
+import FormField from './FormField';
+import FormContainer, { FormContainerProps } from './FormContainer';
+
+interface Props<Schema> {
+	items: Array<FormItem<Schema>>;
+	/** @see https://github.com/react-hook-form/react-hook-form/issues/2129#issuecomment-657334424 */
+	schema: ObjectSchema<object | any>;
+	onSubmit: SubmitHandler<Schema>;
+	defaultValues?: UnpackNestedValue<DeepPartial<Schema>>;
+	submitText?: string;
+	focusOnFirstElement?: boolean;
+	fullWidth?: boolean;
+	containerProps?: Partial<FormContainerProps>;
+}
+
+const Form = <Schema,>({
+	items,
+	schema,
+	onSubmit,
+	defaultValues,
+	submitText = 'Submit',
+	focusOnFirstElement = false,
+	fullWidth = false,
+	containerProps = {},
+}: Props<Schema>) => {
+	const { handleSubmit, utils } = useForm({
+		defaultValues,
+		onSubmit,
+		schema,
+		...(focusOnFirstElement && { firstFocusElementName: items[0]?.name }),
+	});
+
+	const _containerProps = {
+		...containerProps,
+		style: {
+			...containerProps?.style,
+			...(fullWidth && { width: '100%' }),
+		},
+	};
+
+	return (
+		<FormContainer
+			onSubmit={handleSubmit}
+			submitText={submitText}
+			{..._containerProps}
+		>
+			{items.map(props => (
+				<FormField
+					key={props.name}
+					utils={utils}
+					{...props}
+					required={
+						props.required || utils.checkIfRequiredField(props.name)
+					}
+				/>
+			))}
+		</FormContainer>
+	);
+};
+
+export type { Props as FormProps };
+export default Form;
