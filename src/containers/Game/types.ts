@@ -143,6 +143,14 @@ type PickedGameState<K extends keyof GameState> = {
 	[P in K]: GameState[P];
 };
 
+type OnlineGameId = string;
+
+type OnlineGame = {
+	gameId: OnlineGameId;
+	gameState: GameState;
+	players: Array<PlayerId>;
+};
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -173,4 +181,6 @@ export type {
 	GameApiHookOnline,
 	GameApiHookLocal,
 	PickedGameState,
+	OnlineGameId,
+	OnlineGame,
 };
