@@ -22,4 +22,8 @@ const wrapPreventFocusLock = (
 
 const doesNotExist = (value: any) => value === null || value === undefined;
 
-export { sleep, wrapPreventFocusLock, doesNotExist };
+const findEnumKeyFromValue = (enumerable: object, key: string) => {
+	return Object.keys(enumerable)[Object.values(enumerable).indexOf(key)];
+};
+
+export { sleep, wrapPreventFocusLock, doesNotExist, findEnumKeyFromValue };

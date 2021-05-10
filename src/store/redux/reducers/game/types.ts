@@ -56,12 +56,12 @@ namespace GameConfigRanges {
 	// #endregion
 	// #region GameConfig.sizes
 	export type MapSize = RangeOf<15, 6>;
-	export type SquareSize = 32; // | 64 ?
+	export type SquareSize = 32 | 48 | 64; // | 64 ?
 	// TODO: This wont' be a square movement in the future
-	export type MovementSize = 32; // will be pixellated
+	export type MovementSize = 32 | 48 | 64; // will be pixellated
 	// #endregion
 	// #region GameConfig.duration
-	export type FiringDuration = 0.5 | 0.75 | 1.5 | 2.5 | RangeOf<3, 1>;
+	export type FiringDuration = 1.5 | 2.5 | RangeOf<3, 1>;
 	export type ExplodingDuration = 0.5 | 1 | 1.5;
 	// #endregion
 }
@@ -91,6 +91,7 @@ type GameConfig = {
 		/** Movement size */
 		movement: GameConfigRanges.MovementSize; // px
 	};
+	// TODO: pluralize this
 	duration: {
 		bomb: {
 			/** Duration before bomb explodes */

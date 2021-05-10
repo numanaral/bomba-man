@@ -47,8 +47,8 @@ enum Explosive {
 }
 
 enum RoomType {
-	Local = 'Local',
-	Online = 'Online',
+	Local = 'local',
+	Online = 'online',
 }
 const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
 

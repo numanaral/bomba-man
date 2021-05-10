@@ -1,13 +1,18 @@
+import PageContainer from 'components/PageContainer';
+import RoomCreator from 'containers/RoomCreator';
 import { RoomType } from 'enums';
+import { RouteComponentPropsWithLocationState } from 'routes/types';
 
-interface Props {
-	roomType: RoomType;
-}
-
-const RoomCreator = ({ roomType }: Props) => {
-	// grab game state and updater function
-	// setup the game
-	return <div>{roomType}</div>;
+const RoomCreatorPage = ({
+	match: {
+		params: { type },
+	},
+}: RouteComponentPropsWithLocationState<{ type: RoomType }>) => {
+	return (
+		<PageContainer>
+			<RoomCreator type={type} />
+		</PageContainer>
+	);
 };
 
-export default RoomCreator;
+export default RoomCreatorPage;
