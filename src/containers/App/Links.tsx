@@ -24,7 +24,7 @@ const LinkText = styled.h1`
 
 const Links = () => {
 	return (
-		<Wrapper>
+		<Wrapper id="site-navbar">
 			<NavLink to="/">
 				<LinkText>{config.title}</LinkText>
 			</NavLink>
