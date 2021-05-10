@@ -1,4 +1,5 @@
 import { ExplosionState, Explosive } from 'enums';
+import useIsUnmounted from 'hooks/useIsUnmounted';
 import { useEffect, useState } from 'react';
 import {
 	Bomb as BombType,
@@ -79,15 +80,19 @@ const Bomb = ({
 		ExplosionState.Firing
 	);
 
+	const isMounted = useIsUnmounted();
+
 	useEffect(() => {
 		const kaboom = async () => {
 			await sleep(firingDuration * 1000);
-			// if (!isMounted.current) return;
+			if (!isMounted.current) return;
 			triggerExplosion(id, async (bombIds: Set<BombId>) => {
+				if (!isMounted.current) return;
 				// update animation
 				setExplosionState(ExplosionState.Exploding);
 				await sleep(explodingDuration * 1000);
 
+				if (!isMounted.current) return;
 				// complete explosion for this bomb
 				onExplosionComplete(id);
 				// then complete the explosion for all the other bombs
