@@ -17,7 +17,8 @@ interface Props {
 
 // TODO
 const WaitingRoom = ({ gameId }: Props) => {
-	const { push } = useHistory();
+	const { push, listen } = useHistory();
+
 	const {
 		pending,
 		error,
@@ -35,6 +36,15 @@ const WaitingRoom = ({ gameId }: Props) => {
 		onPlayerExit(playerId);
 	});
 
+	const unlisten = listen(() => {
+		if (!playerId) return;
+		onPlayerExit(playerId);
+	});
+
+	useEffect(() => {
+		return () => unlisten();
+	}, [unlisten]);
+
 	useEffect(() => {
 		if (!isReady) return;
 
@@ -45,7 +55,16 @@ const WaitingRoom = ({ gameId }: Props) => {
 			push(`${BASE_PATH}/unauthorized`, { message: 'Game is full!' });
 			return;
 		}
-		const newPlayerId = `P${playerCount + 1}` as PlayerId;
+		// Pick a number that's the smallest from non existing player ids
+		// i.e. P1 joins, P2 joins, P1 leaves, P1 joins, he should be assigned
+		// P1 and not P2 (because ind + 1 will be 2 at this point)
+		const currentPlayerNumbers = playerKeys.map(key => {
+			return Number(key.replace('P', ''));
+		});
+		const openPlayerNumbers = [1, 2, 3, 4].filter(openNumber => {
+			return !currentPlayerNumbers.includes(openNumber);
+		});
+		const newPlayerId = `P${Math.min(...openPlayerNumbers)}` as PlayerId;
 		onPlayerJoin(newPlayerId);
 		// TODO: error checking?
 		setPlayerId(newPlayerId);
