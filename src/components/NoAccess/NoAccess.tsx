@@ -8,12 +8,19 @@ const H1Wrapper = styled(H1)`
 	color: ${theme.palette.color.error};
 `;
 
-const NoAccess: React.FC = ({ children }) => (
+interface Props {
+	message?: string;
+}
+
+const DEFAULT_ERROR_MESSAGE =
+	"Either the game is not found or you don't have access to it.";
+const NoAccess: React.FC<Props> = ({
+	children,
+	message = DEFAULT_ERROR_MESSAGE,
+}) => (
 	<PageContainer fullHeight>
 		<Spacer spacing="5" />
-		<H1Wrapper>
-			Either the game is not found or you don&apos;t have access to it.
-		</H1Wrapper>
+		<H1Wrapper>{message}</H1Wrapper>
 		<Spacer spacing="10" />
 		{children}
 	</PageContainer>

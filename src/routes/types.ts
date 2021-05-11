@@ -30,6 +30,8 @@ type ReactRouterState = {
 	to?: string;
 	roles?: Roles;
 	gameConfig?: GameConfig;
+	/** Passed to /unauthorized */
+	message?: string;
 };
 
 type RouteComponentPropsWithLocationState<
