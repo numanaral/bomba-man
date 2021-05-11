@@ -92,17 +92,28 @@ const useWatchOnlineGame = (id: string) => {
 		create<PlayerConfig>(playerConfig, `/gameState/players/${playerId}`);
 	};
 
+	const onStartGame = () => {
+		update({
+			started: true,
+		});
+	};
+
+	const onEndGame = () => {
+		update({
+			started: false,
+		});
+	};
+
 	const onPlayerExit = (playerId: PlayerId) => {
 		// remove as active player
 		remove(`/players/${playerId}`);
 		// remove him from the game state
 		remove(`/gameState/players/${playerId}`);
-	};
 
-	const onStartGame = () => {
-		update({
-			started: true,
-		});
+		// 2 because the state won't be updated just yet
+		if (Object.keys(game.players).length <= 2) {
+			onEndGame();
+		}
 	};
 
 	const _game: OnlineGame = {

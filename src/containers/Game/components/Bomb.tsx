@@ -10,6 +10,7 @@ import {
 import styled, { keyframes } from 'styled-components';
 import theme from 'theme';
 import { sleep } from 'utils';
+import { PlayerId } from '../types';
 import Cube from './Cube';
 
 const getTransform = (deg: number, is3D: boolean) => {
@@ -61,6 +62,8 @@ interface Props extends BombType {
 	triggerExplosion: BombFn;
 	onExplosionComplete: BombFn;
 	is3D: boolean;
+	/** needed to not trigger the bomb explosion multiple times */
+	currentOnlinePlayerId?: PlayerId;
 }
 
 const Bomb = ({
@@ -68,6 +71,8 @@ const Bomb = ({
 	firingDuration,
 	explodingDuration,
 	// explosionSize,
+	playerId,
+	currentOnlinePlayerId,
 	tileSize,
 	id,
 	top,
@@ -103,7 +108,7 @@ const Bomb = ({
 				});
 			});
 		};
-		kaboom();
+		if (playerId === currentOnlinePlayerId) kaboom();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

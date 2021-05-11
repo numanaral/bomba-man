@@ -14,7 +14,11 @@ type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
 interface Props extends GameApi {}
 
-const GameContent = ({ state, provider }: Props) => {
+const GameContent = ({
+	state,
+	provider,
+	playerId: currentOnlinePlayerId,
+}: Props) => {
 	const { triggerExplosion, onExplosionComplete } = provider;
 	const { gameMap, players, bombs, is3D, config } = state;
 
@@ -73,6 +77,7 @@ const GameContent = ({ state, provider }: Props) => {
 						key={id}
 						id={id}
 						playerId={playerId}
+						currentOnlinePlayerId={currentOnlinePlayerId}
 						{...bombProps}
 						color={theme.palette.color.error}
 						tileSize={config.sizes.tile}
