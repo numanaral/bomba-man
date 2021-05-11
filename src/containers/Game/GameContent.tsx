@@ -22,10 +22,7 @@ const GameContent = ({ state, provider }: Props) => {
 		<>
 			{(Object.entries(players) as PlayerEntry).map(
 				([playerId, playerConfig]) => {
-					// TODO: Put this in the store
-					const {
-						[playerId]: keyboardConfig,
-					} = config.keyboardConfig;
+					const keyboardConfig = players[playerId]?.keyboardConfig;
 					const { coordinates, state: playerState } = playerConfig;
 
 					const isAlive = !isPlayerDead(playerState, config.powerUps);

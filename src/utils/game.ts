@@ -1,12 +1,14 @@
 import {
 	Coordinates,
 	GameMap,
+	KeyboardConfig,
+	KeyboardEventCode,
 	KeyMap,
 	NextMoveProps,
 	NonNullablePlayerRef,
+	PlayerActionKeys,
 	PlayerConfig,
 	PlayerId,
-	PlayerKeyboardConfig,
 	PlayerRef,
 	Players,
 	PlayerState,
@@ -32,7 +34,7 @@ import {
 	GameState,
 	GameConfig,
 } from 'store/redux/reducers/game/types';
-import * as KeyCode from 'keycode-js';
+import gameConfig from 'config';
 import { getRandomInt } from './math';
 
 /**
@@ -205,10 +207,11 @@ const getDefaultPowerUps = () => {
 const generatePlayer = (
 	playerId: PlayerId,
 	config: GameConfig,
+	// optional because NPC doesn't have one
+	keyboardConfig: KeyboardConfig = null,
 	coordinates?: Coordinates
 ): PlayerConfig => {
 	const {
-		keyboardConfig: { [playerId]: defaultKeyboardConfig },
 		sizes: { map: mapSize, movement: movementSize },
 	} = config;
 
@@ -226,7 +229,7 @@ const generatePlayer = (
 			deathCount: 0,
 			powerUps: getDefaultPowerUps(),
 		},
-		keyboardConfig: defaultKeyboardConfig,
+		keyboardConfig,
 	};
 };
 
@@ -237,11 +240,26 @@ const generatePlayers = (
 		config.sizes.map
 	);
 
+	const {
+		'0': p1KeyboardConfig,
+		'1': p2KeyboardConfig,
+	} = gameConfig.keyboardConfig;
+
 	return {
-		P1: generatePlayer(Player.P1, config, defaultCoordinates.P1),
-		P2: generatePlayer(Player.P2, config, defaultCoordinates.P2),
-		P3: generatePlayer(Player.P3, config, defaultCoordinates.P3),
-		P4: generatePlayer(Player.P4, config, defaultCoordinates.P4),
+		P1: generatePlayer(
+			Player.P1,
+			config,
+			{ '0': p1KeyboardConfig },
+			defaultCoordinates.P1
+		),
+		P2: generatePlayer(
+			Player.P2,
+			config,
+			{ '1': p2KeyboardConfig },
+			defaultCoordinates.P2
+		),
+		P3: generatePlayer(Player.P3, config, null, defaultCoordinates.P3),
+		P4: generatePlayer(Player.P4, config, null, defaultCoordinates.P4),
 	};
 };
 
@@ -269,7 +287,7 @@ const generateDefaultGameConfig = (): GameConfig => {
 			},
 		},
 		tiles: {
-			blockTileChance: 7,
+			blockTileChance: 9,
 		},
 		sizes: {
 			map: 15,
@@ -283,22 +301,22 @@ const generateDefaultGameConfig = (): GameConfig => {
 				exploding: 1,
 			},
 		},
-		keyboardConfig: {
-			P1: {
-				MoveUp: KeyCode.CODE_W,
-				MoveRight: KeyCode.CODE_D,
-				MoveDown: KeyCode.CODE_S,
-				MoveLeft: KeyCode.CODE_A,
-				DropBomb: KeyCode.CODE_SPACE,
-			},
-			P2: {
-				MoveUp: KeyCode.CODE_UP,
-				MoveRight: KeyCode.CODE_RIGHT,
-				MoveDown: KeyCode.CODE_DOWN,
-				MoveLeft: KeyCode.CODE_LEFT,
-				DropBomb: KeyCode.CODE_SEMICOLON,
-			},
-		},
+		// keyboardConfig: {
+		// 	P1: {
+		// 		MoveUp: KeyCode.CODE_W,
+		// 		MoveRight: KeyCode.CODE_D,
+		// 		MoveDown: KeyCode.CODE_S,
+		// 		MoveLeft: KeyCode.CODE_A,
+		// 		DropBomb: KeyCode.CODE_SPACE,
+		// 	},
+		// 	P2: {
+		// 		MoveUp: KeyCode.CODE_UP,
+		// 		MoveRight: KeyCode.CODE_RIGHT,
+		// 		MoveDown: KeyCode.CODE_DOWN,
+		// 		MoveLeft: KeyCode.CODE_LEFT,
+		// 		DropBomb: KeyCode.CODE_SEMICOLON,
+		// 	},
+		// },
 	};
 };
 
@@ -310,7 +328,9 @@ const generateDefaultGameState = (config?: GameConfig): GameState => {
 	} = _config;
 	return {
 		players: {
-			P1: generatePlayer(Player.P1, _config),
+			P1: generatePlayer(Player.P1, _config, {
+				'0': gameConfig.keyboardConfig[0],
+			}),
 		},
 		gameMap: generateRandomGameMap(mapSize, blockDensity),
 		bombs: {},
@@ -754,43 +774,84 @@ const generateBomb = (
 	return bomb;
 };
 
+const mapAllPossibleKeyboardKeysForAction = (
+	keyboardConfig: KeyboardConfig,
+	actionKey: PlayerActionKeys
+) => {
+	if (!keyboardConfig) return [];
+	return Object.values(keyboardConfig).map(
+		({ [actionKey]: keyCode }) => keyCode
+	);
+};
+
 const getMoveDirectionFromKeyboardCode = (
 	keyCode: string,
-	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig
+	keyboardConfig: KeyboardConfig
 ) => {
+	const isKeyPressed = (actionKey: PlayerActionKeys) => {
+		return mapAllPossibleKeyboardKeysForAction(
+			keyboardConfig,
+			actionKey
+		).includes(keyCode as KeyboardEventCode);
+	};
+
 	switch (true) {
-		case keyCode === MoveUp:
+		case isKeyPressed('MoveUp'):
 			return Direction.UP;
-		case keyCode === MoveRight:
+		case isKeyPressed('MoveRight'):
 			return Direction.RIGHT;
-		case keyCode === MoveDown:
+		case isKeyPressed('MoveDown'):
 			return Direction.DOWN;
-		case keyCode === MoveLeft:
+		case isKeyPressed('MoveLeft'):
 			return Direction.LEFT;
 		default:
 			return null;
 	}
 };
 
+const shouldTakeAction = (
+	keyMap: React.MutableRefObject<KeyMap>,
+	keyboardConfig: KeyboardConfig,
+	actionKey: PlayerActionKeys
+) => {
+	// Get the keys that are being pressed right now
+	const currentlyPressedKeys = Object.keys(keyMap.current).filter(
+		mappedKey => {
+			return keyMap.current[mappedKey as KeyboardEventCode];
+		}
+	);
+	const possibleKeysForAction = mapAllPossibleKeyboardKeysForAction(
+		keyboardConfig,
+		actionKey
+	);
+	return currentlyPressedKeys.some(pressedKey => {
+		return possibleKeysForAction.includes(pressedKey as KeyboardEventCode);
+	});
+};
+
 const getMoveDirectionFromKeyMap = (
 	keyMap: React.MutableRefObject<KeyMap>,
-	{ MoveUp, MoveRight, MoveDown, MoveLeft }: PlayerKeyboardConfig,
+	keyboardConfig: KeyboardConfig,
 	multi = false
 ) => {
+	const isKeyPressed = (actionKey: PlayerActionKeys) => {
+		return shouldTakeAction(keyMap, keyboardConfig, actionKey);
+	};
+
 	return (multi
 		? // record and play all keys that being held
 		  [
-				keyMap.current[MoveUp] && Direction.UP,
-				keyMap.current[MoveRight] && Direction.RIGHT,
-				keyMap.current[MoveDown] && Direction.DOWN,
-				keyMap.current[MoveLeft] && Direction.LEFT,
+				isKeyPressed('MoveUp') && Direction.UP,
+				isKeyPressed('MoveRight') && Direction.RIGHT,
+				isKeyPressed('MoveDown') && Direction.DOWN,
+				isKeyPressed('MoveLeft') && Direction.LEFT,
 		  ]
 		: // handle single key down
 		  [
-				(keyMap.current[MoveUp] && Direction.UP) ||
-					(keyMap.current[MoveRight] && Direction.RIGHT) ||
-					(keyMap.current[MoveDown] && Direction.DOWN) ||
-					(keyMap.current[MoveLeft] && Direction.LEFT),
+				(isKeyPressed('MoveUp') && Direction.UP) ||
+					(isKeyPressed('MoveRight') && Direction.RIGHT) ||
+					(isKeyPressed('MoveDown') && Direction.DOWN) ||
+					(isKeyPressed('MoveLeft') && Direction.LEFT),
 		  ]
 	).filter(Boolean) as Array<Direction>;
 };
@@ -852,6 +913,8 @@ export {
 	getExplosionScaleSize,
 	getExplosionResults,
 	generateBomb,
+	mapAllPossibleKeyboardKeysForAction,
+	shouldTakeAction,
 	getMoveDirectionFromKeyboardCode,
 	getMoveDirectionFromKeyMap,
 	topLeftCoordinatesToSquareCoordinates,

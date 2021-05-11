@@ -4,7 +4,7 @@ import {
 	PlayerConfig,
 	TopLeftCoordinates,
 	PlayerState,
-	PlayerKeyboardConfig,
+	// KeyboardConfig,
 	SquareCoordinates,
 	Square,
 } from 'containers/Game/types';
@@ -69,10 +69,11 @@ abstract class GameUpdater {
 	// #endregion
 
 	// #region 			GameState.players.[*].[*PlayerConfig].keyboardConfig
-	abstract updatePlayerPlayerKeyboardConfig(
-		keyboardConfig: Partial<PlayerKeyboardConfig>,
-		playerId: PlayerId
-	): void;
+	// ??!!: Remove this option for now
+	// abstract updatePlayerPlayerKeyboardConfig(
+	// 	keyboardConfig: Partial<KeyboardConfig>,
+	// 	playerId: PlayerId
+	// ): void;
 	// #endregion
 
 	// #endregion

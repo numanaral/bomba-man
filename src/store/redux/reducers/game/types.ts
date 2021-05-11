@@ -3,7 +3,7 @@ import {
 	GameMap,
 	NonNullablePlayerRef,
 	PlayerId,
-	PlayerKeyboardConfig,
+	// PlayerKeyboardConfig,
 	Players,
 	SquareCoordinates,
 	TopLeftCoordinates,
@@ -100,7 +100,7 @@ type GameConfig = {
 			exploding: GameConfigRanges.ExplodingDuration; // second
 		};
 	};
-	keyboardConfig: Partial<Record<PlayerId, PlayerKeyboardConfig>>;
+	// keyboardConfig: Partial<Record<PlayerId, PlayerKeyboardConfig>>;
 };
 
 // type GameState = Immutable<{

@@ -7,7 +7,7 @@ import {
 import {
 	PlayerConfig,
 	PlayerId,
-	PlayerKeyboardConfig,
+	// KeyboardConfig,
 	Players,
 	PlayerState,
 	Square,
@@ -100,15 +100,15 @@ class LocalGameUpdater extends GameUpdater {
 	// #endregion
 
 	// #region 			GameState.players.[*].[*PlayerConfig].keyboardConfig
-	updatePlayerPlayerKeyboardConfig = async (
-		keyboardConfig: Partial<PlayerKeyboardConfig>,
-		playerId: PlayerId
-	) => {
-		updateImmerDraft(
-			this.draft.players[playerId]!.keyboardConfig || {},
-			keyboardConfig
-		);
-	};
+	// updatePlayerPlayerKeyboardConfig = async (
+	// 	keyboardConfig: Partial<KeyboardConfig>,
+	// 	playerId: PlayerId
+	// ) => {
+	// 	updateImmerDraft(
+	// 		this.draft.players[playerId]!.keyboardConfig || {},
+	// 		keyboardConfig
+	// 	);
+	// };
 	// #endregion
 
 	// #endregion

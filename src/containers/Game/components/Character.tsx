@@ -5,8 +5,8 @@ import theme from 'theme';
 import { CUBE_BASE_TRANSFORM } from 'utils/game';
 import {
 	CharacterProps,
+	KeyboardConfig,
 	PlayerId,
-	PlayerKeyboardConfig,
 	TopLeftCoordinates,
 } from '../types';
 // import CircleCharacter from './CircleCharacter';
@@ -19,7 +19,7 @@ interface Props {
 	size: GameConfigRanges.SquareSize;
 	tileSize: GameConfigRanges.SquareSize;
 	coordinates: TopLeftCoordinates;
-	keyboardConfig?: PlayerKeyboardConfig;
+	keyboardConfig?: KeyboardConfig;
 	is3D: boolean;
 	highlight?: boolean;
 }

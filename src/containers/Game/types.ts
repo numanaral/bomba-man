@@ -55,12 +55,11 @@ type KeyboardEventCode = ValuesOf<typeof KeyCode>;
 // TODO: group types into separate folders/files
 
 // #region Character Config Types
-type MovementActions = Record<`Move${Direction}`, KeyboardEventCode>;
-type CharacterActions = {
-	DropBomb: KeyboardEventCode;
-	// Jump: KeyboardEventCode;
-};
-type PlayerKeyboardConfig = MovementActions & CharacterActions;
+// TODO: Maybe convert these to enums?
+type MovementActionKeys = `Move${Direction}`;
+type CharacterActionKeys = 'DropBomb'; // | 'Jump';
+type PlayerActionKeys = MovementActionKeys | CharacterActionKeys;
+type PlayerKeyboardConfig = Record<PlayerActionKeys, KeyboardEventCode>;
 
 type PlayerId = `P${RangeOf<4, 1>}`;
 
@@ -80,11 +79,14 @@ type PlayerState = {
 	powerUps: PowerUps;
 };
 
+// using object because firebase
+type KeyboardConfig = Record<string, PlayerKeyboardConfig> | null; // null for firebase
+
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
 	state: PlayerState;
-	keyboardConfig: PlayerKeyboardConfig | undefined;
+	keyboardConfig: KeyboardConfig;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
@@ -105,7 +107,7 @@ type CharacterProps = {
 	name: string;
 	size: number;
 	coordinates: TopLeftCoordinates;
-	keyboardConfig?: PlayerKeyboardConfig;
+	keyboardConfig?: KeyboardConfig;
 	highlight?: boolean;
 	isWalking?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
@@ -148,7 +150,10 @@ type OnlineGameId = string;
 type OnlineGame = {
 	gameId: OnlineGameId;
 	gameState: GameState;
-	players: Array<PlayerId>;
+	players: {
+		[key in PlayerId]?: boolean; // bool?
+	};
+	started: boolean;
 };
 
 export type {
@@ -161,7 +166,8 @@ export type {
 	Square,
 	GameMap,
 	KeyboardEventCode,
-	PlayerKeyboardConfig,
+	PlayerActionKeys,
+	KeyboardConfig,
 	PlayerId,
 	Players,
 	PlayerRef,

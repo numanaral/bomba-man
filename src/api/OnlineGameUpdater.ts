@@ -8,7 +8,7 @@ import {
 import {
 	PlayerConfig,
 	PlayerId,
-	PlayerKeyboardConfig,
+	// KeyboardConfig,
 	Players,
 	PlayerState,
 	PowerUps,
@@ -126,15 +126,15 @@ class OnlineGameUpdater extends GameUpdater {
 	// #endregion
 
 	// #region 			GameState.players.[*].[*PlayerConfig].keyboardConfig
-	updatePlayerPlayerKeyboardConfig = async (
-		keyboardConfig: Partial<PlayerKeyboardConfig>,
-		playerId: PlayerId
-	) => {
-		this.updaters.update<PlayerKeyboardConfig>(
-			{ ...keyboardConfig },
-			`/players/${playerId}`
-		);
-	};
+	// updatePlayerPlayerKeyboardConfig = async (
+	// 	keyboardConfig: KeyboardConfig,
+	// 	playerId: PlayerId
+	// ) => {
+	// 	this.updaters.update<KeyboardConfig>(
+	// 		{ ...keyboardConfig },
+	// 		`/players/${playerId}`
+	// 	);
+	// };
 	// #endregion
 
 	// #endregion

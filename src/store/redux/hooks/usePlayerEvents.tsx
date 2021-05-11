@@ -1,11 +1,11 @@
 import {
 	GameApi,
+	KeyboardConfig,
 	KeyboardEventCode,
 	KeyMap,
 	NonNullablePlayerRef,
 	OnDropBomb,
 	PlayerId,
-	PlayerKeyboardConfig,
 	Players,
 } from 'containers/Game/types';
 import { PowerUp } from 'enums';
@@ -14,6 +14,7 @@ import {
 	getMoveDirectionFromKeyMap,
 	getPoweredUpValue,
 	isPlayerDead,
+	mapAllPossibleKeyboardKeysForAction,
 } from 'utils/game';
 import { npcAction } from 'utils/npc';
 import useInterval from 'hooks/useInterval';
@@ -22,7 +23,7 @@ import { CODE_SPACE } from 'keycode-js';
 import { GameConfig, OnTriggerMove } from '../reducers/game/types';
 
 type HandleActionsFn = (playerId: PlayerId) => void;
-type KeyDownAction = (playerId: PlayerId, keys: PlayerKeyboardConfig) => void;
+type KeyDownAction = (playerId: PlayerId, keys: KeyboardConfig) => void;
 
 type KeyAction = (keyEventCode: KeyboardEventCode) => void;
 
@@ -91,7 +92,7 @@ const useEvents = ({
 		if (!Object.values(keyMap.current).filter(Boolean).length) return;
 
 		const { keyboardConfig, state: playerState } = players[playerId]!;
-		if (!keyboardConfig) return;
+		if (!keyboardConfig || !keyboardConfig.length) return;
 
 		// we only want to take this action for non-NPC players
 		const movementSpeed = getPoweredUpValue(
@@ -225,8 +226,12 @@ const handleBombForPlayers = (
 		if (canPlayerTakeAction(players, playerId, powerUpConfig)) {
 			const { keyboardConfig } = players[playerId]!;
 			if (keyboardConfig) {
-				const { DropBomb } = keyboardConfig;
-				if (keyEventCode === DropBomb) {
+				// let isKeyPressed = false;
+				const bombKeys = mapAllPossibleKeyboardKeysForAction(
+					keyboardConfig,
+					'DropBomb'
+				);
+				if (bombKeys.includes(keyEventCode)) {
 					dropBomb(playerId);
 				}
 			}
