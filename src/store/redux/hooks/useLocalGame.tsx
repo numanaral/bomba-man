@@ -1,4 +1,5 @@
 import { GameApiHookLocal } from 'containers/Game/types';
+import { GameType } from 'enums';
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -28,6 +29,7 @@ const useLocalGame: GameApiHookLocal = gameConfig => {
 	return {
 		provider,
 		state,
+		type: GameType.Local,
 	};
 };
 

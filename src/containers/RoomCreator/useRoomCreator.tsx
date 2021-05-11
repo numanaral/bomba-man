@@ -1,5 +1,5 @@
 import { useForm } from 'components/Form';
-import { RoomType } from 'enums';
+import { GameType } from 'enums';
 import { generateDefaultGameConfig } from 'utils/game';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
@@ -11,7 +11,7 @@ import { SectionProps } from './types';
 
 const defaultValues = generateDefaultGameConfig();
 
-const useOnSubmit = (type: RoomType) => {
+const useOnSubmit = (type: GameType) => {
 	const { push } = useHistory<ReactRouterState>();
 	const onSubmit = (gameConfig: GameConfig) => {
 		console.log(`${BASE_PATH}/room-creator/${type}`);
@@ -22,7 +22,7 @@ const useOnSubmit = (type: RoomType) => {
 	return onSubmit;
 };
 
-const useRoomCreator = (type: RoomType) => {
+const useRoomCreator = (type: GameType) => {
 	const onSubmit = useOnSubmit(type);
 
 	const { handleSubmit, utils } = useForm({

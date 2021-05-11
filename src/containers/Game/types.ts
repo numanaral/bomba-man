@@ -1,4 +1,4 @@
-import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
+import { Direction, Player, PowerUp, Tile, Explosive, GameType } from 'enums';
 import * as KeyCode from 'keycode-js';
 import {
 	Bombs,
@@ -133,6 +133,7 @@ type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
 type GameApi = {
 	provider: GameProvider;
 	state: GameState;
+	type: GameType;
 } & {
 	pending?: false | JSX.Element;
 	error?: false | JSX.Element;

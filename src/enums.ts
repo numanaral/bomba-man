@@ -46,7 +46,7 @@ enum Explosive {
 	FireVertical = 'FV',
 }
 
-enum RoomType {
+enum GameType {
 	Local = 'local',
 	Online = 'online',
 }
@@ -60,6 +60,6 @@ export {
 	Tile,
 	PowerUp,
 	Explosive,
-	RoomType,
+	GameType,
 	FIRE_VALUES,
 };

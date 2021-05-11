@@ -1,4 +1,4 @@
-import { RoomType } from 'enums';
+import { GameType } from 'enums';
 import { FormContainer } from 'components/Form';
 import { Grid, GridSize } from '@material-ui/core';
 import { SectionProps } from './types';
@@ -6,7 +6,7 @@ import { WrappedSection } from './components';
 import { ConfigDisclaimer } from './disclaimers';
 import useRoomCreator from './useRoomCreator';
 
-const RoomCreator = ({ type }: { type: RoomType }) => {
+const RoomCreator = ({ type }: { type: GameType }) => {
 	const { handleSubmit, columns, utils } = useRoomCreator(type);
 
 	const columnKeys = Object.keys(columns);

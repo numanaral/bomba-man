@@ -1,4 +1,5 @@
 import { GameApiHookOnline, OnlineGameId } from 'containers/Game/types';
+import { GameType } from 'enums';
 import useOnlineGameProvider from 'store/firebase/hooks/useOnlineGameProvider';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 
@@ -16,6 +17,7 @@ const useOnlineGame: GameApiHookOnline = gameId => {
 		pending,
 		error,
 		state: gameState,
+		type: GameType.Online,
 	};
 };
 

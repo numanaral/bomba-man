@@ -1,4 +1,4 @@
-import { RoomType } from 'enums';
+import { GameType } from 'enums';
 import { Redirect } from 'react-router-dom';
 import loadable from 'utils/loadable';
 import { BASE_PATH } from './constants';
@@ -26,7 +26,7 @@ const PAGE_ROLES = {
 const LazyHome = loadable(() => import(`routes/pages/Home`));
 const LazyLocal = loadable(() => import(`routes/pages/Local`));
 const LazyInstructions = loadable(() => import(`routes/pages/Instructions`));
-const LazyRoomCreator = loadable<RouteComponentPropsWithLocationState<{ type: RoomType }>>(() => import(`routes/pages/RoomCreator`));
+const LazyRoomCreator = loadable<RouteComponentPropsWithLocationState<{ type: GameType }>>(() => import(`routes/pages/RoomCreator`));
 const LazyOnline = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/Online`));
 const LazyJoin = loadable(() => import(`routes/pages/Join`));
 const LazyWaitingRoom = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/WaitingRoom`));
