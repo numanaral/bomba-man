@@ -26,9 +26,13 @@ type Link = {
 };
 
 type ReactRouterState = {
+	/** Passed to /* */
 	referrer?: string;
+	/** Passed to /* */
 	to?: string;
+	/** Passed to /* */
 	roles?: Roles;
+	/** Passed to /local */
 	gameConfig?: GameConfig;
 	/** Passed to /unauthorized */
 	message?: string;

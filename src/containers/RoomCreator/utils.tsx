@@ -33,7 +33,7 @@ const generatePowerUpSection = (
 			...powerUpIconPack[powerUp],
 			...(movementStops &&
 				powerUp === PowerUp.MovementSpeed && {
-					label: `${label} (milliseconds)`,
+					label: `${label} (action interval, milliseconds)`,
 					type: FormComponent.Slider,
 					step: null,
 					min: Math.min(...movementStops),

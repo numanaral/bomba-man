@@ -123,8 +123,8 @@ const RouteWrapper = ({
 			} else if (
 				// If logged in, don't allow to /login or /unauthorized directly
 				pathname === `${BASE_PATH}/signup` ||
-				pathname === `${BASE_PATH}/login` ||
-				pathname === `${BASE_PATH}/unauthorized`
+				pathname === `${BASE_PATH}/login`
+				// pathname === `${BASE_PATH}/unauthorized`
 			) {
 				// Redirect back to home
 				push(`${BASE_PATH}/`);

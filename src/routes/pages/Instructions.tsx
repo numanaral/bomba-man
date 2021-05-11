@@ -3,8 +3,8 @@ import { faKeyboard } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
 	FontAwesomeIconProps,
+	PlayerActionKeys,
 	PlayerId,
-	PlayerKeyboardConfig,
 } from 'containers/Game/types';
 import { H1 } from 'components/typography';
 import {
@@ -54,7 +54,7 @@ const SquareIcon: React.FC<SquareIconProps> = ({
 );
 
 interface KeyboardSetupContainerProps {
-	keyboardConfig: Record<KeysOf<PlayerKeyboardConfig>, string>;
+	keyboardConfig: Record<PlayerActionKeys, string>;
 }
 
 const KeyboardSetupContainer = ({
