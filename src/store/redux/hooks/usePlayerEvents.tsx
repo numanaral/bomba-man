@@ -174,7 +174,7 @@ const usePlayerActionSpeed = (
 	const movementSpeed = useMemo(() => {
 		const playerState = players[playerId]?.state;
 		// if there is no NPC, lets not call this often
-		if (!playerState) return Number.MAX_SAFE_INTEGER;
+		if (!playerState) return null;
 		return getPoweredUpValue(
 			playerState,
 			PowerUp.MovementSpeed,
@@ -205,16 +205,20 @@ const usePlayerInterval = (
 	powerUpConfig: GameConfig['powerUps'],
 	cb: HandleActionsFn
 ) => {
-	const playerActionSpeed = usePlayerActionSpeed(
+	const playerActionSpeedOrNull = usePlayerActionSpeed(
 		players,
 		playerId,
 		powerUpConfig
 	);
 
-	useInterval(() => {
-		if (!canPlayerTakeAction(players, playerId, powerUpConfig)) return;
-		cb(playerId);
-	}, playerActionSpeed);
+	useInterval(
+		() => {
+			if (!canPlayerTakeAction(players, playerId, powerUpConfig)) return;
+			cb(playerId);
+		},
+		playerActionSpeedOrNull || Number.MAX_SAFE_INTEGER,
+		!playerActionSpeedOrNull
+	);
 };
 
 const handleBombForPlayers = (

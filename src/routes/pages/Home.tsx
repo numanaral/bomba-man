@@ -2,7 +2,7 @@ import Container from 'components/Container';
 import { NAV_LIST } from 'routes/pages-and-roles';
 import styled from 'styled-components';
 import LinkButton from 'components/LinkButton';
-import { Fragment, useMemo, useEffect } from 'react';
+import { Fragment } from 'react';
 import Spacer from 'components/Spacer';
 // import SpriteCharacter from 'containers/Game/components/SpriteCharacter';
 import { CharacterIcon } from 'containers/RoomCreator/icons';
@@ -63,21 +63,10 @@ const useRainbowColors = (stopIt: boolean) => {
 	);
 
 	const reOrderColors = () => {
-		setColorMap(v => {
-			return [...v.slice(1), v[0]];
-		});
+		setColorMap(v => [...v.slice(1), v[0]]);
 	};
 
-	/** We don't want to keep calling so often it if it's stopped */
-	const intervalSpeed = useMemo(() => {
-		return stopIt ? Number.MAX_SAFE_INTEGER : 100;
-	}, [stopIt]);
-
-	const clearLastInterval = useInterval(reOrderColors, intervalSpeed);
-
-	useEffect(() => {
-		if (stopIt) clearLastInterval();
-	}, [stopIt, clearLastInterval]);
+	useInterval(reOrderColors, 100, stopIt);
 
 	return colorMap;
 };
@@ -129,7 +118,9 @@ const Home = () => {
 			</Menu>
 			{!dontShowAgain && (
 				<TooltipButton
-					text={stopIt ? 'Maybe do it one more time' : 'Please stop!'}
+					text={
+						stopIt ? 'Nvm, let the colors shine!' : 'Please stop!'
+					}
 					variant="outlined"
 					onClick={toggleColorRotation}
 				/>
