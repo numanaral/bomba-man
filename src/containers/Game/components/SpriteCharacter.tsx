@@ -18,6 +18,8 @@ const Wrapper = styled.div<{ $size: number }>`
 		const spriteSheetSquareSize = pixelMultiplier * -1 * SPRITE_SQUARE_SIZE;
 		const translateDiff = ($size / 4) * -1;
 		const topDiff = Math.min(-15, translateDiff * 2.5);
+		const labelFontSize = Math.ceil(spriteSize / 6);
+		const labelMaxWidth = Math.ceil(spriteSize * 0.8);
 
 		const spriteSizing = `
 			width: ${spriteSize}px;
@@ -61,12 +63,12 @@ const Wrapper = styled.div<{ $size: number }>`
 					position: absolute;
 					left: 15px;
 					right: 15px;
-					font-size: 12px;
+					font-size: ${labelFontSize}px;
 					font-weight: bold;
 					border: 1px dashed white;
 					border-radius: 9999px;
 					opacity: 1;
-					max-width: 50px;
+					max-width: ${labelMaxWidth}px;
 					margin: auto;
 					text-align: center;
 				}

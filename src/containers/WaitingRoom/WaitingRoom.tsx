@@ -79,15 +79,18 @@ const WaitingRoom = ({ gameId }: Props) => {
 				</ContainerWithCenteredItems>
 				<Spacer spacing="15" />
 				<Grid container justify="space-between" item xs={12} sm={8}>
-					{Object.keys(game.players).map(id => (
-						<CharacterIcon
-							size={80}
-							name={id}
-							id={id as PlayerId}
-							showId
-							isWalking
-						/>
-					))}
+					{Object.keys(game.players).map(id => {
+						const isCurrentPlayer = playerId === id;
+						return (
+							<CharacterIcon
+								size={isCurrentPlayer ? 80 : 50}
+								name={id}
+								id={id as PlayerId}
+								showId
+								isWalking={isCurrentPlayer}
+							/>
+						);
+					})}
 				</Grid>
 			</ContainerWithCenteredItems>
 		)
