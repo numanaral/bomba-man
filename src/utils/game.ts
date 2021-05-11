@@ -10,7 +10,6 @@ import {
 	PlayerConfig,
 	PlayerId,
 	PlayerRef,
-	Players,
 	PlayerState,
 	PowerUpOrNull,
 	PowerUps,
@@ -699,7 +698,6 @@ const getExplosionSquareCoordinatesFromBomb = (
  */
 const getExplosionResults = (
 	gameMap: GameMap,
-	players: Players,
 	bombCoordinates: TopLeftCoordinates,
 	explosionSize: number,
 	sizes: GameConfig['sizes'],

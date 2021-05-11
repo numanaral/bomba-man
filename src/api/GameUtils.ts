@@ -199,7 +199,6 @@ class GameUtils {
 		// find surrounding objects to modify
 		const { coordinatesToSetOnFire } = getExplosionResults(
 			this.state.gameMap,
-			this.state.players,
 			bombCoordinates,
 			bombSize,
 			this.state.config.sizes
@@ -433,7 +432,6 @@ class GameUtils {
 		this.updaters.removeBomb(bombId);
 		const { coordinatesToSetOnFire } = getExplosionResults(
 			this.state.gameMap,
-			this.state.players,
 			bombCoordinates,
 			bombSize,
 			this.state.config.sizes,
