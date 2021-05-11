@@ -1,6 +1,6 @@
-import { GameState } from 'store/redux/reducers/game/types';
 // eslint-disable-next-line import/no-unresolved
 import { DataSnapshot } from '@firebase/database-types';
+import { OnlineGame } from 'containers/Game/types';
 
 namespace FirebaseObjects {
 	export type Sortable = {
@@ -72,7 +72,7 @@ namespace FirebaseSchema {
 	};
 
 	export type FirebaseSchema = {
-		online: GameState;
+		online: OnlineGame;
 	};
 
 	// TODO: Once we have are collecting data, update this

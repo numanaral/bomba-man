@@ -26,12 +26,13 @@ const PAGE_ROLES = {
 const LazyHome = loadable(() => import(`routes/pages/Home`));
 const LazyLocal = loadable(() => import(`routes/pages/Local`));
 const LazyInstructions = loadable(() => import(`routes/pages/Instructions`));
-
-// Private routes
-const LazyProfile = loadable(() => import(`routes/pages/Profile`));
 const LazyRoomCreator = loadable<RouteComponentPropsWithLocationState<{ type: RoomType }>>(() => import(`routes/pages/RoomCreator`));
 const LazyOnline = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/Online`));
 const LazyJoin = loadable(() => import(`routes/pages/Join`));
+const LazyWaitingRoom = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/WaitingRoom`));
+
+// Private routes
+const LazyProfile = loadable(() => import(`routes/pages/Profile`));
 
 // Handler Pages
 const LazyNotFound = loadable(() => import(`./pages/NotFound`));
@@ -79,6 +80,12 @@ const ROUTE_LIST = [
 		description: `Invite friends to play alongside you in this room.`,
 		path: '/online/:id',
 		component: LazyOnline,
+	},
+	{
+		title: 'Waiting Room',
+		description: `Waiting for your friends to join before the game starts.`,
+		path: '/waiting-room/:id',
+		component: LazyWaitingRoom,
 	},
 	{
 		title: 'Join a Game',

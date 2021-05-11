@@ -17,7 +17,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import useFirebaseUtils from './useFirebaseUtils';
 
 const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
-	const updaters = useFirebaseUtils<GameState>(`online/${gameId}`);
+	const updaters = useFirebaseUtils<GameState>(`online/${gameId}/gameState`);
 	// const { notifyError } = useNotificationProvider();
 	// const { userId } = useAuth();
 

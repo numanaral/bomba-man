@@ -26,7 +26,7 @@ const Join = ({ noWrapper = false }: Props) => {
 
 	const onSubmit = useCallback(
 		(data: OnlineRoomSchema) => {
-			push(`${BASE_PATH}/online/${data.roomId}`);
+			push(`${BASE_PATH}/waiting-room/${data.roomId}`);
 		},
 		[push]
 	);

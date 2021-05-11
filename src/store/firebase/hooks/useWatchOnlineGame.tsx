@@ -6,13 +6,16 @@ import {
 } from 'react-redux-firebase';
 import { useSelector } from 'react-redux';
 import useAuth from 'store/firebase/hooks/useAuth';
-import { fromFirestore, toFirestore } from 'store/firebase/utils';
+import { toFirestore } from 'store/firebase/utils';
 import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
 import { GameState } from 'store/redux/reducers/game/types';
-import { generateDefaultGameState } from 'utils/game';
+import { generateDefaultGameState, generatePlayer } from 'utils/game';
 import LoadingIndicator from 'components/LoadingIndicator';
 import NoAccess from 'components/NoAccess';
 import loadable from 'utils/loadable';
+import { OnlineGame, PlayerConfig, PlayerId } from 'containers/Game/types';
+import gameConfig from 'config';
+import useFirebaseUtils from './useFirebaseUtils';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 
@@ -24,7 +27,9 @@ const useWatchOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
 	const { userId } = useAuth();
 	const firebase = useFirebase();
-	useFirebaseConnect(`online/${id}`);
+	const refKey = `online/${id}`;
+	useFirebaseConnect(refKey);
+	const { create, update, remove } = useFirebaseUtils<OnlineGame>(refKey);
 
 	const onlineGameFromFirebase = useSelector(makeSelectOnlineGame(id));
 
@@ -35,8 +40,7 @@ const useWatchOnlineGame = (id: string) => {
 		</NoAccess>
 	);
 
-	const onlineGame =
-		(onlineGameFromFirebase && fromFirestore(onlineGameFromFirebase)) || [];
+	const game = onlineGameFromFirebase;
 
 	const createOnlineGame = async (props: GameState, gameId: string = id) => {
 		try {
@@ -69,25 +73,68 @@ const useWatchOnlineGame = (id: string) => {
 		}
 	};
 
-	const gameState: GameState = {
-		players: onlineGame.players || defaultGameState.players,
-		gameMap: onlineGame.gameMap || defaultGameState.gameMap,
-		bombs: onlineGame.bombs || defaultGameState.bombs,
-		powerUps: onlineGame.powerUps || defaultGameState.powerUps,
-		is3D: onlineGame.is3D || defaultGameState.is3D,
-		isSideView: onlineGame.isSideView || defaultGameState.isSideView,
-		animationCounter:
-			onlineGame.animationCounter || defaultGameState.animationCounter,
-		config: defaultGameState.config,
+	const onPlayerJoin = (playerId: PlayerId) => {
+		// set player as active
+		update<OnlineGame['players']>(
+			{
+				[playerId]: true,
+			},
+			'/players'
+		);
+
+		const playerConfig = generatePlayer(
+			playerId,
+			game.gameState.config,
+			gameConfig.keyboardConfig
+		);
+
+		// put him in the game state
+		create<PlayerConfig>(playerConfig, `/gameState/players/${playerId}`);
+	};
+
+	const onPlayerExit = (playerId: PlayerId) => {
+		// remove as active player
+		remove(`/players/${playerId}`);
+		// remove him from the game state
+		remove(`/gameState/players/${playerId}`);
+	};
+
+	const onStartGame = () => {
+		update({
+			started: true,
+		});
+	};
+
+	const _game: OnlineGame = {
+		gameId: id,
+		gameState: {
+			players: game?.gameState?.players || defaultGameState.players,
+			gameMap: game?.gameState?.gameMap || defaultGameState.gameMap,
+			bombs: game?.gameState?.bombs || defaultGameState.bombs,
+			powerUps: game?.gameState?.powerUps || defaultGameState.powerUps,
+			is3D: game?.gameState?.is3D || defaultGameState.is3D,
+			isSideView:
+				game?.gameState?.isSideView || defaultGameState.isSideView,
+			animationCounter:
+				game?.gameState?.animationCounter ||
+				defaultGameState.animationCounter,
+			config: defaultGameState.config,
+		},
+		players: game?.players || {},
+		started: game?.started || false,
 	};
 
 	return {
-		gameState,
+		game: _game,
 		createOnlineGame,
 		updateOnlineGame,
 		deleteOnlineGame,
 		pending,
 		error,
+		isReady: !pending && !error,
+		onPlayerJoin,
+		onPlayerExit,
+		onStartGame,
 	};
 };
 
