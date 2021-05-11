@@ -1,3 +1,4 @@
+import gameConfig from 'config';
 import {
 	Coordinates,
 	Square,
@@ -480,7 +481,9 @@ class GameUtils {
 		}
 
 		this.updaters.addPlayer(
-			generatePlayer(Player.P2, this.state.config),
+			generatePlayer(Player.P2, this.state.config, {
+				'0': gameConfig.keyboardConfig['1'],
+			}),
 			Player.P2
 		);
 	};
