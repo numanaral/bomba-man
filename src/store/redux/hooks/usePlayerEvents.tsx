@@ -8,7 +8,7 @@ import {
 	PlayerId,
 	Players,
 } from 'containers/Game/types';
-import { PowerUp } from 'enums';
+import { GameType, PowerUp } from 'enums';
 import { useEffect, useMemo, useRef } from 'react';
 import {
 	getMoveDirectionFromKeyMap,
@@ -92,7 +92,7 @@ const useEvents = ({
 		if (!Object.values(keyMap.current).filter(Boolean).length) return;
 
 		const { keyboardConfig, state: playerState } = players[playerId]!;
-		if (!keyboardConfig || !keyboardConfig.length) return;
+		if (!keyboardConfig || !Object.keys(keyboardConfig).length) return;
 
 		// we only want to take this action for non-NPC players
 		const movementSpeed = getPoweredUpValue(
@@ -258,7 +258,12 @@ const IntervalWrapper = ({
 	return null;
 };
 
-const usePlayerEvents = ({ state, provider }: GameApi) => {
+const usePlayerEvents = ({
+	state,
+	provider,
+	type: gameType,
+	playerId,
+}: GameApi) => {
 	const { dropBomb, triggerMove } = provider;
 	const {
 		gameMap,
@@ -274,13 +279,22 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 
 	const { playerRefs } = usePlayerRefs();
 
+	const _players = useMemo<Players>(() => {
+		return gameType === GameType.Local
+			? players
+			: { [playerId!]: players[playerId!] };
+		// none of the deps will affect this
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [players]);
+	// }, [gameType, playerId, players]);
+
 	const keyMap = useKeyboardEvent({
-		onKeyDown: handleBombForPlayers(players, dropBomb, powerUpConfig),
+		onKeyDown: handleBombForPlayers(_players, dropBomb, powerUpConfig),
 	});
 	const timeOutRef = useTimeOutRef();
 	const { handleActions } = useEvents({
 		triggerMove,
-		players,
+		players: _players,
 		timeOutRef,
 		keyMap,
 		is3D,
@@ -292,22 +306,22 @@ const usePlayerEvents = ({ state, provider }: GameApi) => {
 	// multiple times
 	// TODO: In the next update, start these intervals
 	// when the keys are pressed and not continuously
-	return Object.keys(players).map(playerId => {
+	return Object.keys(_players).map(pId => {
 		return (
 			<IntervalWrapper
-				key={playerId}
-				playerId={playerId as PlayerId}
-				players={players}
+				key={pId}
+				playerId={pId as PlayerId}
+				players={_players}
 				powerUpConfig={powerUpConfig}
 				cb={
-					playerId === 'P4'
+					pId === 'P4'
 						? () => {
 								npcAction({
-									playerId,
+									playerId: pId,
 									dropBomb,
 									gameMap,
 									bombs,
-									players,
+									players: _players,
 									triggerMove,
 									ref: playerRefs.current
 										.P4 as NonNullablePlayerRef,
