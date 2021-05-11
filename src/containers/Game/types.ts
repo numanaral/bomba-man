@@ -134,9 +134,13 @@ type GameApi = {
 	provider: GameProvider;
 	state: GameState;
 	type: GameType;
+	// firebase
 } & {
 	pending?: false | JSX.Element;
 	error?: false | JSX.Element;
+	// online mode
+} & {
+	playerId?: PlayerId;
 };
 
 type GameApiHookOnline = (gameId?: string) => GameApi;

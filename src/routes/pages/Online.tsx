@@ -15,12 +15,11 @@ const Online = ({
 	const playerId = location?.state?.playerId;
 
 	useBeforeUnload(() => {
-		debugger;
 		if (!playerId) return;
 		onPlayerExit(playerId);
 	});
 
-	return pending || error || <Game {...gameProps} />;
+	return pending || error || <Game {...gameProps} playerId={playerId} />;
 };
 
 export default Online;
