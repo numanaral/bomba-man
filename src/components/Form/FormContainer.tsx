@@ -2,6 +2,7 @@ import { Grid } from '@material-ui/core';
 import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
 import TooltipButton from 'components/TooltipButton';
 import Spacer from 'components/Spacer';
+import { useState } from 'react';
 import { FormProps } from './Form';
 
 interface Props
@@ -17,6 +18,7 @@ const FormContainer: React.FC<Props> = ({
 	doubleSubmit = false,
 	...rest
 }) => {
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const submitButton = (
 		<ContainerWithCenteredItems container>
 			<Grid container justify="center" item xs={12} sm={8} md={6}>
@@ -26,6 +28,9 @@ const FormContainer: React.FC<Props> = ({
 					fullWidth
 					bg="primary"
 					variant="contained"
+					onKeyUp={() => setIsSubmitting(true)}
+					loading={isSubmitting}
+					disabled={isSubmitting}
 				/>
 			</Grid>
 		</ContainerWithCenteredItems>
