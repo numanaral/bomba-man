@@ -10,7 +10,6 @@ const useOnlineGameActions = () => {
 	const { create, update, remove } = useFirebaseUtils<OnlineGame>(refKey);
 
 	const createOnlineGame = async (gameState: GameState) => {
-		debugger;
 		// create the game
 		const { key: newGameId } = (await create({
 			gameState,

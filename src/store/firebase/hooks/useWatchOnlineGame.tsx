@@ -20,7 +20,7 @@ const useWatchOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
 	const refKey = `online/${id}`;
 	useFirebaseConnect(refKey);
-	const { create, update, remove } = useFirebaseUtils<OnlineGame>(refKey);
+	const { update, remove } = useFirebaseUtils<OnlineGame>(refKey);
 
 	const onlineGameFromFirebase = useSelector(makeSelectOnlineGame(id));
 
@@ -49,7 +49,7 @@ const useWatchOnlineGame = (id: string) => {
 		);
 
 		// put him in the game state
-		create<PlayerConfig>(playerConfig, `/gameState/players/${playerId}`);
+		update<PlayerConfig>(playerConfig, `/gameState/players/${playerId}`);
 	};
 
 	const onStartGame = () => {
@@ -71,7 +71,7 @@ const useWatchOnlineGame = (id: string) => {
 		remove(`/gameState/players/${playerId}`);
 
 		// 2 because the state won't be updated just yet
-		if (Object.keys(game.players).length <= 2) {
+		if (game.players && Object.keys(game.players).length <= 2) {
 			onEndGame();
 		}
 	};
@@ -98,7 +98,7 @@ const useWatchOnlineGame = (id: string) => {
 			animationCounter:
 				game?.gameState?.animationCounter ||
 				defaultGameState.animationCounter,
-			config: defaultGameState.config,
+			config: game?.gameState?.config || defaultGameState.config,
 		},
 		players: game?.players || {},
 		started: game?.started || false,
