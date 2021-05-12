@@ -23,22 +23,22 @@ const GameEnd = ({ location }: Props) => {
 
 	if (!endGame) return null;
 
-	const { endGameCondition, ...playerDisplayProps } = endGame!;
+	const { gameEndCondition, ...playerDisplayProps } = endGame!;
 
-	const emoji = endGameCondition === GameEndCondition.Win ? ':)' : ':(';
+	const emoji = gameEndCondition === GameEndCondition.Win ? ':)' : ':(';
 
 	return (
 		<PageContainer>
 			<H1>
 				You have{' '}
 				<span style={{ color: theme.palette.color.info }}>
-					{endGameCondition}
+					{gameEndCondition}
 				</span>{' '}
 				the game {emoji}
 			</H1>
 			<PlayerDisplay
 				{...playerDisplayProps}
-				endGameCondition={endGameCondition}
+				gameEndCondition={gameEndCondition}
 			/>
 		</PageContainer>
 	);

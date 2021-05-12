@@ -162,7 +162,7 @@ type OnlineGame = {
 };
 
 type GameEnd = Omit<PlayerDisplayProps, 'onStart'> & {
-	endGameCondition: GameEndCondition;
+	gameEndCondition: GameEndCondition;
 };
 
 export type {

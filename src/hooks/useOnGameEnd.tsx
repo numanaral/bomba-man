@@ -11,9 +11,9 @@ const useOnGameEnd = (
 ) => {
 	const { push } = useHistory<ReactRouterState>();
 
-	let endGameCondition = GameEndCondition.Lose;
+	let gameEndCondition = GameEndCondition.Lose;
 	if (players && currentOnlinePlayerId) {
-		endGameCondition =
+		gameEndCondition =
 			players[currentOnlinePlayerId] === PlayerCondition.Alive
 				? GameEndCondition.Win
 				: GameEndCondition.Lose;
@@ -30,10 +30,10 @@ const useOnGameEnd = (
 			endGame: {
 				players,
 				currentOnlinePlayerId,
-				endGameCondition,
+				gameEndCondition,
 			},
 		});
-	}, [currentOnlinePlayerId, endGameCondition, players, push]);
+	}, [currentOnlinePlayerId, gameEndCondition, players, push]);
 };
 
 export default useOnGameEnd;

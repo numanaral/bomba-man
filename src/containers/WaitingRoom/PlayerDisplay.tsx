@@ -15,14 +15,14 @@ interface Props {
 	players: OnlineGame['players'];
 	currentOnlinePlayerId?: PlayerId;
 	onStartGame?: CallableFunction;
-	endGameCondition?: GameEndCondition;
+	gameEndCondition?: GameEndCondition;
 }
 
 const PlayerDisplay = ({
 	players,
 	currentOnlinePlayerId,
 	onStartGame,
-	endGameCondition,
+	gameEndCondition,
 }: Props) => {
 	return (
 		<ContainerWithCenteredItems container>
@@ -48,8 +48,8 @@ const PlayerDisplay = ({
 				{Object.keys(players).map(id => {
 					const isCurrentPlayer = currentOnlinePlayerId === id;
 					const isEndGameDeadCharacter =
-						!doesNotExist(endGameCondition) &&
-						endGameCondition === GameEndCondition.Lose;
+						!doesNotExist(gameEndCondition) &&
+						gameEndCondition === GameEndCondition.Lose;
 
 					const props: CharacterIconProps = {
 						size: isCurrentPlayer ? 80 : 50,
