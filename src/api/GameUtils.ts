@@ -488,16 +488,18 @@ class GameUtils {
 		);
 	};
 
+	// temporary
 	toggleGameNpc = () => {
-		if (this.state.players.P4) {
-			this.updaters.removePlayer(Player.P4);
-			return;
-		}
-
-		this.updaters.addPlayer(
-			generatePlayer(Player.P4, this.state.config),
-			Player.P4
-		);
+		(['P3', 'P4'] as Array<PlayerId>).forEach(playerId => {
+			if (this.state.players[playerId]) {
+				this.updaters.removePlayer(playerId);
+			} else {
+				this.updaters.addPlayer(
+					generatePlayer(playerId, this.state.config),
+					playerId
+				);
+			}
+		});
 	};
 	// #endregion
 }

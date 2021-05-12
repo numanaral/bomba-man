@@ -301,37 +301,35 @@ const usePlayerEvents = ({
 		powerUpConfig,
 	});
 
+	const handleNpcActions = (pId: PlayerId) => {
+		npcAction({
+			playerId: pId,
+			dropBomb,
+			gameMap,
+			bombs,
+			players: _players,
+			triggerMove,
+			ref: playerRefs.current[pId] as NonNullablePlayerRef,
+			powerUpConfig,
+			sizes,
+			bombDuration,
+		});
+	};
+
 	// URGENT: Since this triggers a move event, if the
 	// player is on the same explosion fire, he dies
 	// multiple times
 	// TODO: In the next update, start these intervals
 	// when the keys are pressed and not continuously
 	return Object.keys(_players).map(pId => {
+		const isNpc = gameType === GameType.Local && ['P3', 'P4'].includes(pId);
 		return (
 			<IntervalWrapper
 				key={pId}
 				playerId={pId as PlayerId}
 				players={_players}
 				powerUpConfig={powerUpConfig}
-				cb={
-					pId === 'P4'
-						? () => {
-								npcAction({
-									playerId: pId,
-									dropBomb,
-									gameMap,
-									bombs,
-									players: _players,
-									triggerMove,
-									ref: playerRefs.current
-										.P4 as NonNullablePlayerRef,
-									powerUpConfig,
-									sizes,
-									bombDuration,
-								});
-						  }
-						: handleActions
-				}
+				cb={isNpc ? handleNpcActions : handleActions}
 			/>
 		);
 	});
