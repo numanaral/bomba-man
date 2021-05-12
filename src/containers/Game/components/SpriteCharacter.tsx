@@ -121,29 +121,30 @@ const ANIMATION_STOP_THROTTLE_DURATION = 200;
 
 interface Props extends Omit<CharacterProps, 'tileSize' | 'is3D' | 'size'> {
 	isWalking?: boolean;
+	direction?: Direction;
 	// size can be any number by default, unless it's a game character
 	size: number;
 }
 
-const SpriteCharacter = ({
+type UseSpriteCharacterAction = Partial<Props> & {
+	currentKeyDirection: string;
+	// setters
+	setDirection: React.Dispatch<React.SetStateAction<Direction>>;
+	setCurrentKeyDirection: React.Dispatch<React.SetStateAction<string>>;
+};
+
+const useSpriteCharacterAction = ({
 	id,
 	currentOnlinePlayerId,
-	name,
-	coordinates: { top, left },
-	style,
 	keyboardConfig,
-	highlight,
-	isWalking = false,
-	size,
-	...rest
-}: Props) => {
-	/** Direction being faced */
-	const [direction, setDirection] = useState<Direction>(Direction.DOWN);
-	/** Direction key being held */
-	const [currentKeyDirection, setCurrentKeyDirection] = useState('');
+	// values
+	currentKeyDirection,
+	// setters
+	setDirection,
+	setCurrentKeyDirection,
+}: UseSpriteCharacterAction) => {
 	const lastMovementTime = useRef(new Date().getTime());
 
-	const _isWalking = isWalking || !!currentKeyDirection;
 	// We only want to bind the event if it's:
 	// - not online game
 	// - online game and it's the current player
@@ -203,7 +204,46 @@ const SpriteCharacter = ({
 			document.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('keyup', handleKeyUp);
 		};
-	}, [currentKeyDirection, keyboardConfig, shouldBindEvent]);
+	}, [
+		currentKeyDirection,
+		keyboardConfig,
+		setCurrentKeyDirection,
+		setDirection,
+		shouldBindEvent,
+	]);
+};
+
+const SpriteCharacter = ({
+	id,
+	currentOnlinePlayerId,
+	name,
+	coordinates: { top, left },
+	style,
+	keyboardConfig,
+	highlight,
+	isWalking: defaultIsWalking = false,
+	size,
+	direction: defaultDirection,
+	...rest
+}: Props) => {
+	/** Direction being faced */
+	const [direction, setDirection] = useState<Direction>(
+		defaultDirection || Direction.DOWN
+	);
+	/** Direction key being held */
+	const [currentKeyDirection, setCurrentKeyDirection] = useState('');
+
+	useSpriteCharacterAction({
+		id,
+		currentOnlinePlayerId,
+		keyboardConfig,
+		// values
+		currentKeyDirection,
+		// setters
+		setDirection,
+		setCurrentKeyDirection,
+	});
+	const _isWalking = defaultIsWalking || !!currentKeyDirection;
 
 	return (
 		<Wrapper
