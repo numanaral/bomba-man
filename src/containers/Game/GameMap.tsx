@@ -10,7 +10,7 @@ interface Props
 }
 
 const GameMap: React.FC<Props> = ({
-	sizes: { map: mapSize, tile: tileSize },
+	sizes,
 	children,
 	gameMap,
 	is3D,
@@ -19,12 +19,11 @@ const GameMap: React.FC<Props> = ({
 }) => {
 	return (
 		<Map
-			size={mapSize}
+			sizes={sizes}
 			gameMap={gameMap}
 			is3D={is3D}
 			isTopView={!isSideView}
 			animationCounter={animationCounter}
-			tileSize={tileSize}
 		>
 			{children}
 		</Map>
