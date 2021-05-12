@@ -8,21 +8,20 @@ import { Grid } from '@material-ui/core';
 import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
 import Spacer from 'components/Spacer';
 import TooltipButton from 'components/TooltipButton';
-import { GameEndCondition } from 'enums';
-import { doesNotExist } from 'utils';
+import { PlayerCondition } from 'enums';
 
 interface Props {
 	players: OnlineGame['players'];
 	currentOnlinePlayerId?: PlayerId;
 	onStartGame?: CallableFunction;
-	gameEndCondition?: GameEndCondition;
+	isGameEnd?: boolean;
 }
 
 const PlayerDisplay = ({
 	players,
 	currentOnlinePlayerId,
 	onStartGame,
-	gameEndCondition,
+	isGameEnd = false,
 }: Props) => {
 	return (
 		<ContainerWithCenteredItems container>
@@ -47,19 +46,30 @@ const PlayerDisplay = ({
 			<Grid container justify="space-between" item xs={12} sm={8}>
 				{Object.keys(players).map(id => {
 					const isCurrentPlayer = currentOnlinePlayerId === id;
-					const isEndGameDeadCharacter =
-						!doesNotExist(gameEndCondition) &&
-						gameEndCondition === GameEndCondition.Lose;
+					const isGameEndDeadCharacter =
+						isGameEnd &&
+						players[id as PlayerId] === PlayerCondition.Dead;
+
+					let size = 50;
+					let isWalking = false;
+
+					if (
+						(isCurrentPlayer && !isGameEnd) ||
+						!isGameEndDeadCharacter
+					) {
+						size = 80;
+						isWalking = true;
+					}
 
 					const props: CharacterIconProps = {
-						size: isCurrentPlayer ? 80 : 50,
+						size,
 						name: id,
 						id: id as PlayerId,
 						showId: true,
-						isWalking: isCurrentPlayer,
+						isWalking,
 					};
 
-					return isEndGameDeadCharacter ? (
+					return isGameEndDeadCharacter ? (
 						<DeadCharacterIcon {...props} />
 					) : (
 						<CharacterIcon {...props} />

@@ -36,10 +36,7 @@ const GameEnd = ({ location }: Props) => {
 				</span>{' '}
 				the game {emoji}
 			</H1>
-			<PlayerDisplay
-				{...playerDisplayProps}
-				gameEndCondition={gameEndCondition}
-			/>
+			<PlayerDisplay {...playerDisplayProps} isGameEnd />
 		</PageContainer>
 	);
 };
