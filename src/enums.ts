@@ -56,6 +56,11 @@ enum GameEndCondition {
 	Lose = 'Lost',
 }
 
+enum PlayerCondition {
+	Alive = 'alive',
+	Dead = 'dead',
+}
+
 const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
 
 export {
@@ -68,5 +73,6 @@ export {
 	Explosive,
 	GameType,
 	GameEndCondition,
+	PlayerCondition,
 	FIRE_VALUES,
 };

@@ -6,6 +6,7 @@ import {
 	Explosive,
 	GameType,
 	GameEndCondition,
+	PlayerCondition,
 } from 'enums';
 import * as KeyCode from 'keycode-js';
 import {
@@ -155,7 +156,7 @@ type OnlineGame = {
 	gameId: OnlineGameId;
 	gameState: GameState;
 	players: {
-		[key in PlayerId]?: boolean; // bool?
+		[key in PlayerId]?: PlayerCondition;
 	};
 	started: boolean;
 };
