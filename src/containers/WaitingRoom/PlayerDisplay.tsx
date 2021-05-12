@@ -8,14 +8,14 @@ import { Grid } from '@material-ui/core';
 import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
 import Spacer from 'components/Spacer';
 import TooltipButton from 'components/TooltipButton';
-import { EndGameCondition } from 'enums';
+import { GameEndCondition } from 'enums';
 import { doesNotExist } from 'utils';
 
 interface Props {
 	players: OnlineGame['players'];
 	currentOnlinePlayerId?: PlayerId;
 	onStartGame?: CallableFunction;
-	endGameCondition?: EndGameCondition;
+	endGameCondition?: GameEndCondition;
 }
 
 const PlayerDisplay = ({
@@ -49,7 +49,7 @@ const PlayerDisplay = ({
 					const isCurrentPlayer = currentOnlinePlayerId === id;
 					const isEndGameDeadCharacter =
 						!doesNotExist(endGameCondition) &&
-						endGameCondition === EndGameCondition.Lose;
+						endGameCondition === GameEndCondition.Lose;
 
 					const props: CharacterIconProps = {
 						size: isCurrentPlayer ? 80 : 50,

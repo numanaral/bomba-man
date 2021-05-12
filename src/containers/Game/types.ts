@@ -5,7 +5,7 @@ import {
 	Tile,
 	Explosive,
 	GameType,
-	EndGameCondition,
+	GameEndCondition,
 } from 'enums';
 import * as KeyCode from 'keycode-js';
 import {
@@ -161,7 +161,7 @@ type OnlineGame = {
 };
 
 type GameEnd = Omit<PlayerDisplayProps, 'onStart'> & {
-	endGameCondition: EndGameCondition;
+	endGameCondition: GameEndCondition;
 };
 
 export type {

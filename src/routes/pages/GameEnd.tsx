@@ -5,7 +5,7 @@ import theme from 'theme';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
 import { useEffect } from 'react';
-import { EndGameCondition } from 'enums';
+import { GameEndCondition } from 'enums';
 import PlayerDisplay from 'containers/WaitingRoom/PlayerDisplay';
 
 interface Props extends RouteComponentPropsWithLocationState {}
@@ -25,7 +25,7 @@ const GameEnd = ({ location }: Props) => {
 
 	const { endGameCondition, ...playerDisplayProps } = endGame!;
 
-	const emoji = endGameCondition === EndGameCondition.Win ? ':)' : ':(';
+	const emoji = endGameCondition === GameEndCondition.Win ? ':)' : ':(';
 
 	return (
 		<PageContainer>

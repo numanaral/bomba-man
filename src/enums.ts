@@ -51,7 +51,7 @@ enum GameType {
 	Online = 'online',
 }
 
-enum EndGameCondition {
+enum GameEndCondition {
 	Win = 'Won',
 	Lose = 'Lost',
 }
@@ -67,6 +67,6 @@ export {
 	PowerUp,
 	Explosive,
 	GameType,
-	EndGameCondition,
+	GameEndCondition,
 	FIRE_VALUES,
 };
