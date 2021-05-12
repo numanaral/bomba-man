@@ -1,5 +1,5 @@
 import Game from 'containers/Game';
-import useBeforeUnload from 'hooks/useBeforeUnload';
+import useOnPlayerExit from 'hooks/useOnPlayerExit';
 import { RouteComponentPropsWithLocationState } from 'routes/types';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import useOnlineGame from 'store/redux/hooks/useOnlineGame';
@@ -14,10 +14,7 @@ const Online = ({
 	const { onPlayerExit } = useWatchOnlineGame(id);
 	const playerId = location?.state?.playerId;
 
-	useBeforeUnload(() => {
-		if (!playerId) return;
-		onPlayerExit(playerId);
-	});
+	useOnPlayerExit(id, onPlayerExit, playerId);
 
 	return pending || error || <Game {...gameProps} playerId={playerId} />;
 };

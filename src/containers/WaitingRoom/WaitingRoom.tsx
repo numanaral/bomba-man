@@ -1,5 +1,4 @@
 import { OnlineGameId, PlayerId } from 'containers/Game/types';
-import useBeforeUnload from 'hooks/useBeforeUnload';
 import { useEffect, useState } from 'react';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import { useHistory } from 'react-router-dom';
@@ -9,6 +8,7 @@ import { Grid } from '@material-ui/core';
 import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
 import Spacer from 'components/Spacer';
 import TooltipButton from 'components/TooltipButton';
+import useOnPlayerExit from 'hooks/useOnPlayerExit';
 
 interface Props {
 	// playerId: PlayerId;
@@ -17,7 +17,7 @@ interface Props {
 
 // TODO
 const WaitingRoom = ({ gameId }: Props) => {
-	const { push, listen } = useHistory();
+	const { push } = useHistory();
 
 	const {
 		pending,
@@ -31,21 +31,7 @@ const WaitingRoom = ({ gameId }: Props) => {
 
 	const [playerId, setPlayerId] = useState<PlayerId>();
 
-	useBeforeUnload(() => {
-		if (!playerId) return;
-		onPlayerExit(playerId);
-	});
-
-	const unlisten = listen(({ pathname }) => {
-		if (!playerId) return;
-		// if we are redirected to the game, don't trigger this
-		if (pathname === `${BASE_PATH}/online/${gameId}`) return;
-		onPlayerExit(playerId);
-	});
-
-	useEffect(() => {
-		return () => unlisten();
-	}, [unlisten]);
+	useOnPlayerExit(gameId, onPlayerExit, playerId);
 
 	useEffect(() => {
 		if (!isReady) return;
