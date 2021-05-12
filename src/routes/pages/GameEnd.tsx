@@ -25,13 +25,25 @@ const GameEnd = ({ location }: Props) => {
 
 	const { gameEndCondition, ...playerDisplayProps } = endGame!;
 
-	const emoji = gameEndCondition === GameEndCondition.Win ? ':)' : ':(';
+	const isWon = gameEndCondition === GameEndCondition.Win;
+	const emoji = isWon ? ':)' : ':(';
 
 	return (
 		<PageContainer>
 			<H1>
 				You have{' '}
-				<span style={{ color: theme.palette.color.info }}>
+				<span
+					style={{
+						color:
+							theme.palette.color[
+								isWon
+									? 'success'
+									: ('error' as KeysOf<
+											typeof theme.palette.color
+									  >)
+							],
+					}}
+				>
 					{gameEndCondition}
 				</span>{' '}
 				the game {emoji}
