@@ -9,7 +9,7 @@ import SpriteCharacter from './SpriteCharacter';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
 	id: PlayerId;
-	currentPlayerId?: PlayerId;
+	currentOnlinePlayerId?: PlayerId;
 	name: string;
 	// skin: Skin;
 	size: GameConfigRanges.SquareSize;
@@ -23,6 +23,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const Character = ({
 	/* skin */
 	id,
+	currentOnlinePlayerId,
 	name,
 	size,
 	tileSize,
@@ -57,6 +58,7 @@ const Character = ({
 		)) || (
 			<SpriteCharacter
 				id={id}
+				currentOnlinePlayerId={currentOnlinePlayerId}
 				// name={`${name}${id}`}
 				name={id}
 				coordinates={{

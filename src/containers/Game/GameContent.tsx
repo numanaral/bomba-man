@@ -40,6 +40,7 @@ const GameContent = ({
 						(isAlive && (
 							<Character
 								id={playerId}
+								currentOnlinePlayerId={currentOnlinePlayerId}
 								key={playerId}
 								name="Bomber"
 								size={config.sizes.character}

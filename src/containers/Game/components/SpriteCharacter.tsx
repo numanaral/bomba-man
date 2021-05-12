@@ -127,7 +127,7 @@ interface Props extends Omit<CharacterProps, 'tileSize' | 'is3D' | 'size'> {
 
 const SpriteCharacter = ({
 	id,
-	currentPlayerId,
+	currentOnlinePlayerId,
 	name,
 	coordinates: { top, left },
 	style,
@@ -147,7 +147,8 @@ const SpriteCharacter = ({
 	// We only want to bind the event if it's:
 	// - not online game
 	// - online game and it's the current player
-	const shouldBindEvent = !currentPlayerId || id === currentPlayerId;
+	const shouldBindEvent =
+		!currentOnlinePlayerId || id === currentOnlinePlayerId;
 
 	useEffect(() => {
 		// ignore the npc action
@@ -178,6 +179,7 @@ const SpriteCharacter = ({
 		};
 
 		const handleKeyUp = () => {
+			if (!shouldBindEvent) return;
 			// keypress-move: keydown + keyup, i.e. D, D, D (not hold D)
 			// Only stop the moving animation after the player goes idle
 			// for some duration. This allows us to use keypress to move
