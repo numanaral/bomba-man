@@ -54,8 +54,11 @@ const PlayerDisplay = ({
 					let isWalking = false;
 
 					if (
-						(isCurrentPlayer && !isGameEnd) ||
-						!isGameEndDeadCharacter
+						(isCurrentPlayer &&
+							(!isGameEnd || !isGameEndDeadCharacter)) ||
+						(!isCurrentPlayer &&
+							isGameEnd &&
+							!isGameEndDeadCharacter)
 					) {
 						size = 80;
 						isWalking = true;
