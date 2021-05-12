@@ -15,6 +15,7 @@ import NoAccess from 'components/NoAccess';
 import loadable from 'utils/loadable';
 import { OnlineGame, PlayerConfig, PlayerId } from 'containers/Game/types';
 import gameConfig from 'config';
+import { PlayerCondition } from 'enums';
 import useFirebaseUtils from './useFirebaseUtils';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
@@ -77,7 +78,7 @@ const useWatchOnlineGame = (id: string) => {
 		// set player as active
 		update<OnlineGame['players']>(
 			{
-				[playerId]: true,
+				[playerId]: PlayerCondition.Alive,
 			},
 			'/players'
 		);

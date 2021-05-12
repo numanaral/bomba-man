@@ -66,6 +66,7 @@ const PlayerDisplay = ({
 					);
 				})}
 			</Grid>
+			<Spacer spacing="5" />
 		</ContainerWithCenteredItems>
 	);
 };
