@@ -21,7 +21,9 @@ const Online = ({
 
 	return (
 		pending ||
-		error || <Game {...gameProps} playerId={currentOnlinePlayerId} />
+		error || (
+			<Game {...gameProps} playerId={currentOnlinePlayerId} gameId={id} />
+		)
 	);
 };
 

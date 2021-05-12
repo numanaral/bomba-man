@@ -140,6 +140,7 @@ type GameApi = {
 	error?: false | JSX.Element;
 	// online mode
 } & {
+	gameId?: OnlineGameId;
 	playerId?: PlayerId;
 };
 

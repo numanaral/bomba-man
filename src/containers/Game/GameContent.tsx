@@ -5,22 +5,28 @@ import {
 	isPlayerDead,
 	isPlayerSteppingOnFire,
 } from 'utils/game';
+import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import Bomb from './components/Bomb';
 import Character from './components/Character';
-import { GameApi, PlayerConfig, PlayerId } from './types';
+import { GameApi, OnlineGameId, PlayerConfig, PlayerId } from './types';
 import DeadCharacter from './components/DeadCharacter';
 
 type PlayerEntry = Array<[PlayerId, PlayerConfig]>;
 
-interface Props extends GameApi {}
+interface Props extends GameApi {
+	gameId?: OnlineGameId;
+}
 
 const GameContent = ({
 	state,
 	provider,
 	playerId: currentOnlinePlayerId,
+	gameId,
 }: Props) => {
 	const { triggerExplosion, onExplosionComplete } = provider;
 	const { gameMap, players, bombs, is3D, config } = state;
+
+	const { onPlayerDeath } = useWatchOnlineGame(gameId || '');
 
 	return (
 		<>
@@ -52,12 +58,15 @@ const GameContent = ({
 							/>
 						)) || (
 							<DeadCharacter
+								id={playerId}
+								name={playerId}
 								key={playerId}
 								coordinates={coordinates!}
 								size={config.sizes.character}
 								explodingDuration={
 									config.duration.bomb.exploding
 								}
+								onDeathAnimationComplete={onPlayerDeath}
 							/>
 						)
 					);

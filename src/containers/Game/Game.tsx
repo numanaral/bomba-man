@@ -9,6 +9,7 @@ const useGameProps = (props: GameApi) => {
 	const {
 		state: { is3D, gameMap, isSideView, animationCounter, config },
 		// provider,
+		gameId,
 	} = props;
 
 	const gameContainerProps = {
@@ -29,6 +30,7 @@ const useGameProps = (props: GameApi) => {
 
 	const gameContentProps = {
 		...props,
+		gameId,
 	};
 
 	return {

@@ -117,6 +117,15 @@ const useWatchOnlineGame = (id: string) => {
 		}
 	};
 
+	const onPlayerDeath = (playerId: PlayerId) => {
+		update<OnlineGame['players']>(
+			{
+				[playerId]: PlayerCondition.Dead,
+			},
+			'/players'
+		);
+	};
+
 	const _game: OnlineGame = {
 		gameId: id,
 		gameState: {
@@ -147,6 +156,7 @@ const useWatchOnlineGame = (id: string) => {
 		onPlayerJoin,
 		onPlayerExit,
 		onStartGame,
+		onPlayerDeath,
 	};
 };
 
