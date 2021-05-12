@@ -140,12 +140,6 @@ const configSections = [
 		side: 1,
 	},
 	{
-		title: 'Tiles',
-		description: 'Tile Configurations',
-		items: tiles,
-		side: 2,
-	},
-	{
 		title: 'Sizes',
 		description: 'Size Configurations',
 		items: sizes,
@@ -155,6 +149,12 @@ const configSections = [
 		title: 'Duration',
 		description: 'Duration Configurations',
 		items: duration,
+		side: 2,
+	},
+	{
+		title: 'Tiles',
+		description: 'Tile Configurations',
+		items: tiles,
 		side: 2,
 	},
 ];
