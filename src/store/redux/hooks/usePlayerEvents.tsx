@@ -322,6 +322,7 @@ const usePlayerEvents = ({
 	// TODO: In the next update, start these intervals
 	// when the keys are pressed and not continuously
 	return Object.keys(_players).map(pId => {
+		// TODO: online game can also have NPCs, have a check for that
 		const isNpc = gameType === GameType.Local && ['P3', 'P4'].includes(pId);
 		return (
 			<IntervalWrapper
