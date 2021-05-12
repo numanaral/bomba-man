@@ -36,8 +36,10 @@ const WaitingRoom = ({ gameId }: Props) => {
 		onPlayerExit(playerId);
 	});
 
-	const unlisten = listen(() => {
+	const unlisten = listen(({ pathname }) => {
 		if (!playerId) return;
+		// if we are redirected to the game, don't trigger this
+		if (pathname === `${BASE_PATH}/online/${gameId}`) return;
 		onPlayerExit(playerId);
 	});
 
