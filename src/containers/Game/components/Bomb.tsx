@@ -87,6 +87,12 @@ const Bomb = ({
 
 	const isMounted = useIsUnmounted();
 
+	// We only want to bind the event if it's:
+	// - not online game
+	// - online game and it's the current player
+	const shouldBindEvent =
+		!currentOnlinePlayerId || playerId === currentOnlinePlayerId;
+
 	useEffect(() => {
 		const kaboom = async () => {
 			await sleep(firingDuration * 1000);
@@ -108,7 +114,7 @@ const Bomb = ({
 				});
 			});
 		};
-		if (playerId === currentOnlinePlayerId) kaboom();
+		if (shouldBindEvent) kaboom();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
