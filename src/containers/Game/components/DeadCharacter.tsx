@@ -32,7 +32,7 @@ const DeadCharacter = ({
 	useEffect(() => {
 		setTimeout(() => {
 			onDeathAnimationComplete?.(id);
-		}, explodingDuration);
+		}, explodingDuration * 1000 + 1000);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	return (
