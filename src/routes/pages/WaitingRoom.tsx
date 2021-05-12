@@ -18,7 +18,7 @@ const WaitingRoomPage = ({
 	} = window;
 	const link = origin + pathname;
 	return (
-		<PageContainer>
+		<PageContainer style={{ overflow: 'hidden' }}>
 			<H1> Waiting Room </H1>
 			<Spacer />
 			<H4>

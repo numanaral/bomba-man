@@ -29,7 +29,7 @@ const GameEnd = ({ location }: Props) => {
 	const emoji = isWon ? ':)' : ':(';
 
 	return (
-		<PageContainer>
+		<PageContainer style={{ overflow: 'hidden' }}>
 			<H1>
 				You have{' '}
 				<span
