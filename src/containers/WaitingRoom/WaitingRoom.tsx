@@ -4,6 +4,9 @@ import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
 import useOnPlayerExit from 'hooks/useOnPlayerExit';
+import theme from 'theme';
+import Spacer from 'components/Spacer';
+import { H1, H4 } from 'components/typography';
 import PlayerDisplay from './PlayerDisplay';
 
 interface Props {
@@ -21,7 +24,6 @@ const WaitingRoom = ({ gameId }: Props) => {
 		game,
 		isReady,
 		onPlayerJoin,
-		onPlayerExit,
 		onStartGame,
 	} = useWatchOnlineGame(gameId);
 
@@ -30,7 +32,7 @@ const WaitingRoom = ({ gameId }: Props) => {
 		setCurrentOnlinePlayerId,
 	] = useState<PlayerId>();
 
-	useOnPlayerExit(gameId, onPlayerExit, currentOnlinePlayerId);
+	useOnPlayerExit(gameId, currentOnlinePlayerId);
 
 	useEffect(() => {
 		if (!isReady) return;
@@ -76,14 +78,38 @@ const WaitingRoom = ({ gameId }: Props) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isReady, game?.started]);
 
+	const {
+		location: { origin, pathname },
+	} = window;
+	const link = origin + pathname;
+
 	return (
 		pending ||
 		error || (
-			<PlayerDisplay
-				players={game.players}
-				onStartGame={onStartGame}
-				currentOnlinePlayerId={currentOnlinePlayerId}
-			/>
+			<>
+				<H1> Waiting Room </H1>
+				<Spacer />
+				<H4>
+					Room / Game Id:
+					<br />
+					<span style={{ color: theme.palette.color.info }}>
+						{gameId}
+					</span>
+				</H4>
+				<Spacer />
+				<H4>
+					Join Link:
+					<br />
+					<span style={{ color: theme.palette.color.info }}>
+						{link}
+					</span>
+				</H4>
+				<PlayerDisplay
+					players={game.players}
+					onStartGame={onStartGame}
+					currentOnlinePlayerId={currentOnlinePlayerId}
+				/>
+			</>
 		)
 	);
 };
