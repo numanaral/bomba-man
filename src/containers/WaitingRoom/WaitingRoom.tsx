@@ -38,6 +38,14 @@ const WaitingRoom = ({ gameId }: Props) => {
 		const { players } = game;
 		const playerKeys = Object.keys(players);
 		const playerCount = playerKeys.length;
+
+		if (game.started) {
+			push(`${BASE_PATH}/unauthorized`, {
+				message: 'Game has already started!',
+			});
+			return;
+		}
+
 		if (playerCount > 3) {
 			push(`${BASE_PATH}/unauthorized`, { message: 'Game is full!' });
 			return;
