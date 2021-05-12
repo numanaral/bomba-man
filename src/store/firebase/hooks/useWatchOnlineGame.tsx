@@ -1,14 +1,6 @@
-import {
-	isEmpty,
-	isLoaded,
-	useFirebase,
-	useFirebaseConnect,
-} from 'react-redux-firebase';
+import { isEmpty, isLoaded, useFirebaseConnect } from 'react-redux-firebase';
 import { useSelector } from 'react-redux';
-import useAuth from 'store/firebase/hooks/useAuth';
-import { toFirestore } from 'store/firebase/utils';
 import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
-import { GameState } from 'store/redux/reducers/game/types';
 import { generateDefaultGameState, generatePlayer } from 'utils/game';
 import LoadingIndicator from 'components/LoadingIndicator';
 import NoAccess from 'components/NoAccess';
@@ -26,8 +18,6 @@ const defaultGameState = generateDefaultGameState();
 
 const useWatchOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
-	const { userId } = useAuth();
-	const firebase = useFirebase();
 	const refKey = `online/${id}`;
 	useFirebaseConnect(refKey);
 	const { create, update, remove } = useFirebaseUtils<OnlineGame>(refKey);
@@ -42,37 +32,6 @@ const useWatchOnlineGame = (id: string) => {
 	);
 
 	const game = onlineGameFromFirebase;
-
-	const createOnlineGame = async (props: GameState, gameId: string = id) => {
-		try {
-			await firebase.set(
-				`online/${gameId}`,
-				toFirestore({
-					...props,
-					userId,
-					// extra props
-				})
-			);
-		} catch (err) {
-			// notifyError(err);
-		}
-	};
-
-	const updateOnlineGame = async (props: Partial<GameState>) => {
-		try {
-			await firebase.update(`online/${id}`, toFirestore(props));
-		} catch (err) {
-			// notifyError(err);
-		}
-	};
-
-	const deleteOnlineGame = async () => {
-		try {
-			await firebase.remove(`online/${id}`);
-		} catch (err) {
-			// notifyError(err);
-		}
-	};
 
 	const onPlayerJoin = (playerId: PlayerId) => {
 		// set player as active
@@ -147,9 +106,6 @@ const useWatchOnlineGame = (id: string) => {
 
 	return {
 		game: _game,
-		createOnlineGame,
-		updateOnlineGame,
-		deleteOnlineGame,
 		pending,
 		error,
 		isReady: !pending && !error,
