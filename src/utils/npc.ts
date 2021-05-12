@@ -79,11 +79,13 @@ const isSquareAPossibleFire = (currentSquareCoordinates: SquareCoordinates) => {
 		const { coordinatesToSetOnFire } = getExplosionResults(
 			Store!.gameMap,
 			{ top, left },
-			getPoweredUpValue(
-				players[playerId]!.state,
-				PowerUp.BombSize,
-				Store!.powerUpConfig
-			),
+			players[playerId]?.state
+				? getPoweredUpValue(
+						players[playerId]!.state,
+						PowerUp.BombSize,
+						Store!.powerUpConfig
+				  )
+				: Store!.powerUpConfig.defaults[PowerUp.BombSize],
 			Store!.sizes
 		);
 		Object.values(coordinatesToSetOnFire)
