@@ -3,12 +3,8 @@ import { useEffect, useState } from 'react';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
-import { CharacterIcon } from 'containers/RoomCreator/icons';
-import { Grid } from '@material-ui/core';
-import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
-import Spacer from 'components/Spacer';
-import TooltipButton from 'components/TooltipButton';
 import useOnPlayerExit from 'hooks/useOnPlayerExit';
+import PlayerDisplay from './PlayerDisplay';
 
 interface Props {
 	// playerId: PlayerId;
@@ -29,9 +25,12 @@ const WaitingRoom = ({ gameId }: Props) => {
 		onStartGame,
 	} = useWatchOnlineGame(gameId);
 
-	const [playerId, setPlayerId] = useState<PlayerId>();
+	const [
+		currentOnlinePlayerId,
+		setCurrentOnlinePlayerId,
+	] = useState<PlayerId>();
 
-	useOnPlayerExit(gameId, onPlayerExit, playerId);
+	useOnPlayerExit(gameId, onPlayerExit, currentOnlinePlayerId);
 
 	useEffect(() => {
 		if (!isReady) return;
@@ -55,7 +54,7 @@ const WaitingRoom = ({ gameId }: Props) => {
 		const newPlayerId = `P${Math.min(...openPlayerNumbers)}` as PlayerId;
 		onPlayerJoin(newPlayerId);
 		// TODO: error checking?
-		setPlayerId(newPlayerId);
+		setCurrentOnlinePlayerId(newPlayerId);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isReady]);
 
@@ -63,43 +62,20 @@ const WaitingRoom = ({ gameId }: Props) => {
 		if (!isReady) return;
 		if (!game?.started) return;
 
-		push(`${BASE_PATH}/online/${gameId}`, { playerId });
+		push(`${BASE_PATH}/online/${gameId}`, {
+			playerId: currentOnlinePlayerId,
+		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isReady, game?.started]);
 
 	return (
 		pending ||
 		error || (
-			<ContainerWithCenteredItems container>
-				<Spacer spacing="5" />
-				<ContainerWithCenteredItems container>
-					<Grid container justify="center" item xs={12} sm={4}>
-						<TooltipButton
-							text="Start"
-							fullWidth
-							bg="primary"
-							variant="contained"
-							disabled={Object.keys(game.players).length <= 1}
-							onClick={onStartGame}
-						/>
-					</Grid>
-				</ContainerWithCenteredItems>
-				<Spacer spacing="15" />
-				<Grid container justify="space-between" item xs={12} sm={8}>
-					{Object.keys(game.players).map(id => {
-						const isCurrentPlayer = playerId === id;
-						return (
-							<CharacterIcon
-								size={isCurrentPlayer ? 80 : 50}
-								name={id}
-								id={id as PlayerId}
-								showId
-								isWalking={isCurrentPlayer}
-							/>
-						);
-					})}
-				</Grid>
-			</ContainerWithCenteredItems>
+			<PlayerDisplay
+				players={game.players}
+				onStartGame={onStartGame}
+				currentOnlinePlayerId={currentOnlinePlayerId}
+			/>
 		)
 	);
 };
