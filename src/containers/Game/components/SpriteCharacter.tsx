@@ -127,6 +127,7 @@ interface Props extends Omit<CharacterProps, 'tileSize' | 'is3D' | 'size'> {
 
 const SpriteCharacter = ({
 	id,
+	currentPlayerId,
 	name,
 	coordinates: { top, left },
 	style,
@@ -143,6 +144,10 @@ const SpriteCharacter = ({
 	const lastMovementTime = useRef(new Date().getTime());
 
 	const _isWalking = isWalking || !!currentKeyDirection;
+	// We only want to bind the event if it's:
+	// - not online game
+	// - online game and it's the current player
+	const shouldBindEvent = !currentPlayerId || id === currentPlayerId;
 
 	useEffect(() => {
 		// ignore the npc action
@@ -161,6 +166,7 @@ const SpriteCharacter = ({
 		};
 
 		const handleKeyDown = (e: KeyboardEvent) => {
+			if (!shouldBindEvent) return;
 			const newDirection = getDirection(e);
 			if (!newDirection) {
 				clearCurrentKey();
@@ -186,13 +192,16 @@ const SpriteCharacter = ({
 			}, ANIMATION_STOP_THROTTLE_DURATION);
 		};
 
-		document.addEventListener('keydown', handleKeyDown);
-		document.addEventListener('keyup', handleKeyUp);
+		//
+		if (shouldBindEvent) {
+			document.addEventListener('keydown', handleKeyDown);
+			document.addEventListener('keyup', handleKeyUp);
+		}
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 			document.removeEventListener('keyup', handleKeyUp);
 		};
-	}, [currentKeyDirection, keyboardConfig]);
+	}, [currentKeyDirection, keyboardConfig, shouldBindEvent]);
 
 	return (
 		<Wrapper
