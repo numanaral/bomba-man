@@ -26,7 +26,7 @@ const useOnGameEnd = (
 
 		if (alivePlayers.length > 1) return;
 
-		push(`${BASE_PATH}/end-game`, {
+		push(`${BASE_PATH}/game-end`, {
 			endGame: {
 				players,
 				currentOnlinePlayerId,
