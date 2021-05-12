@@ -3,17 +3,13 @@ import { Player } from 'enums';
 import { GameConfigRanges } from 'store/redux/reducers/game/types';
 import theme from 'theme';
 import { CUBE_BASE_TRANSFORM } from 'utils/game';
-import {
-	CharacterProps,
-	KeyboardConfig,
-	PlayerId,
-	TopLeftCoordinates,
-} from '../types';
+import { KeyboardConfig, PlayerId, TopLeftCoordinates } from '../types';
 // import CircleCharacter from './CircleCharacter';
 import SpriteCharacter from './SpriteCharacter';
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
 	id: PlayerId;
+	currentPlayerId?: PlayerId;
 	name: string;
 	// skin: Skin;
 	size: GameConfigRanges.SquareSize;
@@ -41,20 +37,6 @@ const Character = ({
 	const _top = padding + top;
 	const _left = padding + left;
 
-	const props: CharacterProps = {
-		id,
-		// name: `${name}${id}`,
-		name: id,
-		coordinates: {
-			top: _top,
-			left: _left,
-		},
-		keyboardConfig,
-		highlight,
-		size,
-		...rest,
-	};
-
 	return (
 		(is3D && (
 			<Cube
@@ -72,9 +54,23 @@ const Character = ({
 				variant={Player[id]}
 				{...rest}
 			/>
-		)) || <SpriteCharacter {...props} />
+		)) || (
+			<SpriteCharacter
+				id={id}
+				// name={`${name}${id}`}
+				name={id}
+				coordinates={{
+					top: _top,
+					left: _left,
+				}}
+				keyboardConfig={keyboardConfig}
+				highlight={highlight}
+				size={size}
+				{...rest}
+			/>
+		)
 	);
 };
 
-export type { Props };
+export type { Props as CharacterProps };
 export default Character;

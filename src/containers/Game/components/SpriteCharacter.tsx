@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getMoveDirectionFromKeyboardCode } from 'utils/game';
 import styled, { css } from 'styled-components';
 import theme from 'theme';
-import { CharacterProps } from '../types';
+import { CharacterProps } from './Character';
 import './SpriteCharacter.scss';
 import spriteShadow from './character-shadow.png';
 import spriteImage from './character-skin-default.png';
@@ -118,6 +118,13 @@ const Wrapper = styled.div<{ $size: number }>`
 `;
 
 const ANIMATION_STOP_THROTTLE_DURATION = 200;
+
+interface Props extends Omit<CharacterProps, 'tileSize' | 'is3D' | 'size'> {
+	isWalking?: boolean;
+	// size can be any number by default, unless it's a game character
+	size: number;
+}
+
 const SpriteCharacter = ({
 	id,
 	name,
@@ -128,7 +135,7 @@ const SpriteCharacter = ({
 	isWalking = false,
 	size,
 	...rest
-}: CharacterProps) => {
+}: Props) => {
 	/** Direction being faced */
 	const [direction, setDirection] = useState<Direction>(Direction.DOWN);
 	/** Direction key being held */
@@ -221,4 +228,5 @@ const SpriteCharacter = ({
 	);
 };
 
+export type { Props as SpriteCharacterProps };
 export default SpriteCharacter;

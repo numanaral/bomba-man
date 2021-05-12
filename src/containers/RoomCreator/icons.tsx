@@ -6,8 +6,11 @@ import {
 	faFire,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import SpriteCharacter from 'containers/Game/components/SpriteCharacter';
-import { CharacterProps, FontAwesomeIconProps } from 'containers/Game/types';
+import SpriteCharacter, {
+	SpriteCharacterProps,
+} from 'containers/Game/components/SpriteCharacter';
+import { FontAwesomeIconProps } from 'containers/Game/types';
+
 import styled from 'styled-components';
 import { generateIconPackFromPowerUps } from './utils';
 
@@ -62,8 +65,8 @@ const CharacterWrapper = styled.div<
 	}}
 `;
 
-interface CharacterIconProps extends Partial<CharacterProps> {
-	size: CharacterProps['size'];
+interface CharacterIconProps extends Partial<SpriteCharacterProps> {
+	size: SpriteCharacterProps['size'];
 	showId?: boolean;
 }
 

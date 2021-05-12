@@ -102,16 +102,6 @@ type KeyMap = {
 	[key in KeyboardEventCode]?: boolean;
 };
 
-type CharacterProps = {
-	id: PlayerId;
-	name: string;
-	size: number;
-	coordinates: TopLeftCoordinates;
-	keyboardConfig?: KeyboardConfig;
-	highlight?: boolean;
-	isWalking?: boolean;
-} & React.HTMLAttributes<HTMLDivElement>;
-
 type NPCActionProps = {
 	playerId: PlayerId;
 	players: Players;
@@ -182,7 +172,6 @@ export type {
 	NonNullablePlayerRef,
 	NextMoveProps,
 	KeyMap,
-	CharacterProps,
 	NPCActionProps,
 	NPCActionFn,
 	Fire,
