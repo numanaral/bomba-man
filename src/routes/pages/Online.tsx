@@ -12,12 +12,12 @@ const Online = ({
 	},
 }: RouteComponentPropsWithLocationState<{ id: string }>) => {
 	const { pending, error, ...gameProps } = useOnlineGame(id);
-	const { onPlayerExit, game } = useWatchOnlineGame(id);
+	const { game } = useWatchOnlineGame(id);
 	const currentOnlinePlayerId = location?.state?.playerId;
 	const players = game?.players || {};
 
-	useOnPlayerExit(id, onPlayerExit, currentOnlinePlayerId);
-	useOnGameEnd(players, currentOnlinePlayerId);
+	useOnPlayerExit(id, currentOnlinePlayerId);
+	useOnGameEnd(players, currentOnlinePlayerId, id);
 
 	return (
 		pending ||
