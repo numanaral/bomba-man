@@ -79,4 +79,4 @@ namespace FirebaseSchema {
 	export type FirestoreSchema = FirebaseObjects.Generic;
 }
 
-export type { FirebaseObjects, FirebaseUtils, FirebaseSchema };
+export type { FirebaseObjects, FirebaseUtils, FirebaseSchema, DataSnapshot };

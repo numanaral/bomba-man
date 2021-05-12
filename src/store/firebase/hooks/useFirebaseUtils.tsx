@@ -32,7 +32,7 @@ const useFirebaseUtils = <RootSchema extends FirebaseUtils.UpdateableValue>(
 		>
 	): FirebaseUtils.DataSnapshotPromise => {
 		try {
-			const dataSnapshot = await firebase.set(
+			const dataSnapshot = await firebase.push(
 				getPath(subPaths),
 				newProps
 			);

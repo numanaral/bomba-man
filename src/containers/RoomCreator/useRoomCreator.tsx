@@ -1,10 +1,14 @@
 import { useForm } from 'components/Form';
 import { GameType } from 'enums';
-import { generateDefaultGameConfig } from 'utils/game';
+import {
+	generateDefaultGameConfig,
+	generateDefaultGameState,
+} from 'utils/game';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
 import { ReactRouterState } from 'routes/types';
 import { GameConfig } from 'store/redux/reducers/game/types';
+import useOnlineGameActions from 'store/firebase/hooks/useOnlineGameActions';
 import { configSchema } from './schemas';
 import { configSections } from './sections';
 import { SectionProps } from './types';
@@ -13,10 +17,17 @@ const defaultValues = generateDefaultGameConfig();
 
 const useOnSubmit = (type: GameType) => {
 	const { push } = useHistory<ReactRouterState>();
-	const onSubmit = (gameConfig: GameConfig) => {
-		console.log(`${BASE_PATH}/room-creator/${type}`);
-		// push(`${BASE_PATH}/${type}`);
-		push(`${BASE_PATH}/${type}`, { gameConfig });
+	const { createOnlineGame } = useOnlineGameActions();
+	const onSubmit = async (gameConfig: GameConfig) => {
+		if (type === GameType.Local) {
+			push(`${BASE_PATH}/${type}`, { gameConfig });
+			return;
+		}
+
+		const newGameId = await createOnlineGame(
+			generateDefaultGameState(gameConfig)
+		);
+		push(`${BASE_PATH}/waiting-room/${newGameId}`);
 	};
 
 	return onSubmit;
