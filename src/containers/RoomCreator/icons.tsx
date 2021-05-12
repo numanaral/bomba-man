@@ -6,6 +6,7 @@ import {
 	faFire,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import DeadCharacter from 'containers/Game/components/DeadCharacter';
 import SpriteCharacter, {
 	SpriteCharacterProps,
 } from 'containers/Game/components/SpriteCharacter';
@@ -88,9 +89,29 @@ const CharacterIcon = ({
 	);
 };
 
+const DeadCharacterIcon = ({
+	size,
+	showId = false,
+	...rest
+}: CharacterIconProps) => {
+	return (
+		<CharacterWrapper $size={size} $showId={showId}>
+			<DeadCharacter
+				coordinates={{ top: 0, left: 0 }}
+				id="P1"
+				name="Bomba-man"
+				explodingDuration={0 as any}
+				size={size}
+				{...rest}
+			/>
+		</CharacterWrapper>
+	);
+};
+
 const ICON_STYLE = { fontSize: 40, width: 50 };
 const powerUpIconPack = generateIconPackFromPowerUps(ICON_STYLE);
 
+export type { CharacterIconProps };
 export {
 	PowerUpIcon,
 	CubeIcon,
@@ -98,6 +119,7 @@ export {
 	FireIcon,
 	SquareIcon,
 	CharacterIcon,
+	DeadCharacterIcon,
 	powerUpIconPack,
 	ICON_STYLE,
 };

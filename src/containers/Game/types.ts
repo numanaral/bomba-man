@@ -1,4 +1,12 @@
-import { Direction, Player, PowerUp, Tile, Explosive, GameType } from 'enums';
+import {
+	Direction,
+	Player,
+	PowerUp,
+	Tile,
+	Explosive,
+	GameType,
+	EndGameCondition,
+} from 'enums';
 import * as KeyCode from 'keycode-js';
 import {
 	Bombs,
@@ -8,6 +16,7 @@ import {
 } from 'store/redux/reducers/game/types';
 import { FontAwesomeIconProps as FontAwesomeBaseIconProps } from '@fortawesome/react-fontawesome';
 import { GameProvider } from 'store/redux/hooks/useGameProvider';
+import { PlayerDisplayProps } from 'containers/WaitingRoom/PlayerDisplay';
 
 // import { Immutable } from 'immer';
 
@@ -151,6 +160,10 @@ type OnlineGame = {
 	started: boolean;
 };
 
+type GameEnd = Omit<PlayerDisplayProps, 'onStart'> & {
+	endGameCondition: EndGameCondition;
+};
+
 export type {
 	CollisionCoordinates,
 	TileProps,
@@ -183,4 +196,5 @@ export type {
 	PickedGameState,
 	OnlineGameId,
 	OnlineGame,
+	GameEnd,
 };

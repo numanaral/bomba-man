@@ -50,6 +50,12 @@ enum GameType {
 	Local = 'local',
 	Online = 'online',
 }
+
+enum EndGameCondition {
+	Win = 'Won',
+	Lose = 'Lost',
+}
+
 const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
 
 export {
@@ -61,5 +67,6 @@ export {
 	PowerUp,
 	Explosive,
 	GameType,
+	EndGameCondition,
 	FIRE_VALUES,
 };

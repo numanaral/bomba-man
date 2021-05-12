@@ -13,7 +13,7 @@ const DeadIcon = (props: FontAwesomeIconProps) => (
 );
 
 interface Props {
-	size: GameConfigRanges.SquareSize;
+	size: number;
 	explodingDuration: GameConfigRanges.ExplodingDuration;
 	coordinates: TopLeftCoordinates;
 }

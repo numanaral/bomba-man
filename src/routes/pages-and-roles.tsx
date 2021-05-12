@@ -26,6 +26,7 @@ const PAGE_ROLES = {
 const LazyHome = loadable(() => import(`routes/pages/Home`));
 const LazyLocal = loadable(() => import(`routes/pages/Local`));
 const LazyInstructions = loadable(() => import(`routes/pages/Instructions`));
+const LazyGameEnd = loadable(() => import(`routes/pages/GameEnd`));
 const LazyRoomCreator = loadable<RouteComponentPropsWithLocationState<{ type: GameType }>>(() => import(`routes/pages/RoomCreator`));
 const LazyOnline = loadable<RouteComponentPropsWithLocationState<{id: string}>>(() => import(`routes/pages/Online`));
 const LazyJoin = loadable(() => import(`routes/pages/Join`));
@@ -98,6 +99,12 @@ const ROUTE_LIST = [
 		description: `How to play.`,
 		path: '/instructions',
 		component: LazyInstructions,
+	},
+	{
+		title: 'End Game',
+		description: `Game has ended.`,
+		path: '/game-end',
+		component: LazyGameEnd,
 	},
 	{
 		title: 'Login',

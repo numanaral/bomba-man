@@ -1,4 +1,4 @@
-import { PlayerId } from 'containers/Game/types';
+import { PlayerId, GameEnd } from 'containers/Game/types';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { RouteComponentProps, StaticContext } from 'react-router';
 import { GameConfig } from 'store/redux/reducers/game/types';
@@ -39,6 +39,8 @@ type ReactRouterState = {
 	message?: string;
 	/** Passed to /online/:id */
 	playerId?: PlayerId;
+	/** Passed to /game-end/:id */
+	endGame?: GameEnd;
 };
 
 type RouteComponentPropsWithLocationState<
