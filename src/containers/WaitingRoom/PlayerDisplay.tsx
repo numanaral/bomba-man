@@ -64,7 +64,8 @@ const PlayerDisplay = ({
 						isWalking = true;
 					}
 
-					const props: CharacterIconProps = {
+					const props: CharacterIconProps & Partial<JSX.Element> = {
+						key: id,
 						size,
 						name: id,
 						id: id as PlayerId,
