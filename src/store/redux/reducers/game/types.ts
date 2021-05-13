@@ -155,7 +155,8 @@ type OnPrepareMoveProps = {
 	ref: NonNullablePlayerRef;
 };
 
-type OnTriggerMove = (props: Omit<OnPrepareMoveProps, 'onComplete'>) => void;
+type TriggerMove = Omit<OnPrepareMoveProps, 'onComplete'>;
+type OnTriggerMove = (props: TriggerMove) => void;
 
 /** Makes the actual move */
 type OnMoveProps = {
@@ -176,6 +177,7 @@ export type {
 	GameAction,
 	GameActionFn,
 	OnPrepareMoveProps,
+	TriggerMove,
 	OnTriggerMove,
 	OnMoveProps,
 	OnMove,

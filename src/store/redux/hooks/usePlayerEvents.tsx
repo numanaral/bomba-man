@@ -20,7 +20,7 @@ import { npcAction } from 'utils/npc';
 import useInterval from 'hooks/useInterval';
 import usePrevious from 'hooks/usePrevious';
 import { CODE_SPACE } from 'keycode-js';
-import { GameConfig, OnTriggerMove } from '../reducers/game/types';
+import { GameConfig, OnTriggerMove, TriggerMove } from '../reducers/game/types';
 
 type HandleActionsFn = (playerId: PlayerId) => void;
 type KeyDownAction = (playerId: PlayerId, keys: KeyboardConfig) => void;
@@ -46,6 +46,42 @@ const usePlayerRefs = () => {
 	return { playerRefs, recalculate };
 };
 
+const useTimeOutRef = () => {
+	const timeOutRef = useRef<Record<PlayerId, number>>({
+		P1: new Date().getTime(),
+		P2: new Date().getTime(),
+		P3: new Date().getTime(),
+		P4: new Date().getTime(),
+	});
+
+	return timeOutRef;
+};
+
+const useCanMove = (
+	players: Players,
+	powerUpConfig: GameConfig['powerUps']
+) => {
+	const timeOutRef = useTimeOutRef();
+	const canMove = (playerId: PlayerId) => {
+		const npc = players[playerId];
+		if (!npc) return false;
+		const { state: npcState } = npc;
+		const newTime = new Date().getTime();
+		const movementSpeed = getPoweredUpValue(
+			npcState,
+			PowerUp.MovementSpeed,
+			powerUpConfig
+		);
+		if (newTime - timeOutRef.current[playerId]! > movementSpeed) {
+			timeOutRef.current[playerId] = newTime;
+			return true;
+		}
+		return false;
+	};
+
+	return canMove;
+};
+
 const useEvents = ({
 	triggerMove,
 	players,
@@ -69,6 +105,8 @@ const useEvents = ({
 		recalculate();
 	}, [is3D, previousIs3D, recalculate]);
 
+	const canMove = useCanMove(players, powerUpConfig);
+
 	const move: KeyDownAction = (playerId, playerKeyboardConfig) => {
 		const directions = getMoveDirectionFromKeyMap(
 			keyMap,
@@ -91,28 +129,15 @@ const useEvents = ({
 		// don't do anything if no key is being pressed
 		if (!Object.values(keyMap.current).filter(Boolean).length) return;
 
-		const { keyboardConfig, state: playerState } = players[playerId]!;
+		const { keyboardConfig } = players[playerId]!;
 		if (!keyboardConfig || !Object.keys(keyboardConfig).length) return;
-
-		// we only want to take this action for non-NPC players
-		const movementSpeed = getPoweredUpValue(
-			playerState,
-			PowerUp.MovementSpeed,
-			powerUpConfig
-		);
 
 		const ref = playerRefs.current[playerId];
 		if (!ref) {
 			playerRefs.current[playerId] = document.getElementById(playerId);
 		}
 
-		if (ref) {
-			const newTime = new Date().getTime();
-			if (newTime - timeOutRef.current[playerId]! > movementSpeed) {
-				timeOutRef.current[playerId] = newTime;
-				move(playerId, keyboardConfig);
-			}
-		}
+		if (ref && canMove(playerId)) move(playerId, keyboardConfig);
 	};
 
 	return { move, handleActions };
@@ -153,17 +178,6 @@ const useKeyboardEvent = ({
 	}, [onKeyDown, onKeyUp]);
 
 	return keyMap;
-};
-
-const useTimeOutRef = () => {
-	const timeOutRef = useRef<Record<PlayerId, number>>({
-		P1: new Date().getTime(),
-		P2: new Date().getTime(),
-		P3: new Date().getTime(),
-		P4: new Date().getTime(),
-	});
-
-	return timeOutRef;
 };
 
 const usePlayerActionSpeed = (
@@ -301,6 +315,8 @@ const usePlayerEvents = ({
 		powerUpConfig,
 	});
 
+	const canMove = useCanMove(players, powerUpConfig);
+
 	const handleNpcActions = (pId: PlayerId) => {
 		npcAction({
 			playerId: pId,
@@ -308,7 +324,9 @@ const usePlayerEvents = ({
 			gameMap,
 			bombs,
 			players: _players,
-			triggerMove,
+			triggerMove: (props: TriggerMove) => {
+				if (canMove(pId)) triggerMove(props);
+			},
 			ref: playerRefs.current[pId] as NonNullablePlayerRef,
 			powerUpConfig,
 			sizes,
