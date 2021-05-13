@@ -17,12 +17,14 @@ const FormField = <Schema,>({
 		control,
 		register,
 		setValue,
+		trigger,
 	},
 	// FormItemProps
 	type,
 	name,
 	label,
 	boundNames,
+	dependentFields,
 	required = false,
 	defaultValue = '',
 	...formItemProps
@@ -50,10 +52,20 @@ const FormField = <Schema,>({
 	controllerProps.render = ({ field: { onChange, ...rest } }) => {
 		const { ref } = register(name);
 		const _onChange = (value: any, ...onChangeRest: any[]) => {
+			// update all bound values
 			boundNames?.forEach(pathName => {
 				setValue(pathName, value);
 			});
+			// trigger the change
 			onChange(value, ...onChangeRest);
+			// trigger a check on the dependent fields
+			if (dependentFields) {
+				dependentFields.forEach(pathName => {
+					trigger(pathName);
+				});
+				// also trigger a check on the current field
+				trigger(name);
+			}
 		};
 		// TODO: create a wrapper/util that will pass the exact
 		// props based on the type

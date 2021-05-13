@@ -35,6 +35,12 @@ type FormItem<Schema> = {
 	label: string;
 	/** If you want a field to update other fields' values */
 	boundNames?: Array<Path<Schema>>;
+	/**
+	 * react-hook-form doesn't revalidate all fields due to performance issues
+	 * @see https://github.com/react-hook-form/react-hook-form/issues/1575#issuecomment-659136700
+	 * so pass all the dependent field names here to validate them together
+	 */
+	dependentFields?: Array<Path<Schema>>;
 	required?: boolean;
 	defaultValue?: string;
 } & PossibleComponentProps;
