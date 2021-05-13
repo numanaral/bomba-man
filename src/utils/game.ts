@@ -231,6 +231,7 @@ const generatePlayer = (
 		keyboardConfig,
 		direction: Direction.DOWN,
 		isWalking: false,
+		isNPC: !keyboardConfig,
 	};
 };
 

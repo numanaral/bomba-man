@@ -217,6 +217,7 @@ const SpriteCharacter = ({
 	onPlayerIsWalking,
 	isWalking: defaultIsWalking = false,
 	direction: defaultDirection = Direction.DOWN,
+	isNPC = false,
 	...rest
 }: Props) => {
 	/** Direction being faced */
@@ -231,7 +232,7 @@ const SpriteCharacter = ({
 	// - not online game
 	// - online game and it's the current player
 	const shouldBindEvent =
-		!currentOnlinePlayerId || id === currentOnlinePlayerId;
+		!isNPC && (!currentOnlinePlayerId || id === currentOnlinePlayerId);
 
 	useSpriteCharacterAction({
 		id,

@@ -99,6 +99,7 @@ type PlayerConfig = {
 	keyboardConfig: KeyboardConfig;
 	direction: Direction;
 	isWalking: boolean;
+	isNPC: boolean;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;

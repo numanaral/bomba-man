@@ -23,6 +23,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 	onPlayerIsWalking?: GameProvider['updatePlayerIsWalking'];
 	isWalking?: boolean;
 	direction?: Direction;
+	isNPC?: boolean;
 }
 
 const Character = ({
