@@ -8,7 +8,7 @@ import {
 	SquareCoordinates,
 	Square,
 } from 'containers/Game/types';
-import { PowerUp } from 'enums';
+import { Direction, PowerUp } from 'enums';
 import {
 	GameState,
 	AnimatableGameMap,
@@ -50,10 +50,23 @@ abstract class GameUpdater {
 	abstract updatePlayerId(id: PlayerId, playerId: PlayerId): void;
 	// #endregion
 
+	// #region 			GameState.players.[*].[*PlayerConfig].direction
+	abstract updatePlayerDirection(
+		playerProps: Pick<PlayerConfig, 'direction' | 'id'>
+	): void;
+	// #endregion
+
+	// #region 			GameState.players.[*].[*PlayerConfig].isWalking
+	abstract updatePlayerIsWalking(
+		playerProps: Pick<PlayerConfig, 'isWalking' | 'id'>
+	): void;
+	// #endregion
+
 	// #region 			GameState.players.[*].[*PlayerConfig].coordinates
 	abstract updatePlayerCoordinates(
 		coordinates: TopLeftCoordinates,
-		playerId: PlayerId
+		playerId: PlayerId,
+		direction: Direction
 	): void;
 	// #endregion
 

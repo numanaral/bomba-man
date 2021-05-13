@@ -97,6 +97,8 @@ type PlayerConfig = {
 	coordinates: TopLeftCoordinates;
 	state: PlayerState;
 	keyboardConfig: KeyboardConfig;
+	direction: Direction;
+	isWalking: boolean;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;

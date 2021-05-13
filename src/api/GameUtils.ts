@@ -274,6 +274,18 @@ class GameUtils {
 		this.updaters.updateGameMap(animatableGameMap);
 	};
 
+	updatePlayerDirection = (
+		newPlayerState: Pick<PlayerConfig, 'direction' | 'id'>
+	) => {
+		this.updaters.updatePlayerDirection(newPlayerState);
+	};
+
+	updatePlayerIsWalking = (
+		newPlayerState: Pick<PlayerConfig, 'isWalking' | 'id'>
+	) => {
+		this.updaters.updatePlayerIsWalking(newPlayerState);
+	};
+
 	triggerMove = ({
 		playerId,
 		direction,
@@ -299,7 +311,12 @@ class GameUtils {
 		);
 	};
 
-	makeMove = ({ playerId, newCoordinates }: OnMoveProps) => {
+	makeMove = ({
+		playerId,
+		newCoordinates,
+		direction,
+		hasMoved,
+	}: OnMoveProps) => {
 		if (this.isPlayerDead(playerId)) return;
 		// if there is a powerUp, assign it to the playerState
 		const {
@@ -351,9 +368,10 @@ class GameUtils {
 			lastCoordinateXSquare
 		];
 		// clear lastSquare only if it was the player
+		// and the player has moved
 		// (on a Tile.Empty)
 		// otherwise we can leave whatever was there
-		if (lastSquare === playerId) {
+		if (lastSquare === playerId && hasMoved) {
 			this.setSquare(
 				{
 					ySquare: lastCoordinateYSquare,
@@ -370,7 +388,11 @@ class GameUtils {
 		}
 
 		// update player's topLeft coordinates
-		this.updaters.updatePlayerCoordinates(newCoordinates, playerId);
+		this.updaters.updatePlayerCoordinates(
+			newCoordinates,
+			playerId,
+			direction
+		);
 	};
 
 	dropBomb = (playerId: PlayerId) => {

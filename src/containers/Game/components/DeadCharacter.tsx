@@ -15,7 +15,7 @@ const DeadIcon = (props: FontAwesomeIconProps) => (
 	<FontAwesomeIcon icon={faBookDead} {...props} />
 );
 
-interface Props extends SpriteCharacterProps {
+interface Props extends Omit<SpriteCharacterProps, 'onPlayerIsWalking'> {
 	explodingDuration: GameConfigRanges.ExplodingDuration;
 	coordinates: TopLeftCoordinates;
 	onDeathAnimationComplete?: (playerId: PlayerId) => void;

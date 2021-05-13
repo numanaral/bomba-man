@@ -2,6 +2,7 @@
 import {
 	GameMap,
 	NonNullablePlayerRef,
+	PlayerConfig,
 	PlayerId,
 	// PlayerKeyboardConfig,
 	Players,
@@ -130,7 +131,8 @@ type GamePayload =
 	| BombId
 	| AnimatableGameMap
 	| OnMoveProps
-	| OnPrepareMoveProps;
+	| OnPrepareMoveProps
+	| PlayerConfig;
 
 type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
@@ -159,6 +161,8 @@ type OnTriggerMove = (props: Omit<OnPrepareMoveProps, 'onComplete'>) => void;
 type OnMoveProps = {
 	playerId: PlayerId;
 	newCoordinates: TopLeftCoordinates;
+	direction: Direction;
+	hasMoved: boolean;
 };
 
 type OnMove = (props: OnMoveProps) => void;

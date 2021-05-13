@@ -229,6 +229,8 @@ const generatePlayer = (
 			powerUps: getDefaultPowerUps(),
 		},
 		keyboardConfig,
+		direction: Direction.DOWN,
+		isWalking: false,
 	};
 };
 
@@ -482,8 +484,16 @@ const handleMove = (
 			// do nothing
 			break;
 	}
-
-	if (!canMove({ top: newTop, left: newLeft }, gameMap, sizes)) return;
+	let hasMoved = true;
+	const newCoordinates = {
+		top: newTop,
+		left: newLeft,
+	};
+	if (!canMove(newCoordinates, gameMap, sizes)) {
+		newCoordinates.top = top;
+		newCoordinates.left = left;
+		hasMoved = false;
+	}
 
 	if (is3D) resetRotation(ref);
 	// TODO: Do a write-up on this
@@ -494,7 +504,9 @@ const handleMove = (
 		if (is3D) handleRotateMove(ref, direction, movementSpeed);
 		onComplete({
 			playerId,
-			newCoordinates: { top: newTop, left: newLeft },
+			newCoordinates,
+			direction,
+			hasMoved,
 		});
 	}, 0);
 };

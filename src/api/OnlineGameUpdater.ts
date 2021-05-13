@@ -16,7 +16,7 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { PowerUp } from 'enums';
+import { Direction, PowerUp } from 'enums';
 import GameUpdater from './GameUpdater';
 import useFirebaseUtils from '../store/firebase/hooks/useFirebaseUtils';
 
@@ -85,13 +85,38 @@ class OnlineGameUpdater extends GameUpdater {
 	};
 	// #endregion
 
+	// #region 			GameState.players.[*].[*PlayerConfig].direction
+	updatePlayerDirection = ({
+		direction,
+		id: playerId,
+	}: Pick<PlayerConfig, 'direction' | 'id'>) => {
+		this.updaters.update<PlayerConfig>(
+			{ direction },
+			`/players/${playerId}`
+		);
+	};
+	// #endregion
+
+	// #region 			GameState.players.[*].[*PlayerConfig].isWalking
+	updatePlayerIsWalking = ({
+		isWalking,
+		id: playerId,
+	}: Pick<PlayerConfig, 'isWalking' | 'id'>) => {
+		this.updaters.update<PlayerConfig>(
+			{ isWalking },
+			`/players/${playerId}`
+		);
+	};
+	// #endregion
+
 	// #region 			GameState.players.[*].[*PlayerConfig].coordinates
 	updatePlayerCoordinates = async (
 		coordinates: TopLeftCoordinates,
-		playerId: PlayerId
+		playerId: PlayerId,
+		direction: Direction
 	) => {
 		this.updaters.update<PlayerConfig>(
-			{ coordinates },
+			{ coordinates, direction, isWalking: true },
 			`/players/${playerId}`
 		);
 	};

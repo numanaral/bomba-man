@@ -10,10 +10,11 @@ import {
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
-import { OnDropBomb } from 'containers/Game/types';
+import { OnDropBomb, PlayerId } from 'containers/Game/types';
 import GameUtils from 'api/GameUtils';
 import OnlineGameUpdater from 'api/OnlineGameUpdater';
 import { useCallback, useEffect, useRef } from 'react';
+import { Direction } from 'enums';
 import useFirebaseUtils from './useFirebaseUtils';
 
 const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
@@ -47,6 +48,20 @@ const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
 			animate: true,
 		});
 	}, [updateGameMap]);
+
+	const updatePlayerDirection = useCallback(
+		(direction: Direction, id: PlayerId) => {
+			gameUtils.current.updatePlayerDirection({ direction, id });
+		},
+		[]
+	);
+
+	const updatePlayerIsWalking = useCallback(
+		(isWalking: boolean, id: PlayerId) => {
+			gameUtils.current.updatePlayerIsWalking({ isWalking, id });
+		},
+		[]
+	);
 
 	const makeMove = useCallback((props: OnMoveProps) => {
 		gameUtils.current.makeMove(props);
@@ -101,6 +116,8 @@ const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
 		updateGameSettings,
 		generateNewCollisionCoordinates,
 		// GAME ACTIONS
+		updatePlayerDirection,
+		updatePlayerIsWalking,
 		makeMove,
 		triggerMove,
 		dropBomb,

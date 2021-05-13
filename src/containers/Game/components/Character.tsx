@@ -1,5 +1,6 @@
 import Cube from 'containers/Game/components/Cube';
-import { Player } from 'enums';
+import { Direction, Player } from 'enums';
+import { GameProvider } from 'store/redux/hooks/useGameProvider';
 import { GameConfigRanges } from 'store/redux/reducers/game/types';
 import theme from 'theme';
 import { CUBE_BASE_TRANSFORM } from 'utils/game';
@@ -11,13 +12,17 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 	id: PlayerId;
 	currentOnlinePlayerId?: PlayerId;
 	name: string;
-	// skin: Skin;
 	size: GameConfigRanges.SquareSize;
 	tileSize: GameConfigRanges.SquareSize;
 	coordinates: TopLeftCoordinates;
 	keyboardConfig?: KeyboardConfig;
 	is3D: boolean;
 	highlight?: boolean;
+	// mainly for sprite
+	// skin: Skin;
+	onPlayerIsWalking?: GameProvider['updatePlayerIsWalking'];
+	isWalking?: boolean;
+	direction?: Direction;
 }
 
 const Character = ({

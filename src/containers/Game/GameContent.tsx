@@ -23,7 +23,11 @@ const GameContent = ({
 	playerId: currentOnlinePlayerId,
 	gameId,
 }: Props) => {
-	const { triggerExplosion, onExplosionComplete } = provider;
+	const {
+		triggerExplosion,
+		onExplosionComplete,
+		updatePlayerIsWalking,
+	} = provider;
 	const { gameMap, players, bombs, is3D, config } = state;
 
 	const { onPlayerDeath } = useWatchOnlineGame(gameId || '');
@@ -32,8 +36,11 @@ const GameContent = ({
 		<>
 			{(Object.entries(players) as PlayerEntry).map(
 				([playerId, playerConfig]) => {
-					const keyboardConfig = players[playerId]?.keyboardConfig;
-					const { coordinates, state: playerState } = playerConfig;
+					const {
+						coordinates,
+						state: playerState,
+						...rest
+					} = playerConfig;
 
 					const isAlive = !isPlayerDead(playerState, config.powerUps);
 					const isSteppingOnFire = isPlayerSteppingOnFire(
@@ -45,16 +52,16 @@ const GameContent = ({
 					return (
 						(isAlive && (
 							<Character
-								id={playerId}
 								currentOnlinePlayerId={currentOnlinePlayerId}
 								key={playerId}
 								name="Bomber"
 								size={config.sizes.character}
 								tileSize={config.sizes.tile}
 								coordinates={coordinates!}
-								keyboardConfig={keyboardConfig}
 								is3D={is3D}
 								highlight={isSteppingOnFire}
+								onPlayerIsWalking={updatePlayerIsWalking}
+								{...rest}
 							/>
 						)) || (
 							<DeadCharacter

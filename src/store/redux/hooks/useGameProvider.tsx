@@ -13,6 +13,8 @@ import {
 	onExplosionCompleteInGame,
 	triggerMoveInGame,
 	triggerExplosionInGame,
+	changePlayerDirectionInGame,
+	changePlayerIsWalkingInGame,
 } from 'store/redux/reducers/game/actions';
 import {
 	AnimatableGameMap,
@@ -25,7 +27,8 @@ import {
 } from 'store/redux/reducers/game/types';
 import { generateDefaultGameState, generateRandomGameMap } from 'utils/game';
 import { makeSelectGameConfig } from 'store/redux/reducers/game/selectors';
-import { OnDropBomb } from 'containers/Game/types';
+import { OnDropBomb, PlayerId } from 'containers/Game/types';
+import { Direction } from 'enums';
 
 const useGameProvider = () => {
 	const dispatch = useDispatch();
@@ -64,6 +67,20 @@ const useGameProvider = () => {
 	);
 
 	// #region GAME ACTIONS
+	const updatePlayerDirection = useCallback(
+		(direction: Direction, id: PlayerId) => {
+			dispatch(changePlayerDirectionInGame({ direction, id }));
+		},
+		[dispatch]
+	);
+
+	const updatePlayerIsWalking = useCallback(
+		(isWalking: boolean, id: PlayerId) => {
+			dispatch(changePlayerIsWalkingInGame({ isWalking, id }));
+		},
+		[dispatch]
+	);
+
 	const makeMove = useCallback(
 		(props: OnMoveProps) => dispatch(makeMoveInGame(props)),
 		[dispatch]
@@ -125,6 +142,8 @@ const useGameProvider = () => {
 		updateGameSettings,
 		generateNewCollisionCoordinates,
 		// GAME ACTIONS
+		updatePlayerDirection,
+		updatePlayerIsWalking,
 		makeMove,
 		triggerMove,
 		dropBomb,

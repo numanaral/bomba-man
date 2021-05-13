@@ -120,36 +120,28 @@ const Wrapper = styled.div<{ $size: number }>`
 const ANIMATION_STOP_THROTTLE_DURATION = 200;
 
 interface Props extends Omit<CharacterProps, 'tileSize' | 'is3D' | 'size'> {
-	isWalking?: boolean;
-	direction?: Direction;
 	// size can be any number by default, unless it's a game character
 	size: number;
 }
 
-type UseSpriteCharacterAction = Partial<Props> & {
-	currentKeyDirection: string;
+type UseSpriteCharacterAction = Omit<Props, 'coordinates' | 'name' | 'size'> & {
+	shouldBindEvent: boolean;
 	// setters
 	setDirection: React.Dispatch<React.SetStateAction<Direction>>;
-	setCurrentKeyDirection: React.Dispatch<React.SetStateAction<string>>;
+	setIsWalking: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const useSpriteCharacterAction = ({
 	id,
-	currentOnlinePlayerId,
+	shouldBindEvent,
 	keyboardConfig,
-	// values
-	currentKeyDirection,
+	// state setter
+	onPlayerIsWalking,
 	// setters
 	setDirection,
-	setCurrentKeyDirection,
+	setIsWalking,
 }: UseSpriteCharacterAction) => {
 	const lastMovementTime = useRef(new Date().getTime());
-
-	// We only want to bind the event if it's:
-	// - not online game
-	// - online game and it's the current player
-	const shouldBindEvent =
-		!currentOnlinePlayerId || id === currentOnlinePlayerId;
 
 	useEffect(() => {
 		// ignore the npc action
@@ -163,19 +155,17 @@ const useSpriteCharacterAction = ({
 			setDirection(newDirection);
 		};
 
-		const clearCurrentKey = () => {
-			if (currentKeyDirection) setCurrentKeyDirection('');
-		};
-
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (!shouldBindEvent) return;
+
 			const newDirection = getDirection(e);
 			if (!newDirection) {
-				clearCurrentKey();
+				onPlayerIsWalking?.(false, id);
+				setIsWalking(false);
 				return;
 			}
 			lastMovementTime.current = new Date().getTime();
-			setCurrentKeyDirection(newDirection);
+			setIsWalking(true);
 			updateDirection(newDirection);
 		};
 
@@ -191,7 +181,8 @@ const useSpriteCharacterAction = ({
 				const delayedCurrentTime =
 					new Date().getTime() - ANIMATION_STOP_THROTTLE_DURATION;
 				if (lastMovementTime.current >= delayedCurrentTime) return;
-				clearCurrentKey();
+				setIsWalking(false);
+				onPlayerIsWalking?.(false, id);
 			}, ANIMATION_STOP_THROTTLE_DURATION);
 		};
 
@@ -205,10 +196,11 @@ const useSpriteCharacterAction = ({
 			document.removeEventListener('keyup', handleKeyUp);
 		};
 	}, [
-		currentKeyDirection,
+		id,
 		keyboardConfig,
-		setCurrentKeyDirection,
+		onPlayerIsWalking,
 		setDirection,
+		setIsWalking,
 		shouldBindEvent,
 	]);
 };
@@ -221,29 +213,53 @@ const SpriteCharacter = ({
 	style,
 	keyboardConfig,
 	highlight,
-	isWalking: defaultIsWalking = false,
 	size,
-	direction: defaultDirection,
+	onPlayerIsWalking,
+	isWalking: defaultIsWalking = false,
+	direction: defaultDirection = Direction.DOWN,
 	...rest
 }: Props) => {
 	/** Direction being faced */
-	const [direction, setDirection] = useState<Direction>(
-		defaultDirection || Direction.DOWN
+	const [eventDirection, setEventDirection] = useState<Direction>(
+		defaultDirection
 	);
-	/** Direction key being held */
-	const [currentKeyDirection, setCurrentKeyDirection] = useState('');
+	const [eventIsWalking, setEventIsWalking] = useState<boolean>(
+		defaultIsWalking
+	);
+
+	// We only want to bind the event if it's:
+	// - not online game
+	// - online game and it's the current player
+	const shouldBindEvent =
+		!currentOnlinePlayerId || id === currentOnlinePlayerId;
 
 	useSpriteCharacterAction({
 		id,
 		currentOnlinePlayerId,
 		keyboardConfig,
-		// values
-		currentKeyDirection,
+		shouldBindEvent,
+		// state setter
+		onPlayerIsWalking,
 		// setters
-		setDirection,
-		setCurrentKeyDirection,
+		setDirection: setEventDirection,
+		setIsWalking: setEventIsWalking,
 	});
-	const _isWalking = defaultIsWalking || !!currentKeyDirection;
+
+	console.log({
+		id,
+		direction: eventDirection,
+		isWalking: eventIsWalking,
+		defaultDirection,
+		defaultIsWalking,
+	});
+
+	let isWalking = defaultIsWalking;
+	let direction = defaultDirection;
+
+	if (shouldBindEvent) {
+		isWalking = eventIsWalking;
+		direction = eventDirection;
+	}
 
 	return (
 		<Wrapper
@@ -260,7 +276,7 @@ const SpriteCharacter = ({
 			<div
 				className="character"
 				data-facing={direction}
-				data-walking={_isWalking.toString()}
+				data-walking={isWalking.toString()}
 				data-highlight={highlight}
 			>
 				<div className="name">{name}</div>
