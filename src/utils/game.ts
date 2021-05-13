@@ -1,6 +1,7 @@
 import {
 	Coordinates,
 	GameMap,
+	GamePlayers,
 	KeyboardConfig,
 	KeyboardEventCode,
 	KeyMap,
@@ -10,6 +11,7 @@ import {
 	PlayerConfig,
 	PlayerId,
 	PlayerRef,
+	Players,
 	PlayerState,
 	PowerUpOrNull,
 	PowerUps,
@@ -25,6 +27,7 @@ import {
 	Explosive,
 	FIRE_VALUES,
 	Player,
+	PlayerCondition,
 } from 'enums';
 import {
 	OnMove,
@@ -303,6 +306,10 @@ const generateDefaultGameConfig = (): GameConfig => {
 				exploding: 1,
 			},
 		},
+		players: {
+			humanPlayers: 1,
+			npcPlayers: 3,
+		},
 		// keyboardConfig: {
 		// 	P1: {
 		// 		MoveUp: KeyCode.CODE_W,
@@ -328,12 +335,24 @@ const generateDefaultGameState = (config?: GameConfig): GameState => {
 		sizes: { map: mapSize },
 		tiles: { blockTileChance: blockDensity },
 	} = _config;
+
+	const players: Players = {};
+
+	for (let i = 0; i < _config.players.npcPlayers; i++) {
+		const playerId = `P${4 - i}` as PlayerId;
+		players[playerId] = generatePlayer(playerId, _config);
+	}
+
+	// online mode will auto assign players so this is only for local
+	for (let i = 0; i < (_config.players.humanPlayers || 0); i++) {
+		const playerId = `P${i + 1}` as PlayerId;
+		players[playerId] = generatePlayer(playerId, _config, {
+			[i]: gameConfig.keyboardConfig[i],
+		});
+	}
+
 	return {
-		players: {
-			P1: generatePlayer(Player.P1, _config, {
-				'0': gameConfig.keyboardConfig[0],
-			}),
-		},
+		players,
 		gameMap: generateRandomGameMap(mapSize, blockDensity),
 		bombs: {},
 		powerUps: {},
@@ -907,6 +926,21 @@ const isPlayerDead = (
 	);
 };
 
+const mapPlayersToGamePlayers = (
+	players: Players,
+	powerUpConfig: GameConfig['powerUps']
+) => {
+	return Object.keys(players).reduce((acc, playerId) => {
+		acc[playerId as PlayerId] = !isPlayerDead(
+			players[playerId as PlayerId]!.state,
+			powerUpConfig
+		)
+			? PlayerCondition.Alive
+			: PlayerCondition.Dead;
+		return acc;
+	}, {} as GamePlayers);
+};
+
 export {
 	generateRandomGameMap,
 	generatePlayer,
@@ -937,4 +971,5 @@ export {
 	getPoweredUpValue,
 	isPlayerSteppingOnFire,
 	isPlayerDead,
+	mapPlayersToGamePlayers,
 };

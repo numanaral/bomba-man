@@ -8,7 +8,7 @@ import {
 	PlayerId,
 	Players,
 } from 'containers/Game/types';
-import { GameType, PowerUp } from 'enums';
+import { PowerUp } from 'enums';
 import { useEffect, useMemo, useRef } from 'react';
 import {
 	getMoveDirectionFromKeyMap,
@@ -272,12 +272,7 @@ const IntervalWrapper = ({
 	return null;
 };
 
-const usePlayerEvents = ({
-	state,
-	provider,
-	type: gameType,
-	playerId,
-}: GameApi) => {
+const usePlayerEvents = ({ state, provider }: GameApi) => {
 	const { dropBomb, triggerMove } = provider;
 	const {
 		gameMap,
@@ -293,22 +288,13 @@ const usePlayerEvents = ({
 
 	const { playerRefs } = usePlayerRefs();
 
-	const _players = useMemo<Players>(() => {
-		return gameType === GameType.Local
-			? players
-			: { [playerId!]: players[playerId!] };
-		// none of the deps will affect this
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [players]);
-	// }, [gameType, playerId, players]);
-
 	const keyMap = useKeyboardEvent({
-		onKeyDown: handleBombForPlayers(_players, dropBomb, powerUpConfig),
+		onKeyDown: handleBombForPlayers(players, dropBomb, powerUpConfig),
 	});
 	const timeOutRef = useTimeOutRef();
 	const { handleActions } = useEvents({
 		triggerMove,
-		players: _players,
+		players,
 		timeOutRef,
 		keyMap,
 		is3D,
@@ -318,12 +304,18 @@ const usePlayerEvents = ({
 	const canMove = useCanMove(players, powerUpConfig);
 
 	const handleNpcActions = (pId: PlayerId) => {
+		const ref = playerRefs.current[pId];
+
+		if (!ref) {
+			playerRefs.current[pId] = document.getElementById(pId);
+		}
+
 		npcAction({
 			playerId: pId,
 			dropBomb,
 			gameMap,
 			bombs,
-			players: _players,
+			players,
 			triggerMove: (props: TriggerMove) => {
 				if (canMove(pId)) triggerMove(props);
 			},
@@ -339,19 +331,20 @@ const usePlayerEvents = ({
 	// multiple times
 	// TODO: In the next update, start these intervals
 	// when the keys are pressed and not continuously
-	return Object.keys(_players).map(pId => {
+	return Object.keys(players).map(pId => {
 		// TODO: online game can also have NPCs, have a check for that
-		const isNpc = gameType === GameType.Local && ['P3', 'P4'].includes(pId);
+		const { isNPC } = players[pId as PlayerId]!;
 		return (
 			<IntervalWrapper
 				key={pId}
 				playerId={pId as PlayerId}
-				players={_players}
+				players={players}
 				powerUpConfig={powerUpConfig}
-				cb={isNpc ? handleNpcActions : handleActions}
+				cb={isNPC ? handleNpcActions : handleActions}
 			/>
 		);
 	});
 };
 
+export { useKeyboardEvent };
 export default usePlayerEvents;

@@ -33,7 +33,7 @@ const useWatchOnlineGame = (id: string) => {
 
 	const game = onlineGameFromFirebase;
 
-	const onPlayerJoin = (playerId: PlayerId) => {
+	const onPlayerJoin = (playerId: PlayerId, isNPC = false) => {
 		// set player as active
 		update<OnlineGame['gamePlayers']>(
 			{
@@ -45,7 +45,7 @@ const useWatchOnlineGame = (id: string) => {
 		const playerConfig = generatePlayer(
 			playerId,
 			game.gameState.config,
-			gameConfig.keyboardConfig
+			(!isNPC && gameConfig.keyboardConfig) || null
 		);
 
 		// put him in the game state

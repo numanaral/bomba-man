@@ -65,6 +65,10 @@ namespace GameConfigRanges {
 	export type FiringDuration = 1.5 | 2.5 | RangeOf<3, 1>;
 	export type ExplodingDuration = 0.5 | 1 | 1.5;
 	// #endregion
+	// #region GameConfig.players
+	export type HumanPlayerCount = RangeOf<4, 1>;
+	export type NPCPlayerCount = RangeOf<4>;
+	// #endregion
 }
 
 type GameConfig = {
@@ -100,6 +104,12 @@ type GameConfig = {
 			/** Duration of the explosion (fire) */
 			exploding: GameConfigRanges.ExplodingDuration; // second
 		};
+	};
+	players: {
+		/** Human player count in the game */
+		humanPlayers?: GameConfigRanges.HumanPlayerCount; // number
+		/** NPC player count in the game */
+		npcPlayers: GameConfigRanges.NPCPlayerCount; // number
 	};
 	// keyboardConfig: Partial<Record<PlayerId, PlayerKeyboardConfig>>;
 };

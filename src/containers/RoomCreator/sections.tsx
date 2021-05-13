@@ -1,5 +1,5 @@
 import { FormComponent } from 'components/Form/types';
-import { PowerUp } from 'enums';
+import { GameType, PowerUp } from 'enums';
 import { generateMarks } from 'utils/material-ui';
 import {
 	PowerUpIcon,
@@ -9,6 +9,8 @@ import {
 	SquareIcon,
 	powerUpIconPack,
 	FireIcon,
+	UserIcon,
+	RobotIcon,
 	ICON_STYLE,
 } from './icons';
 import { PartialConfigFormItems, SectionProps } from './types';
@@ -132,31 +134,93 @@ const duration = [
 	} as SectionProps,
 ] as PartialConfigFormItems;
 
-const configSections = [
-	{
-		title: 'Power Ups',
-		description: 'Power Up Configurations',
-		items: powerUps,
-		side: 1,
-	},
-	{
-		title: 'Sizes',
-		description: 'Size Configurations',
-		items: sizes,
-		side: 2,
-	},
-	{
-		title: 'Duration',
-		description: 'Duration Configurations',
-		items: duration,
-		side: 2,
-	},
-	{
-		title: 'Tiles',
-		description: 'Tile Configurations',
-		items: tiles,
-		side: 2,
-	},
-];
+const players = (type: GameType) => {
+	const isLocalGame = type === GameType.Local;
+	const title = 'Human vs Human vs NPC';
+	let description = 'Select Human Players and NPCs';
 
-export { configSections };
+	if (!isLocalGame) {
+		description = 'Select NPCs to join the game';
+	}
+
+	return [
+		{
+			title,
+			description,
+			items: [
+				...((isLocalGame && [
+					{
+						type: FormComponent.Slider,
+						name: 'players.humanPlayers',
+						label: 'Human Player Count',
+						min: 1,
+						max: 4,
+						marks: generateMarks([1, 2, 3, 4]),
+						step: null,
+						icon: <UserIcon style={ICON_STYLE} />,
+						dependentFields: ['players.npcPlayers'],
+						required: true,
+					},
+				]) ||
+					[]),
+				{
+					type: FormComponent.Slider,
+					name: 'players.npcPlayers',
+					label: 'NPC Player Count',
+					min: 0,
+					max: 4,
+					marks: generateMarks([0, 1, 2, 3, 4]),
+					step: null,
+					icon: <RobotIcon style={ICON_STYLE} />,
+					dependentFields: ['players.humanPlayers'],
+				},
+			],
+		} as SectionProps,
+	] as PartialConfigFormItems;
+};
+
+const getConfigSections = (type: GameType) => {
+	const isLocalGame = type === GameType.Local;
+	let playersTitle = 'Players';
+	let playersDescription = 'Players for the game';
+
+	if (!isLocalGame) {
+		playersTitle = 'NPCs';
+		playersDescription = 'Optional NPCs to play alongside';
+	}
+
+	return [
+		{
+			title: 'Power Ups',
+			description: 'Power Up Configurations',
+			items: powerUps,
+			side: 2,
+		},
+		{
+			title: playersTitle,
+			description: playersDescription,
+			items: players(type),
+			side: 1,
+		},
+		{
+			title: 'Sizes',
+			description: 'Size Configurations',
+			items: sizes,
+			side: 1,
+		},
+		{
+			title: 'Duration',
+			description: 'Duration Configurations',
+			items: duration,
+			side: 1,
+		},
+		{
+			title: 'Tiles',
+			description: 'Tile Configurations',
+			items: tiles,
+			side: 1,
+		},
+	];
+};
+
+export { getConfigSections };

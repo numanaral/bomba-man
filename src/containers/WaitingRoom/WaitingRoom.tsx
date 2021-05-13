@@ -1,5 +1,5 @@
 import { OnlineGameId, PlayerId } from 'containers/Game/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
@@ -7,6 +7,7 @@ import useOnPlayerExit from 'hooks/useOnPlayerExit';
 import theme from 'theme';
 import Spacer from 'components/Spacer';
 import { H1, H4 } from 'components/typography';
+import { mapPlayersToGamePlayers } from 'utils/game';
 import PlayerDisplay from './PlayerDisplay';
 
 interface Props {
@@ -14,7 +15,6 @@ interface Props {
 	gameId: OnlineGameId;
 }
 
-// TODO
 const WaitingRoom = ({ gameId }: Props) => {
 	const { push } = useHistory();
 
@@ -26,6 +26,28 @@ const WaitingRoom = ({ gameId }: Props) => {
 		onPlayerJoin,
 		onStartGame,
 	} = useWatchOnlineGame(gameId);
+
+	const npcPlayerIds = useRef<Array<PlayerId>>([]);
+
+	// setup the NPCs
+	useEffect(() => {
+		if (!isReady) return;
+
+		const {
+			gameState: {
+				players,
+				config: { powerUps: powerUpConfig },
+			},
+		} = game;
+		const mappedPlayers = mapPlayersToGamePlayers(players, powerUpConfig);
+		Object.keys(mappedPlayers).forEach(playerId => {
+			onPlayerJoin(playerId as PlayerId, true);
+			npcPlayerIds.current.push(playerId as PlayerId);
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	const [canStart, setCanStart] = useState(false);
 
 	const [
 		currentOnlinePlayerId,
@@ -78,12 +100,23 @@ const WaitingRoom = ({ gameId }: Props) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isReady, game?.started]);
 
+	useEffect(() => {
+		if (!isReady) return;
+
+		const { gamePlayers } = game;
+		const playerCount = Object.keys(gamePlayers).length;
+
+		// we don't want to count the NPCs, there should be
+		// at least 2 Human Players
+		if (playerCount - npcPlayerIds.current.length > 1) {
+			setCanStart(true);
+		}
+	}, [game, isReady]);
+
 	const {
 		location: { origin, pathname },
 	} = window;
 	const link = origin + pathname;
-	debugger;
-	console.log(game.gamePlayers);
 
 	return (
 		pending ||
@@ -109,6 +142,7 @@ const WaitingRoom = ({ gameId }: Props) => {
 				<PlayerDisplay
 					players={game.gamePlayers}
 					onStartGame={onStartGame}
+					canStart={canStart}
 					currentOnlinePlayerId={currentOnlinePlayerId}
 				/>
 			</>
