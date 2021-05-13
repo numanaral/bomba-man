@@ -3,13 +3,18 @@ import {
 	Grid,
 	Slider as MuiSlider,
 	SliderProps,
+	Typography,
+	useTheme,
 } from '@material-ui/core';
 import { cloneElement, forwardRef } from 'react';
 import { PropsWithFormControl } from '../types';
 
 const Slider = forwardRef<
 	HTMLSpanElement,
-	PropsWithFormControl<SliderProps> & { icon: React.ReactElement }
+	PropsWithFormControl<SliderProps> & {
+		icon: React.ReactElement;
+		helperText: string;
+	}
 >(
 	(
 		{
@@ -20,6 +25,7 @@ const Slider = forwardRef<
 			valueLabelDisplay = 'auto',
 			onChange,
 			disabled,
+			helperText,
 			...rest
 		},
 		ref
@@ -32,6 +38,7 @@ const Slider = forwardRef<
 		};
 
 		const _color = disabled ? '#bdbdbd' : color;
+		const theme = useTheme();
 
 		return (
 			// 	<Typography id="continuous-slider" gutterBottom>
@@ -58,6 +65,16 @@ const Slider = forwardRef<
 								{...rest}
 							/>
 						</Grid>
+						{helperText && (
+							<Grid container>
+								<Typography
+									variant="body2"
+									style={{ color: theme.palette.error.main }}
+								>
+									{helperText}
+								</Typography>
+							</Grid>
+						)}
 					</Grid>
 				}
 				labelPlacement="top"
