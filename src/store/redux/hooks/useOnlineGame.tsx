@@ -7,7 +7,7 @@ const useOnlineGame: GameApiHookOnline = gameId => {
 	const {
 		pending,
 		error,
-		game: { gameState },
+		game: { gameState, gamePlayers },
 	} = useWatchOnlineGame(gameId as string);
 
 	const provider = useOnlineGameProvider(gameId as OnlineGameId, gameState);
@@ -18,6 +18,7 @@ const useOnlineGame: GameApiHookOnline = gameId => {
 		error,
 		state: gameState,
 		type: GameType.Online,
+		gamePlayers,
 	};
 };
 

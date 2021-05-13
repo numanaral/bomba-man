@@ -14,7 +14,7 @@ const Online = ({
 	const { pending, error, ...gameProps } = useOnlineGame(id);
 	const { game } = useWatchOnlineGame(id);
 	const currentOnlinePlayerId = location?.state?.playerId;
-	const players = game?.players || {};
+	const players = game?.gamePlayers || {};
 
 	useOnPlayerExit(id, currentOnlinePlayerId);
 	useOnGameEnd(players, currentOnlinePlayerId, id);

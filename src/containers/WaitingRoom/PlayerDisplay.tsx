@@ -11,7 +11,7 @@ import TooltipButton from 'components/TooltipButton';
 import { PlayerCondition } from 'enums';
 
 interface Props {
-	players: OnlineGame['players'];
+	players: OnlineGame['gamePlayers'];
 	currentOnlinePlayerId?: PlayerId;
 	onStartGame?: CallableFunction;
 	isGameEnd?: boolean;

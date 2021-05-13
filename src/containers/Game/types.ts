@@ -133,10 +133,13 @@ type PowerUpOrNull = PowerUp | null;
 
 type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
 
+type GamePlayers = Partial<Record<PlayerId, PlayerCondition>>;
+
 type GameApi = {
 	provider: GameProvider;
 	state: GameState;
 	type: GameType;
+	gamePlayers: GamePlayers;
 	// firebase
 } & {
 	pending?: false | JSX.Element;
@@ -159,9 +162,7 @@ type OnlineGameId = string;
 type OnlineGame = {
 	gameId: OnlineGameId;
 	gameState: GameState;
-	players: {
-		[key in PlayerId]?: PlayerCondition;
-	};
+	gamePlayers: GamePlayers;
 	started: boolean;
 };
 

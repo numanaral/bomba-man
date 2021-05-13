@@ -35,11 +35,11 @@ const useWatchOnlineGame = (id: string) => {
 
 	const onPlayerJoin = (playerId: PlayerId) => {
 		// set player as active
-		update<OnlineGame['players']>(
+		update<OnlineGame['gamePlayers']>(
 			{
 				[playerId]: PlayerCondition.Alive,
 			},
-			'/players'
+			'/gamePlayers'
 		);
 
 		const playerConfig = generatePlayer(
@@ -66,22 +66,22 @@ const useWatchOnlineGame = (id: string) => {
 
 	const onPlayerExit = (playerId: PlayerId) => {
 		// remove as active player
-		remove(`/players/${playerId}`);
+		remove(`/gamePlayers/${playerId}`);
 		// remove him from the game state
 		remove(`/gameState/players/${playerId}`);
 
 		// 2 because the state won't be updated just yet
-		if (game.players && Object.keys(game.players).length <= 2) {
+		if (game.gamePlayers && Object.keys(game.gamePlayers).length <= 2) {
 			onEndGame();
 		}
 	};
 
 	const onPlayerDeath = (playerId: PlayerId) => {
-		update<OnlineGame['players']>(
+		update<OnlineGame['gamePlayers']>(
 			{
 				[playerId]: PlayerCondition.Dead,
 			},
-			'/players'
+			'/gamePlayers'
 		);
 	};
 
@@ -100,7 +100,7 @@ const useWatchOnlineGame = (id: string) => {
 				defaultGameState.animationCounter,
 			config: game?.gameState?.config || defaultGameState.config,
 		},
-		players: game?.players || {},
+		gamePlayers: game?.gamePlayers || {},
 		started: game?.started || false,
 	};
 

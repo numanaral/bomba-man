@@ -1,5 +1,5 @@
-import { GameApiHookLocal } from 'containers/Game/types';
-import { GameType } from 'enums';
+import { GameApiHookLocal, PlayerId } from 'containers/Game/types';
+import { GameType, PlayerCondition } from 'enums';
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -30,6 +30,12 @@ const useLocalGame: GameApiHookLocal = gameConfig => {
 		provider,
 		state,
 		type: GameType.Local,
+		gamePlayers: Object.keys(state.players).reduce<
+			Record<PlayerId, PlayerCondition>
+		>((acc, playerId) => {
+			acc[playerId as PlayerId] = PlayerCondition.Alive;
+			return acc;
+		}, {} as Record<PlayerId, PlayerCondition>),
 	};
 };
 

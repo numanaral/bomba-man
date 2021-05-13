@@ -37,8 +37,8 @@ const WaitingRoom = ({ gameId }: Props) => {
 	useEffect(() => {
 		if (!isReady) return;
 
-		const { players } = game;
-		const playerKeys = Object.keys(players);
+		const { gamePlayers } = game;
+		const playerKeys = Object.keys(gamePlayers);
 		const playerCount = playerKeys.length;
 
 		if (game.started) {
@@ -82,6 +82,8 @@ const WaitingRoom = ({ gameId }: Props) => {
 		location: { origin, pathname },
 	} = window;
 	const link = origin + pathname;
+	debugger;
+	console.log(game.gamePlayers);
 
 	return (
 		pending ||
@@ -105,7 +107,7 @@ const WaitingRoom = ({ gameId }: Props) => {
 					</span>
 				</H4>
 				<PlayerDisplay
-					players={game.players}
+					players={game.gamePlayers}
 					onStartGame={onStartGame}
 					currentOnlinePlayerId={currentOnlinePlayerId}
 				/>
