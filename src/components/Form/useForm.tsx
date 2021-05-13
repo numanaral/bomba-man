@@ -60,7 +60,6 @@ const useForm = <Schema,>({
 		};
 
 		const field = get(errors, fieldName);
-
 		const componentRequiredProps: DynamicObject = {
 			required: true,
 			rules: { required: true },
@@ -75,7 +74,14 @@ const useForm = <Schema,>({
 
 	/** Checks if the field is required from the yup schema */
 	const checkIfRequiredField = (fieldName: Path<Schema>) => {
-		return schema.fields?.[fieldName]?.exclusiveTests?.required;
+		const keys = fieldName.split('.').reverse();
+		let field = null;
+		// recursively look for the field
+		while (keys.length) {
+			const key = keys.pop()!;
+			field = !field ? schema.fields[key] : field.fields[key];
+		}
+		return field?.exclusiveTests?.required;
 	};
 
 	const utils = {

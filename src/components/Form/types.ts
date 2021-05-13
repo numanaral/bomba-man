@@ -61,6 +61,7 @@ type UseFormUtils<Schema> = {
 		fieldName: Path<Schema>,
 		required: boolean
 	) => [Pick<ControllerProps, 'rules'>, DynamicObject];
+	checkIfRequiredField: (fieldName: Path<Schema>) => boolean;
 } & UseFormReturn<Schema>;
 
 export { FormComponent };

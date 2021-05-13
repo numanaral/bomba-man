@@ -53,9 +53,7 @@ const Form = <Schema,>({
 					key={props.name}
 					utils={utils}
 					{...props}
-					required={
-						props.required || utils.checkIfRequiredField(props.name)
-					}
+					required={props.required}
 				/>
 			))}
 		</FormContainer>

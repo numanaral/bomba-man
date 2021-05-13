@@ -11,7 +11,13 @@ type Props<Schema> = FormItem<Schema> & {
 
 const FormField = <Schema,>({
 	// utils
-	utils: { getRequiredField, control, register, setValue },
+	utils: {
+		checkIfRequiredField,
+		getRequiredField,
+		control,
+		register,
+		setValue,
+	},
 	// FormItemProps
 	type,
 	name,
@@ -23,7 +29,7 @@ const FormField = <Schema,>({
 }: Props<Schema>) => {
 	const [controllerRequiredProps, componentRequiredProps] = getRequiredField(
 		name,
-		required
+		required || checkIfRequiredField(name)
 	);
 
 	// render is added later for sure
