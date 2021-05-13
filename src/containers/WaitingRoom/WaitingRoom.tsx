@@ -7,7 +7,7 @@ import useOnPlayerExitOnline from 'hooks/useOnPlayerExitOnline';
 import theme from 'theme';
 import Spacer from 'components/Spacer';
 import { H1, H4 } from 'components/typography';
-import { mapPlayersToGamePlayers } from 'utils/game';
+// import { mapPlayersToGamePlayers } from 'utils/game';
 import PlayerDisplay from './PlayerDisplay';
 
 interface Props {
@@ -29,23 +29,23 @@ const WaitingRoom = ({ gameId }: Props) => {
 
 	const npcPlayerIds = useRef<Array<PlayerId>>([]);
 
-	// setup the NPCs
-	useEffect(() => {
-		if (!isReady) return;
+	// // setup the NPCs
+	// useEffect(() => {
+	// 	if (!isReady) return;
 
-		const {
-			gameState: {
-				players,
-				config: { powerUps: powerUpConfig },
-			},
-		} = game;
-		const mappedPlayers = mapPlayersToGamePlayers(players, powerUpConfig);
-		Object.keys(mappedPlayers).forEach(playerId => {
-			onPlayerJoin(playerId as PlayerId, true);
-			npcPlayerIds.current.push(playerId as PlayerId);
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	// 	const {
+	// 		gameState: {
+	// 			players,
+	// 			config: { powerUps: powerUpConfig },
+	// 		},
+	// 	} = game;
+	// 	const mappedPlayers = mapPlayersToGamePlayers(players, powerUpConfig);
+	// 	Object.keys(mappedPlayers).forEach(playerId => {
+	// 		onPlayerJoin(playerId as PlayerId, true);
+	// 		npcPlayerIds.current.push(playerId as PlayerId);
+	// 	});
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, []);
 
 	const [canStart, setCanStart] = useState(false);
 

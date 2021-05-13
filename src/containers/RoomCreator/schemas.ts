@@ -149,8 +149,8 @@ const getConfigSchema = (gameType: GameType) =>
 						}
 					}
 					return true;
-				})
-				.required(),
+				}),
+			// .required(),
 		}),
 	});
 

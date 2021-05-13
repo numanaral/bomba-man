@@ -173,6 +173,7 @@ const players = (type: GameType) => {
 					step: null,
 					icon: <RobotIcon style={ICON_STYLE} />,
 					dependentFields: ['players.humanPlayers'],
+					required: true,
 				},
 			],
 		} as SectionProps,
@@ -196,12 +197,16 @@ const getConfigSections = (type: GameType) => {
 			items: powerUps,
 			side: 2,
 		},
-		{
-			title: playersTitle,
-			description: playersDescription,
-			items: players(type),
-			side: 1,
-		},
+		// NOTE: disabled NPCs for online game, they lag the game
+		...((isLocalGame && [
+			{
+				title: playersTitle,
+				description: playersDescription,
+				items: players(type),
+				side: 1,
+			},
+		]) ||
+			[]),
 		{
 			title: 'Sizes',
 			description: 'Size Configurations',
