@@ -4,6 +4,9 @@ import {
 	faTh,
 	faSquare,
 	faFire,
+	faUser,
+	faRobot,
+	faGhost,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DeadCharacter from 'containers/Game/components/DeadCharacter';
@@ -33,6 +36,18 @@ const FireIcon = (props: FontAwesomeIconProps) => (
 
 const SquareIcon = (props: FontAwesomeIconProps) => (
 	<FontAwesomeIcon icon={faSquare} {...props} />
+);
+
+const UserIcon = (props: FontAwesomeIconProps) => (
+	<FontAwesomeIcon icon={faUser} {...props} />
+);
+
+const RobotIcon = (props: FontAwesomeIconProps) => (
+	<FontAwesomeIcon icon={faRobot} {...props} />
+);
+
+const GhostIcon = (props: FontAwesomeIconProps) => (
+	<FontAwesomeIcon icon={faGhost} {...props} />
 );
 
 const CharacterWrapper = styled.div<
@@ -118,6 +133,9 @@ export {
 	MapIcon,
 	FireIcon,
 	SquareIcon,
+	UserIcon,
+	RobotIcon,
+	GhostIcon,
 	CharacterIcon,
 	DeadCharacterIcon,
 	powerUpIconPack,

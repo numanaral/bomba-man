@@ -5,7 +5,7 @@ import { BASE_PATH } from 'routes/constants';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import useBeforeUnload from './useBeforeUnload';
 
-const useOnPlayerExit = (gameId: OnlineGameId, playerId?: PlayerId) => {
+const useOnPlayerExitOnline = (gameId: OnlineGameId, playerId?: PlayerId) => {
 	const { onPlayerExit } = useWatchOnlineGame(gameId);
 	const { listen } = useHistory();
 	useBeforeUnload(() => {
@@ -13,6 +13,7 @@ const useOnPlayerExit = (gameId: OnlineGameId, playerId?: PlayerId) => {
 		onPlayerExit(playerId);
 	});
 
+	/** @see https://help.mouseflow.com/en/articles/4310818-tracking-url-changes-with-react#:~:text=2.%20Listening%20for%20route%20changes */
 	useEffect(() => {
 		return listen(({ pathname }) => {
 			if (!playerId) return;
@@ -25,4 +26,4 @@ const useOnPlayerExit = (gameId: OnlineGameId, playerId?: PlayerId) => {
 	}, [gameId, listen, onPlayerExit, playerId]);
 };
 
-export default useOnPlayerExit;
+export default useOnPlayerExitOnline;

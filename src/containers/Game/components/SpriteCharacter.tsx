@@ -246,14 +246,6 @@ const SpriteCharacter = ({
 		setIsWalking: setEventIsWalking,
 	});
 
-	console.log({
-		id,
-		direction: eventDirection,
-		isWalking: eventIsWalking,
-		defaultDirection,
-		defaultIsWalking,
-	});
-
 	let isWalking = defaultIsWalking;
 	let direction = defaultDirection;
 

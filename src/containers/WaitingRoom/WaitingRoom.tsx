@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
-import useOnPlayerExit from 'hooks/useOnPlayerExit';
+import useOnPlayerExitOnline from 'hooks/useOnPlayerExitOnline';
 import theme from 'theme';
 import Spacer from 'components/Spacer';
 import { H1, H4 } from 'components/typography';
@@ -54,7 +54,7 @@ const WaitingRoom = ({ gameId }: Props) => {
 		setCurrentOnlinePlayerId,
 	] = useState<PlayerId>();
 
-	useOnPlayerExit(gameId, currentOnlinePlayerId);
+	useOnPlayerExitOnline(gameId, currentOnlinePlayerId);
 
 	useEffect(() => {
 		if (!isReady) return;

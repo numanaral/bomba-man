@@ -44,9 +44,7 @@ const useGameProvider = () => {
 
 	const startGame = useCallback(
 		(payload: GameConfig) => {
-			console.log('payload', payload);
 			const gameState = generateDefaultGameState(payload);
-			console.log('gameState', gameState);
 			updateGameSettings(gameState);
 		},
 		[updateGameSettings]

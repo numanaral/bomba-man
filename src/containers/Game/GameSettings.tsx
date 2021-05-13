@@ -1,27 +1,17 @@
-import { GameType } from 'enums';
 import { memo, useMemo } from 'react';
 import GameButton from './GameButton';
 import { GameApi } from './types';
 
 interface Props extends GameApi {}
 
-const GameSettings = ({ state, provider, type }: Props) => {
+const GameSettings = ({ state, provider }: Props) => {
 	const {
 		generateNewCollisionCoordinates,
 		togglePerspective,
 		toggleDimension,
-		toggleTwoPlayer,
-		toggleNPC,
 	} = provider;
 
-	const {
-		is3D,
-		isSideView,
-		players: { P2, P4: NPC },
-	} = state;
-
-	const player2IsOn = !!P2;
-	const npcIsOn = !!NPC;
+	const { is3D, isSideView } = state;
 
 	const buttons = useMemo(
 		() =>
@@ -41,19 +31,6 @@ const GameSettings = ({ state, provider, type }: Props) => {
 					active: isSideView,
 					disabled: !is3D,
 				},
-				...((type === GameType.Local && [
-					{
-						label: 'Toggle Two-Player Mode',
-						onClick: toggleTwoPlayer,
-						active: player2IsOn,
-					},
-					{
-						label: 'Toggle NPC',
-						onClick: toggleNPC,
-						active: npcIsOn,
-					},
-				]) ||
-					[]),
 			].map(({ label, ...rest }) => (
 				<GameButton key={label} {...rest}>
 					{label}
@@ -63,13 +40,8 @@ const GameSettings = ({ state, provider, type }: Props) => {
 			generateNewCollisionCoordinates,
 			is3D,
 			isSideView,
-			npcIsOn,
-			player2IsOn,
 			toggleDimension,
-			toggleNPC,
 			togglePerspective,
-			toggleTwoPlayer,
-			type,
 		]
 	);
 

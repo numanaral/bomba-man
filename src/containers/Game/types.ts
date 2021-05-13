@@ -151,6 +151,7 @@ type GameApi = {
 };
 
 type GameApiHookOnline = (gameId?: string) => GameApi;
+// it's null if you directly go to /local without /room-creator
 type GameApiHookLocal = (gameConfig?: GameConfig) => GameApi | null;
 
 type PickedGameState<K extends keyof GameState> = {
@@ -202,5 +203,6 @@ export type {
 	PickedGameState,
 	OnlineGameId,
 	OnlineGame,
+	GamePlayers,
 	GameEnd,
 };

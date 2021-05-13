@@ -1,6 +1,6 @@
 import Game from 'containers/Game';
 import useOnGameEnd from 'hooks/useOnGameEnd';
-import useOnPlayerExit from 'hooks/useOnPlayerExit';
+import useOnPlayerExitOnline from 'hooks/useOnPlayerExitOnline';
 import { RouteComponentPropsWithLocationState } from 'routes/types';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import useOnlineGame from 'store/redux/hooks/useOnlineGame';
@@ -16,7 +16,7 @@ const Online = ({
 	const currentOnlinePlayerId = location?.state?.playerId;
 	const players = game?.gamePlayers || {};
 
-	useOnPlayerExit(id, currentOnlinePlayerId);
+	useOnPlayerExitOnline(id, currentOnlinePlayerId);
 	useOnGameEnd(players, currentOnlinePlayerId, id);
 
 	return (

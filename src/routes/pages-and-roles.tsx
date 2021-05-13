@@ -148,7 +148,7 @@ const SHARED_DISPLAY_PAGES = ([
 			label: 'Local Game',
 			tooltip: 'Local Game',
 			text: 'Local Game',
-			to: '/local',
+			to: '/room-creator/local',
 		},
 		{
 			label: 'Create Online Game',

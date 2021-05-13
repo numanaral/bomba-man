@@ -84,6 +84,7 @@ const getConfigSchema = (gameType: GameType) =>
 		players: yup.object().shape({
 			humanPlayers: yup
 				.mixed()
+				/** Lifesaver @see https://github.com/jquense/yup/issues/735#issuecomment-574260390 */
 				.test((_: number, context: yup.TestContext) => {
 					const { createError, path, parent } = context;
 					const {
@@ -92,6 +93,7 @@ const getConfigSchema = (gameType: GameType) =>
 					} = parent as Config['players'];
 					if (gameType === GameType.Local) {
 						if (humanPlayers! + npcPlayers > 4) {
+							/** @see https://github.com/jquense/yup/issues/222#issuecomment-557457026 */
 							return createError({
 								message: `You cannot have more than 4 players`,
 								path,
