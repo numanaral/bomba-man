@@ -184,6 +184,9 @@ const generateScore = (
 		if (score !== null) return score;
 	}
 	if (newSquare === Tile.Breaking) {
+		if (isSquareAPossibleFire(oldCoordinates)) {
+			return NPCScore.IsDanger;
+		}
 		const score = dropBombAndRunOrScoreTarget(
 			newCoordinates,
 			oldCoordinates,
