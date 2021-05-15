@@ -163,6 +163,7 @@ const PlayerSetupContainer = ({
 					id={playerId}
 					showName
 					isWalking
+					isNPC={false}
 					keyboardConfig={{
 						'0': gameConfig.keyboardConfig[playerIdIndex],
 					}}

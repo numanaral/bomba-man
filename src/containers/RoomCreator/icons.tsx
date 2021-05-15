@@ -98,6 +98,7 @@ const CharacterIcon = ({
 				coordinates={{ top: 0, left: 0 }}
 				id="P1"
 				name="Bomba-man"
+				isNPC
 				size={size}
 				{...rest}
 			/>
