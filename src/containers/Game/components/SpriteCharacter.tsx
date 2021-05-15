@@ -9,8 +9,8 @@ import spriteShadow from './character-shadow.png';
 import spriteImage from './character-skin-default.png';
 
 const SPRITE_SQUARE_SIZE = 32;
-const Wrapper = styled.div<{ $size: number }>`
-	${({ $size }) => {
+const Wrapper = styled.div<{ $size: number; $name: string }>`
+	${({ $size, $name }) => {
 		// CALCULATED
 		const pixelMultiplier = $size / SPRITE_SQUARE_SIZE;
 		const spriteSize = pixelMultiplier * SPRITE_SQUARE_SIZE;
@@ -18,8 +18,10 @@ const Wrapper = styled.div<{ $size: number }>`
 		const spriteSheetSquareSize = pixelMultiplier * -1 * SPRITE_SQUARE_SIZE;
 		const translateDiff = ($size / 4) * -1;
 		const topDiff = Math.min(-15, translateDiff * 2.5);
-		const labelFontSize = Math.ceil(spriteSize / 6);
-		const labelMaxWidth = Math.ceil(spriteSize * 0.8);
+		const labelFontSize = Math.min(30, Math.ceil(spriteSize / 6));
+		const labelTopDiff = Math.floor(spriteSize / (5 * 2));
+		// const labelMaxWidth = Math.ceil(spriteSize * 0.8);
+		const labelMaxWidth = $name.length * 20 + spriteSize / 20;
 
 		const spriteSizing = `
 			width: ${spriteSize}px;
@@ -61,14 +63,15 @@ const Wrapper = styled.div<{ $size: number }>`
 
 				& .name {
 					position: absolute;
-					left: 15px;
-					right: 15px;
+					left: 0;
+					right: 0;
+					top: ${labelTopDiff}px;
 					font-size: ${labelFontSize}px;
+					max-width: ${labelMaxWidth}px;
 					font-weight: bold;
 					border: 1px dashed white;
 					border-radius: 9999px;
 					opacity: 1;
-					max-width: ${labelMaxWidth}px;
 					margin: auto;
 					text-align: center;
 				}
@@ -265,6 +268,7 @@ const SpriteCharacter = ({
 			className="character-wrapper"
 			{...rest}
 			$size={size * 2}
+			$name={name}
 		>
 			<div
 				className="character"
