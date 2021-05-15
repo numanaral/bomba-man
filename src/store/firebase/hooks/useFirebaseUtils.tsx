@@ -6,7 +6,7 @@ import {
 	useFirebase,
 	useFirebaseConnect,
 } from 'react-redux-firebase';
-import { FirebaseUtils } from '../types';
+import { DataSnapshot, FirebaseUtils } from '../types';
 // eslint-disable-next-line import/no-unresolved
 // import { fromFirestore } from '../utils';
 // TODO: notification-provider
@@ -23,19 +23,36 @@ const useFirebaseUtils = <RootSchema extends FirebaseUtils.UpdateableValue>(
 		return `${baseRefPath}${subPath || ''}`;
 	};
 
+	/**
+	 * @example
+	 * ```ts
+	 * // Usage 1: Generate random id
+	 * const { key: newGameId } = (await create(newProps, subPaths)) as DataSnapshot;
+	 *
+	 * // Usage 2: Set your own id (fails if exists)
+	 * const customId = 'some-id';
+	 * await create(newProps, subPaths, undefined, customId);
+	 * ```
+	 */
 	const create = async <
 		OverrideSchema extends FirebaseUtils.OverridableValue = void
 	>(
-		...[newProps, subPaths, cb]: FirebaseUtils.CreateProps<
+		...[newProps, subPaths, cb, key]: FirebaseUtils.CreateProps<
 			RootSchema,
 			OverrideSchema
 		>
 	): FirebaseUtils.DataSnapshotPromise => {
 		try {
-			const dataSnapshot = await firebase.push(
-				getPath(subPaths),
-				newProps
-			);
+			let dataSnapshot: DataSnapshot;
+			// if provided with a key, first check if document exists
+			// if it
+			if (key) {
+				dataSnapshot = await firebase.uniqueSet(getPath(subPaths), {
+					[key]: newProps,
+				});
+			} else {
+				dataSnapshot = await firebase.push(getPath(subPaths), newProps);
+			}
 			cb?.onSuccess?.(dataSnapshot);
 
 			return dataSnapshot;

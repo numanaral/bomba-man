@@ -43,10 +43,10 @@ namespace FirebaseUtils {
 		cb?: PromiseCallback
 	];
 
-	export type CreateProps<RootSchema, OverrideSchema> = CreateOrUpdateProps<
-		RootSchema,
-		OverrideSchema
-	>;
+	export type CreateProps<RootSchema, OverrideSchema> = [
+		...CreateOrUpdateProps<RootSchema, OverrideSchema>,
+		...[key?: string]
+	];
 
 	export type ReadProps<RootSchema, OverrideSchema> = [
 		state: OverridableType<RootSchema, OverrideSchema>
