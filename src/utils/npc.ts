@@ -205,7 +205,7 @@ const generateScore = (
 const generateMovementTree = (
 	newCoordinates: SquareCoordinates,
 	oldCoordinates: SquareCoordinates,
-	level: number = 2,
+	level: number = 1,
 	parentId: number | null = null
 ) => {
 	const { ySquare: newYSquare, xSquare: newXSquare } = newCoordinates;
