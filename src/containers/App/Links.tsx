@@ -33,9 +33,12 @@ const LinkText = styled.h1`
 
 const Links = () => {
 	const { pathname } = useLocation();
+	const localHomePath = `${BASE_PATH}`;
+	const isHomePage =
+		pathname === localHomePath || pathname === `${localHomePath}/`;
 	return (
 		<Wrapper id="site-navbar">
-			{pathname === `${BASE_PATH}` ? (
+			{isHomePage ? (
 				<Spacer spacing="7" />
 			) : (
 				<NavLink to="/">
