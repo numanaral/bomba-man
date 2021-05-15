@@ -15,6 +15,15 @@ import {
 } from './game';
 import { getRandomInt } from './math';
 
+// allow debugging in prod
+// @ts-ignore
+window.NPC_DEBUG = false;
+const log = (value: any, label = '') => {
+	// @ts-ignore
+	if (!window.NPC_DEBUG) return;
+	console.log(...[label, value].filter(Boolean));
+};
+
 type NpcStore = {
 	id: number;
 	parentNodes: MovementNode[];
@@ -130,6 +139,7 @@ const dropBombAndRunOrScoreTarget = (
 ) => {
 	// TODO: is this necessary? it's already the nextSquare
 	if (isAdjacent(newCoordinates, oldCoordinates)) {
+		// TODO: move this up to usePlayerEvents
 		const currentTime = new Date().getTime();
 		if (
 			Store!.lastBombTime <=
@@ -371,7 +381,10 @@ const findBestMove = (
 		currentCoordinates,
 		undefined
 	);
+	log(currentCoordinates, 'currentCoordinates');
+	log(movementTree, 'originalMoves');
 	getTotalScoreOfAllNodes(movementTree);
+	log(movementTree, 'scoredMoves');
 
 	return findNodeWithHighestScore(Store!.parentNodes);
 };
@@ -411,6 +424,7 @@ const npcAction: NPCActionFn = ({
 	);
 
 	const bestMovementNode = findBestMove(currentSquareCoordinates);
+	log(bestMovementNode, 'bestMovementNode');
 
 	if ((bestMovementNode?.score || 0) > 0) {
 		triggerMove({ playerId, direction: bestMovementNode!.direction, ref });
