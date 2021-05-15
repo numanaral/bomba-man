@@ -1,2 +1,0 @@
-(this["webpackJsonpmy-app"]=this["webpackJsonpmy-app"]||[]).push([[20],{511:function(e,a,s){"use strict";s.r(a);var t=s(543),n=s(539),c=s(5);a.default=function(){return Object(c.jsx)(t.a,{children:Object(c.jsx)(n.a,{children:"You are logged in as a guest!"})})}}}]);
-//# sourceMappingURL=20.3bbd8ddd.chunk.js.map
