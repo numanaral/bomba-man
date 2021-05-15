@@ -10,6 +10,7 @@ import useInterval from 'hooks/useInterval';
 import TooltipButton from 'components/TooltipButton';
 import useLocalStorage from 'hooks/useLocalStorage';
 import * as colors from '@material-ui/core/colors';
+import theme from 'theme';
 
 // const size = 8;
 
@@ -93,7 +94,12 @@ const Home = () => {
 	return (
 		<Container>
 			<Spacer spacing="5" />
-			<CharacterIcon size={100} isWalking />
+			<CharacterIcon
+				size={100}
+				color={theme.palette.color.primary}
+				showName
+				isWalking
+			/>
 			<Spacer spacing="5" />
 			{/* <CharacterWrapper>
 				<SpriteCharacter

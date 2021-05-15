@@ -3,7 +3,7 @@ import { KeyboardConfig } from 'containers/Game/types';
 import * as KeyCode from 'keycode-js';
 
 const config = {
-	title: 'Bomberman (WIP)',
+	title: 'Bomba-man',
 	// powerUps: {
 	// 	[PowerUp.Life]: 0, // number
 	// 	[PowerUp.BombCount]: 0, // number

@@ -14,7 +14,6 @@ import SpriteCharacter, {
 	SpriteCharacterProps,
 } from 'containers/Game/components/SpriteCharacter';
 import { FontAwesomeIconProps } from 'containers/Game/types';
-
 import styled from 'styled-components';
 import { generateIconPackFromPowerUps } from './utils';
 
@@ -51,18 +50,18 @@ const GhostIcon = (props: FontAwesomeIconProps) => (
 );
 
 const CharacterWrapper = styled.div<
-	StyledProps<CharacterIconProps, 'size' | 'showId'>
+	StyledProps<CharacterIconProps, 'size' | 'showName' | 'color'>
 >`
 	position: relative;
 	pointer-events: none;
 	min-width: 50px;
 
-	${({ $showId }) => {
-		if ($showId) return '';
-
+	${({ $showName, $color }) => {
 		return `
 			.name {
-				display: none;
+				${!$showName ? 'display: none;' : ''}
+				${$color ? `background-color: ${$color} !important;` : ''}
+				
 			}
 		`;
 	}}
@@ -83,16 +82,18 @@ const CharacterWrapper = styled.div<
 
 interface CharacterIconProps extends Partial<SpriteCharacterProps> {
 	size: SpriteCharacterProps['size'];
-	showId?: boolean;
+	color?: string;
+	showName?: boolean;
 }
 
 const CharacterIcon = ({
 	size,
-	showId = false,
+	showName = false,
+	color,
 	...rest
 }: CharacterIconProps) => {
 	return (
-		<CharacterWrapper $size={size} $showId={showId}>
+		<CharacterWrapper $size={size} $showName={showName} $color={color}>
 			<SpriteCharacter
 				coordinates={{ top: 0, left: 0 }}
 				id="P1"
@@ -106,11 +107,11 @@ const CharacterIcon = ({
 
 const DeadCharacterIcon = ({
 	size,
-	showId = false,
+	showName = false,
 	...rest
 }: CharacterIconProps) => {
 	return (
-		<CharacterWrapper $size={size} $showId={showId}>
+		<CharacterWrapper $size={size} $showName={showName}>
 			<DeadCharacter
 				coordinates={{ top: 0, left: 0 }}
 				id="P1"

@@ -94,7 +94,7 @@ const PlayerDisplay = ({
 							size,
 							name: id,
 							id: id as PlayerId,
-							showId: true,
+							showName: true,
 							isWalking,
 						};
 
