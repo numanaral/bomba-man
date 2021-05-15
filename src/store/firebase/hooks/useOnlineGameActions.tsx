@@ -1,7 +1,7 @@
 import { useFirebaseConnect } from 'react-redux-firebase';
 import { GameState } from 'store/redux/reducers/game/types';
 import { OnlineGame, OnlineGameId } from 'containers/Game/types';
-import { DataSnapshot } from 'store/firebase/types';
+import getRandomName from 'utils/random-name-generator';
 import useFirebaseUtils from './useFirebaseUtils';
 
 const useOnlineGameActions = () => {
@@ -10,19 +10,27 @@ const useOnlineGameActions = () => {
 	const { create, update, remove } = useFirebaseUtils<OnlineGame>(refKey);
 
 	const createOnlineGame = async (gameState: GameState) => {
+		const randomName = getRandomName();
 		// create the game
-		const { key: newGameId } = (await create({
-			gameState,
-			started: false,
-		})) as DataSnapshot;
+		await create(
+			{
+				gameState,
+				started: false,
+			},
+			undefined,
+			undefined,
+			randomName
+		);
+
+		// TODO: error checking..
 		// set its id
 		await update(
 			{
-				gameId: newGameId as OnlineGameId,
+				gameId: randomName as OnlineGameId,
 			},
-			`/${newGameId}`
+			`/${randomName}`
 		);
-		return newGameId;
+		return randomName;
 	};
 
 	const removeOnlineGame = async (gameId: OnlineGameId) => {
