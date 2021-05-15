@@ -9,6 +9,7 @@ import { OnlineGame, PlayerConfig, PlayerId } from 'containers/Game/types';
 import gameConfig from 'config';
 import { PlayerCondition } from 'enums';
 import useFirebaseUtils from './useFirebaseUtils';
+import useOnlineGameActions from './useOnlineGameActions';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 
@@ -21,6 +22,7 @@ const useWatchOnlineGame = (id: string) => {
 	const refKey = `online/${id}`;
 	useFirebaseConnect(refKey);
 	const { update, remove } = useFirebaseUtils<OnlineGame>(refKey);
+	const { removeOnlineGame } = useOnlineGameActions();
 
 	const onlineGameFromFirebase = useSelector(makeSelectOnlineGame(id));
 
@@ -70,9 +72,16 @@ const useWatchOnlineGame = (id: string) => {
 		// remove him from the game state
 		remove(`/gameState/players/${playerId}`);
 
-		// 2 because the state won't be updated just yet
-		if (game.gamePlayers && Object.keys(game.gamePlayers).length <= 2) {
-			onEndGame();
+		if (game.gamePlayers) {
+			const playerLength = Object.keys(game.gamePlayers).length;
+			// 1 <= because the state won't be updated just yet
+			if (playerLength <= 1) {
+				removeOnlineGame(id);
+				// 2 <= because the state won't be updated just yet
+				// ??!!: Is this necessary? Change this when restart is added
+			} else if (playerLength <= 2) {
+				onEndGame();
+			}
 		}
 	};
 
