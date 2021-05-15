@@ -1,0 +1,1 @@
+{"version":3,"sources":["routes/pages/SignUp.tsx"],"names":["SignUp"],"mappings":"iIAIeA,UAJA,WACd,OAAO","file":"static/js/21.8d710958.chunk.js","sourcesContent":["const SignUp = () => {\n\treturn <div>SignUp</div>;\n};\n\nexport default SignUp;\n"],"sourceRoot":""}

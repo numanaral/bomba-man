@@ -1,0 +1,2 @@
+(this["webpackJsonpbomba-man"]=this["webpackJsonpbomba-man"]||[]).push([[6],{517:function(n,a,i){"use strict";i.r(a);var t=i(6);a.default=function(n){var a=n.authorizing;return Object(t.jsxs)("div",{children:["Login",a]})}}}]);
+//# sourceMappingURL=6.970da01f.chunk.js.map
