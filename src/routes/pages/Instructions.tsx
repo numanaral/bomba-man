@@ -10,12 +10,7 @@ import {
 	PlayerId,
 } from 'containers/Game/types';
 import { H1, H4 } from 'components/typography';
-import {
-	Grid,
-	GridJustification,
-	Theme,
-	useMediaQuery,
-} from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import Container from 'components/Container';
 import styled from 'styled-components';
 import { CharacterIcon } from 'containers/RoomCreator/icons';
@@ -155,41 +150,26 @@ const PlayerSetupContainer = ({
 	playerId,
 	side = 'left',
 }: PlayerSetupContainerProps) => {
-	const smAndDown = useMediaQuery<Theme>(t => t.breakpoints.down('sm'));
 	const isLeft = side === 'left';
 
 	const playerIdIndex = Number(playerId.replace('P', '')) - 1;
 
 	return (
-		<Grid container {...(!isLeft && { justify: 'flex-end' })}>
-			<Grid
-				container
-				item
-				xs={12}
-				md={6}
-				justify={
-					smAndDown
-						? 'center'
-						: (`flex-${
-								isLeft ? 'start' : 'end'
-						  }` as GridJustification)
-				}
-			>
-				<Grid item {...(!isLeft && { style: { order: 3 } })}>
-					<CharacterIcon
-						size={80}
-						name={playerId}
-						id={playerId}
-						showId
-						isWalking
-						keyboardConfig={{
-							'0': gameConfig.keyboardConfig[playerIdIndex],
-						}}
-					/>
-				</Grid>
-				<Grid item>
-					<KeyboardSetupContainer keyboardConfig={keyboardConfig} />
-				</Grid>
+		<Grid container xs={12} justify="center">
+			<Grid item {...(!isLeft && { style: { order: 3 } })}>
+				<CharacterIcon
+					size={80}
+					name={playerId}
+					id={playerId}
+					showName
+					isWalking
+					keyboardConfig={{
+						'0': gameConfig.keyboardConfig[playerIdIndex],
+					}}
+				/>
+			</Grid>
+			<Grid item>
+				<KeyboardSetupContainer keyboardConfig={keyboardConfig} />
 			</Grid>
 		</Grid>
 	);
