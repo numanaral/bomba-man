@@ -135,7 +135,7 @@ const Home = () => {
 				<>
 					<Spacer />
 					<TooltipButton
-						text="No, just get rid of this"
+						text="No, just get rid of this FOREVER!"
 						variant="outlined"
 						onClick={dontYouShowMeThisRandomStuff}
 					/>

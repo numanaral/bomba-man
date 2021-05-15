@@ -17,7 +17,7 @@ const GameSettings = ({ state, provider }: Props) => {
 		() =>
 			[
 				{
-					label: 'New Collision Coordinates',
+					label: 'New Tiles / Map',
 					onClick: generateNewCollisionCoordinates,
 				},
 				{
