@@ -28,7 +28,11 @@ const useOnGameEndLocal = (
 
 	const { P1, P2 } = mappedPlayers;
 	// P1 or P2 alive will display You have won as both players are on the same screen
-	if (P1 === PlayerCondition.Alive || (P2 && P2 === PlayerCondition.Alive)) {
+	if (
+		P1 === PlayerCondition.Alive ||
+		// P2 is a Human Player
+		(P2 && !players.P2?.isNPC && P2 === PlayerCondition.Alive)
+	) {
 		gameEndCondition = GameEndCondition.Win;
 	}
 
