@@ -39,6 +39,8 @@ enum NPCScore {
 	IsEmptyTile = 2,
 	IsBreakingTile = 3,
 	IsPlayer = 4,
+	/** If the current and the next spots are fire, we need to get out */
+	IsPossibleFireExit = 1,
 	IsPowerUp = 1000,
 }
 
@@ -164,6 +166,9 @@ const generateScore = (
 	const newSquare = Store!.gameMap[newYSquare][newXSquare];
 	// TODO: Please comment
 	if (isSquareAPossibleFire(newCoordinates)) {
+		if (isSquareAPossibleFire(oldCoordinates)) {
+			return NPCScore.IsPossibleFireExit;
+		}
 		return NPCScore.IsDanger;
 	}
 	if (Object.values(PowerUp).includes(newSquare as PowerUp)) {
