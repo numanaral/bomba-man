@@ -21,7 +21,9 @@ const Wrapper = styled.div<{ $size: number; $name: string }>`
 		const labelFontSize = Math.min(30, Math.ceil(spriteSize / 6));
 		const labelTopDiff = Math.floor(spriteSize / (5 * 2));
 		// const labelMaxWidth = Math.ceil(spriteSize * 0.8);
-		const labelMaxWidth = $name.length * 20 + spriteSize / 20;
+		const labelMaxWidth = Math.floor(
+			$name.length * 20 + (spriteSize * pixelMultiplier) / 10
+		);
 
 		const spriteSizing = `
 			width: ${spriteSize}px;
