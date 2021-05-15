@@ -451,8 +451,6 @@ class GameUtils {
 
 		const bombSize = this.getBombSizeForPlayer(currentBomb.playerId);
 
-		// remove bomb
-		this.updaters.removeBomb(bombId);
 		const { coordinatesToSetOnFire } = getExplosionResults(
 			this.state.gameMap,
 			bombCoordinates,
@@ -482,6 +480,9 @@ class GameUtils {
 					this.setSquare(coordinates, Tile.Empty);
 				}
 			});
+
+		// remove bomb
+		this.updaters.removeBomb(bombId);
 	};
 
 	triggerGameAnimation = () => {
