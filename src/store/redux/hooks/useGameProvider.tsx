@@ -26,16 +26,20 @@ import {
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { generateDefaultGameState, generateRandomGameMap } from 'utils/game';
-import { makeSelectGameConfig } from 'store/redux/reducers/game/selectors';
+import {
+	makeSelectGameConfig,
+	makeSelectGamePlayers,
+} from 'store/redux/reducers/game/selectors';
 import { OnDropBomb, PlayerId } from 'containers/Game/types';
 import { Direction } from 'enums';
 
 const useGameProvider = () => {
 	const dispatch = useDispatch();
 	const {
-		sizes: { map: mapSize },
+		sizes,
 		tiles: { blockTileChance },
 	} = useSelector(makeSelectGameConfig());
+	const players = useSelector(makeSelectGamePlayers());
 
 	const updateGameSettings = useCallback(
 		(payload: GameState) => dispatch(setGameState(payload)),
@@ -58,10 +62,10 @@ const useGameProvider = () => {
 	const generateNewCollisionCoordinates = useCallback(
 		() =>
 			updateGameMap({
-				gameMap: generateRandomGameMap(mapSize, blockTileChance),
+				gameMap: generateRandomGameMap(sizes, blockTileChance, players),
 				animate: true,
 			}),
-		[blockTileChance, mapSize, updateGameMap]
+		[blockTileChance, sizes, players, updateGameMap]
 	);
 
 	// #region GAME ACTIONS

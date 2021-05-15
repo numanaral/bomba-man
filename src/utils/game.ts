@@ -126,61 +126,89 @@ const getDefaultPlayerStartSquareCoordinates = (
 	};
 };
 
-const getForbiddenStartCoordinates = (
+const isSquareOutOfBoundaries = (
+	{ xSquare, ySquare }: SquareCoordinates,
 	mapSize: GameConfigRanges.MapSize
-): SquareCoordinateArray => {
-	const defaultSquareCoordinates = getDefaultPlayerStartSquareCoordinates(
-		mapSize
-	);
+) => {
+	const minTopLeft = 0;
+	const maxTopLeft = mapSize - 1;
 
+	const beyondHorizontalEnd = xSquare < minTopLeft || xSquare > maxTopLeft;
+	const beyondVerticalEnd = ySquare < minTopLeft || ySquare > maxTopLeft;
+
+	return beyondHorizontalEnd || beyondVerticalEnd;
+};
+
+type PlayerAndAdjacentCoordinates = {
+	xSquare: number;
+	ySquare: number;
+	tile: Tile;
+};
+
+const getPlayerAndAdjacentCoordinates = (
+	players: Players,
+	{ movement: movementSize, map: mapSize }: GameConfig['sizes']
+): Array<PlayerAndAdjacentCoordinates> => {
 	// used to calculate the next square
 	// value to add to currentX and currentY square coordinates
 	const xyDiff = [
-		[1, 1], // TopLeft
-		[-1, 1], // TopRight
-		[-1, -1], // BottomRight
-		[1, -1], // BottomLeft
+		[0, -1], // Up
+		[1, 0], // Right
+		[0, 1], // Down
+		[-1, 0], // Left
 	];
 
-	return Object.values(
-		defaultSquareCoordinates
-	).reduce<SquareCoordinateArray>((acc, squareCoordinates, ind) => {
-		const { xSquare, ySquare } = squareCoordinates;
-		const currentDiff = xyDiff[ind];
-		// player's coordinate
-		acc.push(squareCoordinates);
-		for (let i = 0; i < 2; i++) {
-			// horizontal adjacent square coordinate
-			if (i === 0) {
+	return Object.values(players).reduce<Array<PlayerAndAdjacentCoordinates>>(
+		(acc, playerConfig) => {
+			const { coordinates, id: playerId } = playerConfig!;
+			const {
+				xSquare,
+				ySquare,
+			} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+				coordinates,
+				movementSize
+			);
+			// player's coordinate
+			acc.push({ xSquare, ySquare, tile: playerId as Tile });
+			// around coordinates
+			for (let i = 0; i < xyDiff.length; i++) {
+				const currentDiff = xyDiff[i];
+				const [xDiff, yDiff] = currentDiff;
+				const newXSquare = xSquare + xDiff;
+				const newYSquare = ySquare + yDiff;
+				const newSquare = {
+					xSquare: newXSquare,
+					ySquare: newYSquare,
+				};
+				// make sure we only add squares that are within the boundaries
+				if (isSquareOutOfBoundaries(newSquare, mapSize)) continue;
 				acc.push({
-					xSquare: xSquare + currentDiff[i],
-					ySquare,
-				});
-				// vertical adjacent square coordinate
-			} else {
-				acc.push({
-					xSquare,
-					ySquare: ySquare + currentDiff[i],
+					...newSquare,
+					tile: Tile.Empty,
 				});
 			}
-		}
-		return acc;
-	}, []);
+			return acc;
+		},
+		[]
+	);
 };
 
 const generateRandomGameMap = (
-	mapSize: GameConfigRanges.MapSize,
+	sizes: GameConfig['sizes'],
 	blockTileChance: GameConfigRanges.BlockTileChance,
-	forbiddenCoordinates?: SquareCoordinateArray
+	players: Players
 ): GameMap => {
-	const _forbiddenCoordinates =
-		forbiddenCoordinates || getForbiddenStartCoordinates(mapSize);
+	const forbiddenCoordinates = getPlayerAndAdjacentCoordinates(
+		players,
+		sizes
+	);
+
 	const tiles: Array<KeysOf<typeof Tile>> = [
 		...Object.keys(Tile),
 		// reverse block density, we want that many Emptys
 		...Array(11 - blockTileChance).fill('Empty'),
 	];
-	const sizedArray = Array(mapSize).fill(0);
+	const sizedArray = Array(sizes.map).fill(0);
 
 	const randomMap = sizedArray.reduce((accOuter, _, indOuter) => {
 		accOuter[indOuter] = sizedArray.reduce((accInner, __, indInner) => {
@@ -190,10 +218,9 @@ const generateRandomGameMap = (
 		return accOuter;
 	}, {});
 	// ensure we don't fill the char beginning squares with blocks
-	_forbiddenCoordinates.forEach(({ ySquare, xSquare }) => {
-		if (randomMap[ySquare][xSquare] !== Tile.Empty) {
-			randomMap[ySquare][xSquare] = Tile.Empty;
-		}
+	forbiddenCoordinates.forEach(({ ySquare, xSquare, tile }) => {
+		// if (randomMap[ySquare][xSquare] !== Tile.Empty) {
+		randomMap[ySquare][xSquare] = tile;
 	});
 
 	return randomMap;
@@ -332,7 +359,7 @@ const generateDefaultGameConfig = (): GameConfig => {
 const generateDefaultGameState = (config?: GameConfig): GameState => {
 	const _config = config || generateDefaultGameConfig();
 	const {
-		sizes: { map: mapSize },
+		sizes,
 		tiles: { blockTileChance: blockDensity },
 	} = _config;
 
@@ -353,7 +380,7 @@ const generateDefaultGameState = (config?: GameConfig): GameState => {
 
 	return {
 		players,
-		gameMap: generateRandomGameMap(mapSize, blockDensity),
+		gameMap: generateRandomGameMap(sizes, blockDensity, players),
 		bombs: {},
 		powerUps: {},
 		config: _config,
@@ -374,19 +401,6 @@ const isSquareAnObstacle = (
 		nextSquare === Tile.NonBreaking ||
 		nextSquare === Explosive.Bomb
 	);
-};
-
-const isSquareOutOfBoundaries = (
-	{ xSquare, ySquare }: SquareCoordinates,
-	mapSize: GameConfigRanges.MapSize
-) => {
-	const minTopLeft = 0;
-	const maxTopLeft = mapSize - 1;
-
-	const beyondHorizontalEnd = xSquare < minTopLeft || xSquare > maxTopLeft;
-	const beyondVerticalEnd = ySquare < minTopLeft || ySquare > maxTopLeft;
-
-	return beyondHorizontalEnd || beyondVerticalEnd;
 };
 
 const canMove = (
@@ -571,7 +585,7 @@ const getTilesToBreak = (
 	return tilesToBreak;
 };
 
-const isSquareOutsideBoundaries = (
+const isSquareIndexOutsideBoundaries = (
 	squareCoordinate: number,
 	mapSize: GameConfigRanges.MapSize
 ) => {
@@ -675,8 +689,8 @@ const getExplosionSquareCoordinatesFromBomb = (
 
 			// don't go out of boundaries
 			if (
-				isSquareOutsideBoundaries(currentX, mapSize) ||
-				isSquareOutsideBoundaries(currentY, mapSize)
+				isSquareIndexOutsideBoundaries(currentX, mapSize) ||
+				isSquareIndexOutsideBoundaries(currentY, mapSize)
 			) {
 				continue;
 			}

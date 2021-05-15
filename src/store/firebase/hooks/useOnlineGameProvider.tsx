@@ -42,8 +42,9 @@ const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
 	const generateNewCollisionCoordinates = useCallback(() => {
 		updateGameMap({
 			gameMap: generateRandomGameMap(
-				state.current.config.sizes.map,
-				state.current.config.tiles.blockTileChance
+				state.current.config.sizes,
+				state.current.config.tiles.blockTileChance,
+				state.current.players
 			),
 			animate: true,
 		});
