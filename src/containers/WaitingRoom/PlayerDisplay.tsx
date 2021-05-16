@@ -4,7 +4,7 @@ import {
 	CharacterIcon,
 	GhostIcon,
 } from 'containers/RoomCreator/icons';
-import { Grid } from '@material-ui/core';
+import { Grid, Theme, useMediaQuery } from '@material-ui/core';
 import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
 import Spacer from 'components/Spacer';
 import TooltipButton from 'components/TooltipButton';
@@ -45,6 +45,7 @@ const PlayerDisplay = ({
 	isGameEnd = false,
 	canStart = false,
 }: Props) => {
+	const xsAndDown = useMediaQuery<Theme>(t => t.breakpoints.down('xs'));
 	return (
 		<ContainerWithCenteredItems container>
 			{onStartGame && (
@@ -64,11 +65,11 @@ const PlayerDisplay = ({
 					</ContainerWithCenteredItems>
 				</>
 			)}
-			<Spacer spacing="15" />
-			<Grid container justify="space-between" item xs={12} sm={8}>
+			<Spacer spacing={xsAndDown ? 5 : 10} />
+			<Grid container justify="space-between" item xs={10} md={9} lg={8}>
 				{Object.keys(players)
 					.sort()
-					.map(id => {
+					.map((id, ind) => {
 						const isCurrentPlayer = currentOnlinePlayerId === id;
 						const isGameEndDeadCharacter =
 							isGameEnd &&
@@ -98,15 +99,30 @@ const PlayerDisplay = ({
 							isWalking,
 						};
 
-						return isGameEndDeadCharacter ? (
-							<FloatingGhostIcon
-								id={id}
+						return (
+							<Grid
+								container
+								justify="center"
+								alignItems="flex-end"
+								item
+								xs={6}
+								sm={3}
+								// md={3}
 								key={id}
-								$size={size}
-								$playerId={id as PlayerId}
-							/>
-						) : (
-							<CharacterIcon {...props} />
+							>
+								{xsAndDown && ind !== 0 && (
+									<Spacer spacing="10" />
+								)}
+								{isGameEndDeadCharacter ? (
+									<FloatingGhostIcon
+										id={id}
+										$size={size}
+										$playerId={id as PlayerId}
+									/>
+								) : (
+									<CharacterIcon {...props} />
+								)}
+							</Grid>
 						);
 					})}
 			</Grid>
