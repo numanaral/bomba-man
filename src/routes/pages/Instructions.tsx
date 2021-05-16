@@ -69,14 +69,15 @@ const SquareIcon: React.FC<SquareIconProps & IsPressed> = ({
 	</KeyboardIconWrapper>
 );
 
+type InstructionKeyboardConfig = Record<
+	PlayerActionKeys,
+	{
+		label: string;
+		keyCode: KeyboardEventCode;
+	}
+>;
 interface KeyboardSetupContainerProps {
-	keyboardConfig: Record<
-		PlayerActionKeys,
-		{
-			label: string;
-			keyCode: KeyboardEventCode;
-		}
-	>;
+	keyboardConfig: InstructionKeyboardConfig;
 }
 
 const KeyboardSetupContainer = ({
@@ -176,6 +177,53 @@ const PlayerSetupContainer = ({
 	);
 };
 
+const PLAYER_INSTRUCTION_KEYBOARD_CONFIG: Array<InstructionKeyboardConfig> = [
+	{
+		MoveUp: {
+			label: 'W',
+			keyCode: KeyCode.CODE_W,
+		},
+		MoveRight: {
+			label: 'D',
+			keyCode: KeyCode.CODE_D,
+		},
+		MoveDown: {
+			label: 'S',
+			keyCode: KeyCode.CODE_S,
+		},
+		MoveLeft: {
+			label: 'A',
+			keyCode: KeyCode.CODE_A,
+		},
+		DropBomb: {
+			label: 'Space',
+			keyCode: KeyCode.CODE_SPACE,
+		},
+	},
+	{
+		MoveUp: {
+			label: '↑',
+			keyCode: KeyCode.CODE_UP,
+		},
+		MoveRight: {
+			label: '→',
+			keyCode: KeyCode.CODE_RIGHT,
+		},
+		MoveDown: {
+			label: ' ↓',
+			keyCode: KeyCode.CODE_DOWN,
+		},
+		MoveLeft: {
+			label: '←',
+			keyCode: KeyCode.CODE_LEFT,
+		},
+		DropBomb: {
+			label: ';',
+			keyCode: KeyCode.CODE_SEMICOLON,
+		},
+	},
+];
+
 const Instructions = () => {
 	return (
 		<PageContainer style={{ overflow: 'hidden' }}>
@@ -189,59 +237,17 @@ const Instructions = () => {
 					NOTE2: You can test the keys on this screen :)
 				</H4>
 			</Grid>
-			<Spacer spacing="10" />
-			<PlayerSetupContainer
-				playerId="P1"
-				keyboardConfig={{
-					MoveUp: {
-						label: 'W',
-						keyCode: KeyCode.CODE_W,
-					},
-					MoveRight: {
-						label: 'D',
-						keyCode: KeyCode.CODE_D,
-					},
-					MoveDown: {
-						label: 'S',
-						keyCode: KeyCode.CODE_S,
-					},
-					MoveLeft: {
-						label: 'A',
-						keyCode: KeyCode.CODE_A,
-					},
-					DropBomb: {
-						label: 'Space',
-						keyCode: KeyCode.CODE_SPACE,
-					},
-				}}
-			/>
-			<Spacer spacing="10" />
-			<PlayerSetupContainer
-				playerId="P2"
-				keyboardConfig={{
-					MoveUp: {
-						label: '↑',
-						keyCode: KeyCode.CODE_UP,
-					},
-					MoveRight: {
-						label: '→',
-						keyCode: KeyCode.CODE_RIGHT,
-					},
-					MoveDown: {
-						label: ' ↓',
-						keyCode: KeyCode.CODE_DOWN,
-					},
-					MoveLeft: {
-						label: '←',
-						keyCode: KeyCode.CODE_LEFT,
-					},
-					DropBomb: {
-						label: ';',
-						keyCode: KeyCode.CODE_SEMICOLON,
-					},
-				}}
-				side="right"
-			/>
+			{PLAYER_INSTRUCTION_KEYBOARD_CONFIG.map((keyboardConfig, ind) => {
+				return (
+					<>
+						<Spacer spacing="10" />
+						<PlayerSetupContainer
+							playerId={`P${ind + 1}` as PlayerId}
+							keyboardConfig={keyboardConfig}
+						/>
+					</>
+				);
+			})}
 		</PageContainer>
 	);
 };
