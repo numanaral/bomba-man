@@ -9,16 +9,26 @@ import {
 	PlayerActionKeys,
 	PlayerId,
 } from 'containers/Game/types';
-import { H1, H4 } from 'components/typography';
-import { Grid } from '@material-ui/core';
+import { H1 } from 'components/typography';
+import {
+	Grid,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Typography,
+} from '@material-ui/core';
 import Container from 'components/Container';
 import styled from 'styled-components';
-import { CharacterIcon } from 'containers/RoomCreator/icons';
+import { CharacterIcon, powerUpIconPack } from 'containers/RoomCreator/icons';
 import Spacer from 'components/Spacer';
 import theme from 'theme';
 import * as KeyCode from 'keycode-js';
 import { useKeyboardEvent } from 'store/redux/hooks/usePlayerEvents';
-import { useState } from 'react';
+import React, { cloneElement, Fragment, useState } from 'react';
+import { PowerUp } from 'enums';
 
 const KeyboardIcon = (props: FontAwesomeIconProps) => (
 	<FontAwesomeIcon icon={faKeyboard} {...props} />
@@ -224,30 +234,99 @@ const PLAYER_INSTRUCTION_KEYBOARD_CONFIG: Array<InstructionKeyboardConfig> = [
 	},
 ];
 
+const POWER_UPS = [
+	{ powerUp: PowerUp.Life, description: 'Increases the life count.' },
+	{
+		powerUp: PowerUp.BombCount,
+		description: 'Increases the number of bombs a player can drop.',
+	},
+	{
+		powerUp: PowerUp.BombSize,
+		description: 'Increases the size of the bomb explosion range.',
+	},
+	{
+		powerUp: PowerUp.MovementSpeed,
+		description: 'Decreases the time it takes to make a move.',
+	},
+];
+
+const PowerUpTable = () => {
+	return (
+		<TableContainer>
+			<Table aria-label="power-up-table">
+				<TableHead>
+					<TableRow>
+						<TableCell>Power Up</TableCell>
+						<TableCell>Description</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody>
+					{POWER_UPS.map(({ powerUp, description }) => {
+						const { icon, color } = powerUpIconPack[powerUp];
+						return (
+							<TableRow key={powerUp}>
+								<TableCell component="th" scope="row">
+									{cloneElement(icon, { color })}
+								</TableCell>
+								<TableCell>{description}</TableCell>
+							</TableRow>
+						);
+					})}
+				</TableBody>
+			</Table>
+		</TableContainer>
+	);
+};
+
+const PlayerInstructions = () => {
+	return (
+		<Grid container justify="center">
+			{[
+				'NOTE1: In an online game, you can use both setup',
+				'NOTE2: You can test the key-press on this screen',
+			].map(note => (
+				<Typography
+					variant="body2"
+					align="left"
+					key={note}
+					style={{ width: '80%' }}
+				>
+					{note}
+				</Typography>
+			))}
+			{PLAYER_INSTRUCTION_KEYBOARD_CONFIG.map((keyboardConfig, ind) => {
+				const playerId = `P${ind + 1}` as PlayerId;
+				return (
+					<Fragment key={playerId}>
+						<Spacer spacing="8" />
+						<PlayerSetupContainer
+							playerId={playerId}
+							keyboardConfig={keyboardConfig}
+						/>
+					</Fragment>
+				);
+			})}
+		</Grid>
+	);
+};
+
 const Instructions = () => {
 	return (
 		<PageContainer style={{ overflow: 'hidden' }}>
 			<Grid container justify="center" alignItems="center">
 				<KeyboardIcon size="3x" /> &nbsp;&nbsp;
 				<H1> Instructions </H1>
-				<H4 style={{ width: '100%' }}>
-					NOTE: In an online game, you can use both setup
-				</H4>
-				<H4 style={{ width: '100%' }}>
-					NOTE2: You can test the keys on this screen :)
-				</H4>
 			</Grid>
-			{PLAYER_INSTRUCTION_KEYBOARD_CONFIG.map((keyboardConfig, ind) => {
-				return (
-					<>
-						<Spacer spacing="10" />
-						<PlayerSetupContainer
-							playerId={`P${ind + 1}` as PlayerId}
-							keyboardConfig={keyboardConfig}
-						/>
-					</>
-				);
-			})}
+			<Grid container justify="center" alignItems="center">
+				{[<PlayerInstructions />, <PowerUpTable />].map(
+					(component, ind) => (
+						<Grid key={ind} item xs={12} md={6}>
+							<Spacer spacing="3" />
+							{component}
+						</Grid>
+					)
+				)}
+			</Grid>
 		</PageContainer>
 	);
 };
