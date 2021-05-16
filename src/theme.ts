@@ -11,7 +11,23 @@ import {
 	unstable_createMuiStrictModeTheme,
 	ThemeOptions,
 } from '@material-ui/core/styles';
-import { __IS_DEV__ } from 'app';
+import { __IS_DEV__ } from 'app'; // eslint-disable-next-line import/no-unresolved
+import { Overrides as CoreOverrides } from '@material-ui/core/styles/overrides';
+import { RatingClassKey } from '@material-ui/lab';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { CSSProperties } from '@material-ui/styles';
+
+/** @see https://github.com/mui-org/material-ui/issues/12164#issuecomment-564041219 */
+interface Overrides extends CoreOverrides {
+	// Define additional lab components here as needed....
+	MuiRating?:
+		| Partial<Record<RatingClassKey, CSSProperties | (() => CSSProperties)>>
+		| undefined;
+}
+
+interface OverriddenThemeOptions extends ThemeOptions {
+	overrides: Overrides;
+}
 
 const theme = {
 	palette: {
@@ -67,7 +83,20 @@ const theme = {
 	},
 };
 
-const THEME_CONFIG: ThemeOptions = { palette: { type: 'dark' } };
+const THEME_CONFIG: OverriddenThemeOptions = {
+	palette: { type: 'dark' },
+	overrides: {
+		MuiRating: {
+			root: {
+				// allows rating icons to move to the new lines
+				flexWrap: 'wrap',
+				// adds spacing in between the rows when moved to a new line
+				rowGap: 10,
+			},
+		},
+	},
+};
+
 // eslint-disable-next-line camelcase
 const themeFn = __IS_DEV__ ? unstable_createMuiStrictModeTheme : createMuiTheme;
 const getMuiTheme = () => {
