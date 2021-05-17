@@ -1,4 +1,3 @@
-import PageContainer from 'components/PageContainer';
 import { RouteComponentPropsWithLocationState } from 'routes/types';
 import WaitingRoom from 'containers/WaitingRoom';
 
@@ -10,11 +9,7 @@ const WaitingRoomPage = ({
 		params: { id },
 	},
 }: Props) => {
-	return (
-		<PageContainer style={{ overflow: 'hidden' }}>
-			<WaitingRoom gameId={id} />
-		</PageContainer>
-	);
+	return <WaitingRoom gameId={id} />;
 };
 
 export default WaitingRoomPage;

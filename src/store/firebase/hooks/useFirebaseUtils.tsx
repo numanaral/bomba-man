@@ -47,9 +47,12 @@ const useFirebaseUtils = <RootSchema extends FirebaseUtils.UpdateableValue>(
 			// if provided with a key, first check if document exists
 			// if it
 			if (key) {
-				dataSnapshot = await firebase.uniqueSet(getPath(subPaths), {
-					[key]: newProps,
-				});
+				dataSnapshot = await firebase.uniqueSet(
+					getPath(`${subPaths || ''}/${key}`),
+					{
+						...newProps,
+					}
+				);
 			} else {
 				dataSnapshot = await firebase.push(getPath(subPaths), newProps);
 			}

@@ -18,7 +18,7 @@ const NoAccess: React.FC<Props> = ({
 	children,
 	message = DEFAULT_ERROR_MESSAGE,
 }) => (
-	<PageContainer fullHeight>
+	<PageContainer>
 		<Spacer spacing="5" />
 		<H1Wrapper>{message}</H1Wrapper>
 		<Spacer spacing="10" />

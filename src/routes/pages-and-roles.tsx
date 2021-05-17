@@ -100,6 +100,14 @@ const ROUTE_LIST = [
 		path: '/instructions',
 		component: LazyInstructions,
 	},
+	// online version
+	{
+		title: 'End Game',
+		description: `Game has ended.`,
+		path: '/game-end/:id',
+		component: LazyGameEnd,
+	},
+	// local version
 	{
 		title: 'End Game',
 		description: `Game has ended.`,

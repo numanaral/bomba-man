@@ -7,7 +7,7 @@ import { ConfigDisclaimer } from './disclaimers';
 import useRoomCreator from './useRoomCreator';
 
 const RoomCreator = ({ type }: { type: GameType }) => {
-	const { handleSubmit, columns, utils } = useRoomCreator(type);
+	const { handleSubmit, columns, utils, pending } = useRoomCreator(type);
 
 	const columnKeys = Object.keys(columns);
 	// TODO: error out for non-numbers
@@ -20,6 +20,7 @@ const RoomCreator = ({ type }: { type: GameType }) => {
 				onSubmit={handleSubmit}
 				submitText="Start"
 				doubleSubmit
+				pending={pending}
 			>
 				{/* TODO: Convert this to a reusable component as well */}
 				<Grid container spacing={2}>

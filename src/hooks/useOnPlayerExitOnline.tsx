@@ -5,11 +5,13 @@ import { BASE_PATH } from 'routes/constants';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import useBeforeUnload from './useBeforeUnload';
 
+const WHITELISTED_PAGES = ['online', 'waiting-room', 'game-end'];
 const useOnPlayerExitOnline = (gameId: OnlineGameId, playerId?: PlayerId) => {
 	const { onPlayerExit } = useWatchOnlineGame(gameId);
 	const { listen } = useHistory();
 	useBeforeUnload(() => {
 		if (!playerId) return;
+		if (!gameId) return;
 		onPlayerExit(playerId);
 	});
 
@@ -17,10 +19,11 @@ const useOnPlayerExitOnline = (gameId: OnlineGameId, playerId?: PlayerId) => {
 	useEffect(() => {
 		return listen(({ pathname }) => {
 			if (!playerId) return;
-			// if we are redirected to the game, don't trigger this
-			if (pathname === `${BASE_PATH}/online/${gameId}`) return;
-			// end game screen should not trigger this either
-			if (pathname === `${BASE_PATH}/game-end`) return;
+			// if on a whitelisted page, that doesn't count as exit
+			const isWhitelistedPage = WHITELISTED_PAGES.some(page => {
+				return pathname.startsWith(`${BASE_PATH}/${page}/${gameId}`);
+			});
+			if (isWhitelistedPage) return;
 			onPlayerExit(playerId);
 		});
 	}, [gameId, listen, onPlayerExit, playerId]);
