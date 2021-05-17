@@ -4,15 +4,15 @@ import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
 import { ReactRouterState } from 'routes/types';
-import useOnlineGameActions from 'store/firebase/hooks/useOnlineGameActions';
+import { GameConfig } from 'store/redux/reducers/game/types';
 
 const useOnGameEnd = (
 	players: GameEnd['players'],
 	currentOnlinePlayerId?: PlayerId,
-	gameId?: OnlineGameId
+	gameId?: OnlineGameId,
+	gameConfig?: GameConfig
 ) => {
 	const { push } = useHistory<ReactRouterState>();
-	const { removeOnlineGame } = useOnlineGameActions();
 
 	let gameEndCondition = GameEndCondition.Lose;
 	if (players && currentOnlinePlayerId) {
@@ -29,28 +29,22 @@ const useOnGameEnd = (
 
 		if (alivePlayers.length > 1) return;
 
-		push(`${BASE_PATH}/game-end`, {
+		push(`${BASE_PATH}/game-end/${gameId}`, {
 			endGame: {
 				players,
 				currentOnlinePlayerId,
 				gameEndCondition,
 			},
+			gameConfig,
+			playerId: currentOnlinePlayerId,
 		});
-
-		if (gameId) {
-			// delay the game deletion as the death event is recreating the
-			// object in firebase
-			setTimeout(() => {
-				removeOnlineGame(gameId);
-			}, 1000);
-		}
 	}, [
 		currentOnlinePlayerId,
+		gameConfig,
 		gameEndCondition,
 		gameId,
 		players,
 		push,
-		removeOnlineGame,
 	]);
 };
 

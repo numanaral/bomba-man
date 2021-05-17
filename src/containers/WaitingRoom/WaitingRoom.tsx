@@ -1,5 +1,9 @@
-import { OnlineGameId, PlayerId } from 'containers/Game/types';
-import { useEffect, useRef, useState } from 'react';
+import {
+	OnlineGameId,
+	PlayerId,
+	FontAwesomeIconProps,
+} from 'containers/Game/types';
+import { useEffect, useState } from 'react';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import { useHistory } from 'react-router-dom';
 import { BASE_PATH } from 'routes/constants';
@@ -7,58 +11,39 @@ import useOnPlayerExitOnline from 'hooks/useOnPlayerExitOnline';
 import theme from 'theme';
 import Spacer from 'components/Spacer';
 import { H1, H4 } from 'components/typography';
-// import { mapPlayersToGamePlayers } from 'utils/game';
+import useCanStartGame from 'hooks/useCanStartGame';
+import TooltipButton from 'components/TooltipButton';
+import copyToClipboard from 'utils/copy-to-clipboard';
+import { faCopy } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PageContainer from 'components/PageContainer';
 import PlayerDisplay from './PlayerDisplay';
 
+const CopyIcon = (props: FontAwesomeIconProps) => (
+	<FontAwesomeIcon icon={faCopy} {...props} />
+);
+
 interface Props {
-	// playerId: PlayerId;
 	gameId: OnlineGameId;
 }
 
-const WaitingRoom = ({ gameId }: Props) => {
+type UseWatchOnlineGameProps = ReturnType<typeof useWatchOnlineGame>;
+type UseOnJoinRoom = Pick<UseWatchOnlineGameProps, 'game' | 'onPlayerJoin'>;
+type UseOnGameStart = Pick<UseWatchOnlineGameProps, 'game'> & {
+	gameId: OnlineGameId;
+	playerId?: PlayerId;
+};
+
+/** Handles players joining into the room */
+const useOnJoinRoom = ({ game, onPlayerJoin }: UseOnJoinRoom) => {
 	const { push } = useHistory();
-
-	const {
-		pending,
-		error,
-		game,
-		isReady,
-		onPlayerJoin,
-		onStartGame,
-	} = useWatchOnlineGame(gameId);
-
-	const npcPlayerIds = useRef<Array<PlayerId>>([]);
-
-	// // setup the NPCs
-	// useEffect(() => {
-	// 	if (!isReady) return;
-
-	// 	const {
-	// 		gameState: {
-	// 			players,
-	// 			config: { powerUps: powerUpConfig },
-	// 		},
-	// 	} = game;
-	// 	const mappedPlayers = mapPlayersToGamePlayers(players, powerUpConfig);
-	// 	Object.keys(mappedPlayers).forEach(playerId => {
-	// 		onPlayerJoin(playerId as PlayerId, true);
-	// 		npcPlayerIds.current.push(playerId as PlayerId);
-	// 	});
-	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	// }, []);
-
-	const [canStart, setCanStart] = useState(false);
 
 	const [
 		currentOnlinePlayerId,
 		setCurrentOnlinePlayerId,
 	] = useState<PlayerId>();
 
-	useOnPlayerExitOnline(gameId, currentOnlinePlayerId);
-
 	useEffect(() => {
-		if (!isReady) return;
-
 		const { gamePlayers } = game;
 		const playerKeys = Object.keys(gamePlayers);
 		const playerCount = playerKeys.length;
@@ -88,64 +73,112 @@ const WaitingRoom = ({ gameId }: Props) => {
 		// TODO: error checking?
 		setCurrentOnlinePlayerId(newPlayerId);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isReady]);
+	}, []);
+
+	return currentOnlinePlayerId;
+};
+
+/** Handles redirecting to the game screen when room creator starts the game */
+const useOnGameStart = ({ game, gameId, playerId }: UseOnGameStart) => {
+	const { push } = useHistory();
 
 	useEffect(() => {
-		if (!isReady) return;
 		if (!game?.started) return;
 
 		push(`${BASE_PATH}/online/${gameId}`, {
-			playerId: currentOnlinePlayerId,
+			playerId,
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isReady, game?.started]);
+	}, [game?.started]);
+};
 
-	useEffect(() => {
-		if (!isReady) return;
-
-		const { gamePlayers } = game;
-		const playerCount = Object.keys(gamePlayers).length;
-
-		// we don't want to count the NPCs, there should be
-		// at least 2 Human Players
-		if (playerCount - npcPlayerIds.current.length > 1) {
-			setCanStart(true);
-		}
-	}, [game, isReady]);
-
+const useRoomLinkAndCopy = () => {
+	// Generates the room link
 	const {
 		location: { origin, pathname },
 	} = window;
 	const link = origin + pathname;
 
+	const [copyButtonText, setCopyButtonText] = useState('Copy Room Link');
+	const onCopyText = () => {
+		copyToClipboard(link);
+		setCopyButtonText('Copied!');
+	};
+
+	return {
+		copyButtonText,
+		onCopyText,
+	};
+};
+
+type WrapperProps = Pick<
+	UseWatchOnlineGameProps,
+	'onPlayerJoin' | 'game' | 'onStartGame'
+> & {
+	gameId: OnlineGameId;
+};
+const Wrapper = ({ gameId, game, onPlayerJoin, onStartGame }: WrapperProps) => {
+	const currentOnlinePlayerId = useOnJoinRoom({
+		game,
+		onPlayerJoin,
+	});
+	useOnPlayerExitOnline(gameId, currentOnlinePlayerId);
+
+	useOnGameStart({
+		game,
+		gameId,
+		playerId: currentOnlinePlayerId,
+	});
+
+	const canStart = useCanStartGame(game.gamePlayers);
+
+	const { copyButtonText, onCopyText } = useRoomLinkAndCopy();
+
+	return (
+		<PageContainer>
+			<H1> Waiting Room </H1>
+			<Spacer />
+			<H4>
+				Room ID:&nbsp;
+				<span style={{ color: theme.palette.color.info }}>
+					{gameId}
+				</span>
+				<Spacer />
+				<TooltipButton
+					text={copyButtonText}
+					bg="primary"
+					onClick={onCopyText}
+					icon={CopyIcon}
+				/>
+			</H4>
+			<PlayerDisplay
+				players={game.gamePlayers}
+				onStartGame={onStartGame}
+				canStart={canStart}
+				currentOnlinePlayerId={currentOnlinePlayerId}
+			/>
+		</PageContainer>
+	);
+};
+
+const WaitingRoom = ({ gameId }: Props) => {
+	const {
+		pending,
+		error,
+		game,
+		onPlayerJoin,
+		onStartGame,
+	} = useWatchOnlineGame(gameId);
+
 	return (
 		pending ||
 		error || (
-			<>
-				<H1> Waiting Room </H1>
-				<Spacer />
-				<H4>
-					Room / Game Id:
-					<br />
-					<span style={{ color: theme.palette.color.info }}>
-						{gameId}
-					</span>
-				</H4>
-				<Spacer />
-				<H4>
-					Join Link:
-					<br />
-					<span style={{ color: theme.palette.color.info }}>
-						{link}
-					</span>
-				</H4>
-				<PlayerDisplay
-					players={game.gamePlayers}
-					onStartGame={onStartGame}
-					canStart={canStart}
-					currentOnlinePlayerId={currentOnlinePlayerId}
-				/>
-			</>
+			<Wrapper
+				gameId={gameId}
+				game={game}
+				onPlayerJoin={onPlayerJoin}
+				onStartGame={onStartGame}
+			/>
 		)
 	);
 };

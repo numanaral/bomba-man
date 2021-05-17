@@ -7,11 +7,12 @@ import {
 import { Grid, Theme, useMediaQuery } from '@material-ui/core';
 import ContainerWithCenteredItems from 'components/ContainerWithCenteredItems';
 import Spacer from 'components/Spacer';
-import TooltipButton from 'components/TooltipButton';
+import TooltipButton, { TooltipButtonProps } from 'components/TooltipButton';
 import { PlayerCondition } from 'enums';
 import styled, { css } from 'styled-components';
 import { ghostAnimation } from 'animations';
 import theme from 'theme';
+import { useState } from 'react';
 
 interface Props {
 	players: OnlineGame['gamePlayers'];
@@ -38,6 +39,24 @@ const FloatingGhostIcon = styled(GhostIcon)<{
 	}}
 `;
 
+const RoomButton = (props: TooltipButtonProps) => {
+	return (
+		<>
+			<Spacer spacing="5" />
+			<ContainerWithCenteredItems container>
+				<Grid container justify="center" item xs={12} sm={4}>
+					<TooltipButton
+						fullWidth
+						bg="primary"
+						variant="contained"
+						{...props}
+					/>
+				</Grid>
+			</ContainerWithCenteredItems>
+		</>
+	);
+};
+
 const PlayerDisplay = ({
 	players,
 	currentOnlinePlayerId,
@@ -46,28 +65,32 @@ const PlayerDisplay = ({
 	canStart = false,
 }: Props) => {
 	const xsAndDown = useMediaQuery<Theme>(t => t.breakpoints.down('xs'));
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const _onStartGame = () => {
+		setIsSubmitting(true);
+		try {
+			onStartGame?.();
+		} catch (err) {
+			// eslint-disable-next-line no-alert
+			alert(err.message);
+			setIsSubmitting(false);
+		}
+	};
+
 	return (
 		<ContainerWithCenteredItems container>
-			{onStartGame && (
-				<>
-					<Spacer spacing="5" />
-					<ContainerWithCenteredItems container>
-						<Grid container justify="center" item xs={12} sm={4}>
-							<TooltipButton
-								text="Start"
-								fullWidth
-								bg="primary"
-								variant="contained"
-								disabled={!canStart}
-								onClick={onStartGame as ReactOnButtonClick}
-							/>
-						</Grid>
-					</ContainerWithCenteredItems>
-				</>
+			{/* Only P1 can start/restart the game */}
+			{currentOnlinePlayerId === 'P1' && (
+				<RoomButton
+					text={isGameEnd ? 'Restart' : 'Start'}
+					onClick={_onStartGame}
+					pending={isSubmitting}
+					disabled={!canStart || isSubmitting}
+				/>
 			)}
 			<Spacer spacing={xsAndDown ? 5 : 10} />
 			<Grid container justify="space-between" item xs={10} md={9} lg={8}>
-				{Object.keys(players)
+				{Object.keys(players || {})
 					.sort()
 					.map((id, ind) => {
 						const isCurrentPlayer = currentOnlinePlayerId === id;

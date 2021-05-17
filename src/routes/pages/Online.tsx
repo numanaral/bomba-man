@@ -1,28 +1,51 @@
 import Game from 'containers/Game';
+import { OnlineGameId, PlayerId } from 'containers/Game/types';
 import useOnGameEnd from 'hooks/useOnGameEnd';
 import useOnPlayerExitOnline from 'hooks/useOnPlayerExitOnline';
 import { RouteComponentPropsWithLocationState } from 'routes/types';
-import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 import useOnlineGame from 'store/redux/hooks/useOnlineGame';
+
+type WrapperProps = {
+	gameId: OnlineGameId;
+	currentOnlinePlayerId?: PlayerId;
+	gameProps: Omit<ReturnType<typeof useOnlineGame>, 'pending' | 'error'>;
+};
+
+const Wrapper = ({
+	gameId,
+	currentOnlinePlayerId,
+	gameProps,
+}: WrapperProps) => {
+	useOnPlayerExitOnline(gameId, currentOnlinePlayerId);
+	useOnGameEnd(
+		gameProps.gamePlayers,
+		currentOnlinePlayerId,
+		gameId,
+		gameProps.state.config
+	);
+
+	return (
+		<Game {...gameProps} playerId={currentOnlinePlayerId} gameId={gameId} />
+	);
+};
 
 const Online = ({
 	location,
 	match: {
-		params: { id },
+		params: { id: gameId },
 	},
 }: RouteComponentPropsWithLocationState<{ id: string }>) => {
-	const { pending, error, ...gameProps } = useOnlineGame(id);
-	const { game } = useWatchOnlineGame(id);
+	const { pending, error, ...gameProps } = useOnlineGame(gameId);
 	const currentOnlinePlayerId = location?.state?.playerId;
-	const players = game?.gamePlayers || {};
-
-	useOnPlayerExitOnline(id, currentOnlinePlayerId);
-	useOnGameEnd(players, currentOnlinePlayerId, id);
 
 	return (
 		pending ||
 		error || (
-			<Game {...gameProps} playerId={currentOnlinePlayerId} gameId={id} />
+			<Wrapper
+				gameId={gameId}
+				currentOnlinePlayerId={currentOnlinePlayerId}
+				gameProps={gameProps}
+			/>
 		)
 	);
 };
