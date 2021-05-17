@@ -5,6 +5,8 @@ interface Props {
 	color?: HexColor;
 	fullSize?: boolean;
 	fullWidth?: boolean;
+	size?: number;
+	rippleCount?: number;
 }
 
 const Wrapper = styled.div<StyledProps<Props, 'fullSize' | 'fullWidth'>>`
@@ -35,10 +37,12 @@ const Wrapper = styled.div<StyledProps<Props, 'fullSize' | 'fullWidth'>>`
 `;
 
 /** @see https://loading.io/css/ */
-const rippleKeyframes = () => keyframes`
+const rippleKeyframes = (size: number) => {
+	const sizing = Math.round(0.5 * size);
+	return keyframes`
 	0% {
-		top: 144px;
-		left: 144px;
+		top: ${sizing}px;
+		left: ${sizing}px;
 		width: 0;
 		height: 0;
 		opacity: 1;
@@ -46,53 +50,68 @@ const rippleKeyframes = () => keyframes`
 	100% {
 		top: 0px;
 		left: 0px;
-		width: 288px;
-		height: 288px;
+		width: ${sizing * 2}px;
+		height: ${sizing * 2}px;
 		opacity: 0;
 	}
 `;
+};
 
-const Explosion = styled.div<{ $color: string }>`
+const Ripples = styled.div<
+	Required<StyledProps<Props, 'size' | 'rippleCount' | 'color'>>
+>`
 	display: inline-block;
 	position: relative;
-	width: 200px;
-	height: 200px;
+	${({ $size }) => {
+		return `
+			width: ${$size}px;
+			height: ${$size}px;
+		`;
+	}}
 
 	div {
 		position: absolute;
 		opacity: 1;
 		border-radius: 50%;
-		${({ $color }) => css`
-			border: 4px solid ${$color};
-			animation: ${rippleKeyframes()} 1s cubic-bezier(0, 0.2, 0.8, 1)
-				infinite;
-		`}
+		${({ $color, $size }) => {
+			return css`
+				border: 4px solid ${$color};
+				animation: ${rippleKeyframes($size)} 2s
+					cubic-bezier(0, 0.2, 0.8, 1) infinite;
+			`;
+		}}
 	}
 
-	div:nth-child(2) {
-		animation-delay: -0.5s;
-	}
+	${({ $rippleCount }) => {
+		const delays = Array($rippleCount)
+			.fill(0)
+			.reduce((acc, _, ind) => {
+				return `${acc}
+				div:nth-child(${ind + 2}) {
+					animation-delay: -${(ind + 1) * 0.5 + ind}s;
+				}
+			`;
+			}, '');
 
-	div:nth-child(3) {
-		animation-delay: -1s;
-	}
+		return delays;
+	}}
 `;
 
 const LoadingIndicator = ({
 	color = '#f44336',
 	fullSize = false,
 	fullWidth = false,
+	size = 400,
+	rippleCount = 5,
 	...rest
 }: Props) => {
 	return (
 		<Wrapper $fullSize={fullSize} $fullWidth={fullWidth} {...rest}>
-			<Explosion $color={color}>
-				<div />
-				<div />
-				<div />
-				<div />
-				<div />
-			</Explosion>
+			<Ripples $color={color} $size={size} $rippleCount={rippleCount}>
+				{Array.from({ length: rippleCount }).map((_, ind) => {
+					return <div key={ind} />;
+				})}
+			</Ripples>
 		</Wrapper>
 	);
 };
