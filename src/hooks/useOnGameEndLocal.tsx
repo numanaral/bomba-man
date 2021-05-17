@@ -41,9 +41,9 @@ const useOnGameEndLocal = (
 		if (alivePlayers.length > 1) return;
 
 		setTimeout(() => {
-			onGameEnd();
 			// ensure that the redux state was updated
 			setTimeout(() => {
+				onGameEnd(gameState.config);
 				push(`${BASE_PATH}/game-end`, {
 					endGame: {
 						players: mappedPlayers,
