@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import Spacer from 'components/Spacer';
 import { PickedGameState } from './types';
 
 const SettingsAndMap = styled.div`
@@ -30,7 +31,7 @@ interface Props extends PickedGameState<'is3D'> {}
 const GameContainer: React.FC<Props> = ({ children, is3D }) => {
 	return (
 		<CenteredDiv $is3D={is3D}>
-			<h1>Bomba-man - Work In Progress</h1>
+			<Spacer spacing="2" />
 			<SettingsAndMap>{children}</SettingsAndMap>
 		</CenteredDiv>
 	);

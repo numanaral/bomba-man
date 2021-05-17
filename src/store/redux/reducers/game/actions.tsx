@@ -1,5 +1,7 @@
 import {
 	DROP_BOMB,
+	CHANGE_DIRECTION,
+	CHANGE_IS_WALKING,
 	MAKE_MOVE,
 	ON_EXPLOSION_COMPLETE,
 	SET_GAME_MAP,
@@ -25,6 +27,16 @@ const setGameMap: GameActionFn = payload => ({
 });
 
 // #region GAME ACTIONS
+const changePlayerDirectionInGame: GameActionFn = payload => ({
+	type: CHANGE_DIRECTION,
+	payload,
+});
+
+const changePlayerIsWalkingInGame: GameActionFn = payload => ({
+	type: CHANGE_IS_WALKING,
+	payload,
+});
+
 const makeMoveInGame: GameActionFn = payload => ({
 	type: MAKE_MOVE,
 	payload,
@@ -78,6 +90,8 @@ export {
 	setGameState,
 	setGameMap,
 	// GAME ACTIONS
+	changePlayerDirectionInGame,
+	changePlayerIsWalkingInGame,
 	makeMoveInGame,
 	triggerMoveInGame,
 	dropBombInGame,

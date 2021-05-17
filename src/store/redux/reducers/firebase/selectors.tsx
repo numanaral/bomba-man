@@ -16,10 +16,14 @@ const makeSelectProfile = () => {
 	return createSelector(selectFirebase, ({ profile }) => profile);
 };
 
+const makeSelectOnline = () => {
+	return createSelector(selectFirebase, ({ data: { online } }) => online);
+};
+
 const makeSelectOnlineGame = (id: string) => {
 	return createSelector(
 		selectFirebase,
-		({ data: { online } }) => online?.[id]
+		({ data: { online } }) => online && online[id]
 	);
 };
 
@@ -32,6 +36,7 @@ export {
 	selectFirebase,
 	makeSelectAuth,
 	makeSelectProfile,
+	makeSelectOnline,
 	makeSelectOnlineGame,
 };
 export default makeSelectFirebase;

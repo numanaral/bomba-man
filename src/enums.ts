@@ -46,6 +46,21 @@ enum Explosive {
 	FireVertical = 'FV',
 }
 
+enum GameType {
+	Local = 'local',
+	Online = 'online',
+}
+
+enum GameEndCondition {
+	Win = 'Won',
+	Lose = 'Lost',
+}
+
+enum PlayerCondition {
+	Alive = 'alive',
+	Dead = 'dead',
+}
+
 const FIRE_VALUES = Object.values(Explosive).filter(v => v !== Explosive.Bomb);
 
 export {
@@ -56,5 +71,8 @@ export {
 	Tile,
 	PowerUp,
 	Explosive,
+	GameType,
+	GameEndCondition,
+	PlayerCondition,
 	FIRE_VALUES,
 };

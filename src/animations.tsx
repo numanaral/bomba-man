@@ -9,4 +9,15 @@ const bounceAnimation = (withOpacity = false) => keyframes`
 	100% { transform: scale(1, 1); ${(withOpacity && 'opacity: 1;') || ''} }
 `;
 
-export { bounceAnimation };
+const ghostAnimation = (size: number, color: string) => keyframes`
+	0%, 100% { 
+		transform: translateY(0px); 
+		box-shadow: 0 10px 10px #000000;
+	}
+	50% {
+		transform: translateY(-10px);
+		box-shadow: 0 20px ${Math.ceil(size / 6) + 10}px ${color};
+	}
+`;
+
+export { bounceAnimation, ghostAnimation };

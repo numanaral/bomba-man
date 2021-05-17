@@ -14,6 +14,7 @@ type WrapperProps = StyledProps<
 	| 'color'
 	| 'collisionIndex'
 	| 'fireSquare'
+	| 'firingDuration'
 >;
 
 const fireAnimation = (fireSquare: Fire) => {
@@ -64,14 +65,14 @@ const Wrapper = styled.div.attrs<WrapperProps>(
 	position: absolute;
 	/* background-color: ${theme.palette.background.secondary}; */
 	border: 1px solid ${theme.palette.background.primary};
-	${({ $color, $collisionIndex, $animate, $fireSquare }) => {
+	${({ $color, $collisionIndex, $animate, $fireSquare, $firingDuration }) => {
 		return (
 			($fireSquare &&
 				css`
 					border: none;
 					animation: ${fireAnimation($fireSquare)}
-						calc(var(--firing-duration) / 2)
-						var(--ease-in-out-quint) forwards;
+						${($firingDuration || 1) / 2}s var(--ease-in-out-quint)
+						forwards;
 				`) ||
 			($animate &&
 				$color &&
@@ -99,16 +100,18 @@ const Tile = ({
 	collisionIndex,
 	animate = false,
 	fireSquare,
+	firingDuration,
 }: TileProps) => {
 	return (
 		<Wrapper
 			$size={size}
 			$top={top}
 			$left={left}
-			$animate={animate}
 			$color={color}
 			$collisionIndex={collisionIndex}
+			$animate={animate}
 			$fireSquare={fireSquare}
+			$firingDuration={firingDuration}
 		/>
 	);
 };

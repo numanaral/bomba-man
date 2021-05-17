@@ -4,7 +4,6 @@ import { Reducer } from 'redux';
 import LocalGameUpdater from 'api/LocalGameUpdater';
 import GameUtils from 'api/GameUtils';
 import {
-	DEFAULT_VALUES,
 	SET_GAME_STATE,
 	START_GAME,
 	END_GAME,
@@ -29,13 +28,11 @@ import {
 	OnPrepareMoveProps,
 } from './types';
 
-const gameReducer: Reducer<GameState, GameAction> = (
-	state = DEFAULT_VALUES,
-	action
-) => {
-	return produce(state, draft => {
-		const gameUpdater = new LocalGameUpdater(state, draft);
-		const gameUtils = new GameUtils(state, gameUpdater);
+const gameReducer: Reducer<GameState, GameAction> = (state, action) => {
+	if (!state) return {} as GameState;
+	return produce(state!, draft => {
+		const gameUpdater = new LocalGameUpdater(state!, draft!);
+		const gameUtils = new GameUtils(state!, gameUpdater);
 
 		switch (action.type) {
 			case SET_GAME_STATE:

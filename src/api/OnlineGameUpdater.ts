@@ -1,9 +1,3 @@
-// import useAuth from 'store/firebase/hooks/useAuth';
-// TODO: react-router
-// import LoadingIndicator from 'components/LoadingIndicator';
-// import NoAccess from 'components/NoAccess';
-// TODO: notification-provider
-// import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 import {
 	AnimatableGameMap,
 	Bomb,
@@ -14,7 +8,7 @@ import {
 import {
 	PlayerConfig,
 	PlayerId,
-	PlayerKeyboardConfig,
+	// KeyboardConfig,
 	Players,
 	PlayerState,
 	PowerUps,
@@ -22,7 +16,7 @@ import {
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { PowerUp } from 'enums';
+import { Direction, PowerUp } from 'enums';
 import GameUpdater from './GameUpdater';
 import useFirebaseUtils from '../store/firebase/hooks/useFirebaseUtils';
 
@@ -91,13 +85,38 @@ class OnlineGameUpdater extends GameUpdater {
 	};
 	// #endregion
 
+	// #region 			GameState.players.[*].[*PlayerConfig].direction
+	updatePlayerDirection = ({
+		direction,
+		id: playerId,
+	}: Pick<PlayerConfig, 'direction' | 'id'>) => {
+		this.updaters.update<PlayerConfig>(
+			{ direction },
+			`/players/${playerId}`
+		);
+	};
+	// #endregion
+
+	// #region 			GameState.players.[*].[*PlayerConfig].isWalking
+	updatePlayerIsWalking = ({
+		isWalking,
+		id: playerId,
+	}: Pick<PlayerConfig, 'isWalking' | 'id'>) => {
+		this.updaters.update<PlayerConfig>(
+			{ isWalking },
+			`/players/${playerId}`
+		);
+	};
+	// #endregion
+
 	// #region 			GameState.players.[*].[*PlayerConfig].coordinates
 	updatePlayerCoordinates = async (
 		coordinates: TopLeftCoordinates,
-		playerId: PlayerId
+		playerId: PlayerId,
+		direction: Direction
 	) => {
 		this.updaters.update<PlayerConfig>(
-			{ coordinates },
+			{ coordinates, direction, isWalking: true },
 			`/players/${playerId}`
 		);
 	};
@@ -132,15 +151,15 @@ class OnlineGameUpdater extends GameUpdater {
 	// #endregion
 
 	// #region 			GameState.players.[*].[*PlayerConfig].keyboardConfig
-	updatePlayerPlayerKeyboardConfig = async (
-		keyboardConfig: Partial<PlayerKeyboardConfig>,
-		playerId: PlayerId
-	) => {
-		this.updaters.update<PlayerKeyboardConfig>(
-			{ ...keyboardConfig },
-			`/players/${playerId}`
-		);
-	};
+	// updatePlayerPlayerKeyboardConfig = async (
+	// 	keyboardConfig: KeyboardConfig,
+	// 	playerId: PlayerId
+	// ) => {
+	// 	this.updaters.update<KeyboardConfig>(
+	// 		{ ...keyboardConfig },
+	// 		`/players/${playerId}`
+	// 	);
+	// };
 	// #endregion
 
 	// #endregion

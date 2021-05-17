@@ -1,9 +1,3 @@
-// import useAuth from 'store/firebase/hooks/useAuth';
-// TODO: react-router
-// import LoadingIndicator from 'components/LoadingIndicator';
-// import NoAccess from 'components/NoAccess';
-// TODO: notification-provider
-// import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 import {
 	AnimatableGameMap,
 	Bomb,
@@ -13,14 +7,14 @@ import {
 import {
 	PlayerConfig,
 	PlayerId,
-	PlayerKeyboardConfig,
+	// KeyboardConfig,
 	Players,
 	PlayerState,
 	Square,
 	SquareCoordinates,
 	TopLeftCoordinates,
 } from 'containers/Game/types';
-import { PowerUp } from 'enums';
+import { Direction, PowerUp } from 'enums';
 // eslint-disable-next-line import/no-unresolved
 import { WritableDraft } from 'immer/dist/internal';
 import { updateImmerDraft } from 'utils/immer';
@@ -79,12 +73,34 @@ class LocalGameUpdater extends GameUpdater {
 	};
 	// #endregion
 
+	// #region 			GameState.players.[*].[*PlayerConfig].direction
+	updatePlayerDirection = ({
+		direction,
+		id: playerId,
+	}: Pick<PlayerConfig, 'direction' | 'id'>) => {
+		this.draft.players[playerId]!.direction = direction;
+	};
+	// #endregion
+
+	// #region 			GameState.players.[*].[*PlayerConfig].isWalking
+	updatePlayerIsWalking = ({
+		isWalking,
+		id: playerId,
+	}: Pick<PlayerConfig, 'isWalking' | 'id'>) => {
+		this.draft.players[playerId]!.isWalking = isWalking;
+	};
+	// #endregion
+
 	// #region 			GameState.players.[*].[*PlayerConfig].coordinates
 	updatePlayerCoordinates = async (
 		coordinates: TopLeftCoordinates,
-		playerId: PlayerId
+		playerId: PlayerId,
+		direction: Direction
 	) => {
-		this.draft.players[playerId]!.coordinates = coordinates;
+		const player = this.draft.players[playerId]!;
+		player.coordinates = coordinates;
+		player.direction = direction;
+		player.isWalking = true;
 	};
 	// #endregion
 
@@ -106,15 +122,15 @@ class LocalGameUpdater extends GameUpdater {
 	// #endregion
 
 	// #region 			GameState.players.[*].[*PlayerConfig].keyboardConfig
-	updatePlayerPlayerKeyboardConfig = async (
-		keyboardConfig: Partial<PlayerKeyboardConfig>,
-		playerId: PlayerId
-	) => {
-		updateImmerDraft(
-			this.draft.players[playerId]!.keyboardConfig || {},
-			keyboardConfig
-		);
-	};
+	// updatePlayerPlayerKeyboardConfig = async (
+	// 	keyboardConfig: Partial<KeyboardConfig>,
+	// 	playerId: PlayerId
+	// ) => {
+	// 	updateImmerDraft(
+	// 		this.draft.players[playerId]!.keyboardConfig || {},
+	// 		keyboardConfig
+	// 	);
+	// };
 	// #endregion
 
 	// #endregion

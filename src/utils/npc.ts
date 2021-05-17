@@ -15,6 +15,15 @@ import {
 } from './game';
 import { getRandomInt } from './math';
 
+// allow debugging in prod
+// @ts-ignore
+window.NPC_DEBUG = false;
+const log = (value: any, label = '') => {
+	// @ts-ignore
+	if (!window.NPC_DEBUG) return;
+	console.log(...[label, value].filter(Boolean));
+};
+
 type NpcStore = {
 	id: number;
 	parentNodes: MovementNode[];
@@ -39,6 +48,8 @@ enum NPCScore {
 	IsEmptyTile = 2,
 	IsBreakingTile = 3,
 	IsPlayer = 4,
+	/** If the current and the next spots are fire, we need to get out */
+	IsPossibleFireExit = 1,
 	IsPowerUp = 1000,
 }
 
@@ -78,13 +89,14 @@ const isSquareAPossibleFire = (currentSquareCoordinates: SquareCoordinates) => {
 		const { players } = Store!;
 		const { coordinatesToSetOnFire } = getExplosionResults(
 			Store!.gameMap,
-			players,
 			{ top, left },
-			getPoweredUpValue(
-				players[playerId]!.state,
-				PowerUp.BombSize,
-				Store!.powerUpConfig
-			),
+			players[playerId]?.state
+				? getPoweredUpValue(
+						players[playerId]!.state,
+						PowerUp.BombSize,
+						Store!.powerUpConfig
+				  )
+				: Store!.powerUpConfig.defaults[PowerUp.BombSize],
 			Store!.sizes
 		);
 		Object.values(coordinatesToSetOnFire)
@@ -127,6 +139,7 @@ const dropBombAndRunOrScoreTarget = (
 ) => {
 	// TODO: is this necessary? it's already the nextSquare
 	if (isAdjacent(newCoordinates, oldCoordinates)) {
+		// TODO: move this up to usePlayerEvents
 		const currentTime = new Date().getTime();
 		if (
 			Store!.lastBombTime <=
@@ -163,6 +176,9 @@ const generateScore = (
 	const newSquare = Store!.gameMap[newYSquare][newXSquare];
 	// TODO: Please comment
 	if (isSquareAPossibleFire(newCoordinates)) {
+		if (isSquareAPossibleFire(oldCoordinates)) {
+			return NPCScore.IsPossibleFireExit;
+		}
 		return NPCScore.IsDanger;
 	}
 	if (Object.values(PowerUp).includes(newSquare as PowerUp)) {
@@ -183,6 +199,9 @@ const generateScore = (
 		if (score !== null) return score;
 	}
 	if (newSquare === Tile.Breaking) {
+		if (isSquareAPossibleFire(oldCoordinates)) {
+			return NPCScore.IsDanger;
+		}
 		const score = dropBombAndRunOrScoreTarget(
 			newCoordinates,
 			oldCoordinates,
@@ -204,7 +223,7 @@ const generateScore = (
 const generateMovementTree = (
 	newCoordinates: SquareCoordinates,
 	oldCoordinates: SquareCoordinates,
-	level: number = 2,
+	level: number = 1,
 	parentId: number | null = null
 ) => {
 	const { ySquare: newYSquare, xSquare: newXSquare } = newCoordinates;
@@ -362,7 +381,10 @@ const findBestMove = (
 		currentCoordinates,
 		undefined
 	);
+	log(currentCoordinates, 'currentCoordinates');
+	log(movementTree, 'originalMoves');
 	getTotalScoreOfAllNodes(movementTree);
+	log(movementTree, 'scoredMoves');
 
 	return findNodeWithHighestScore(Store!.parentNodes);
 };
@@ -402,6 +424,7 @@ const npcAction: NPCActionFn = ({
 	);
 
 	const bestMovementNode = findBestMove(currentSquareCoordinates);
+	log(bestMovementNode, 'bestMovementNode');
 
 	if ((bestMovementNode?.score || 0) > 0) {
 		triggerMove({ playerId, direction: bestMovementNode!.direction, ref });
