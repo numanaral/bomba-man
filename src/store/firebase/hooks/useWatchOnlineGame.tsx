@@ -94,27 +94,19 @@ const useWatchOnlineGame = (id: string) => {
 		);
 	};
 
-	const _game: OnlineGame = {
-		gameId: id,
-		gameState: {
-			players: game?.gameState?.players || defaultGameState.players,
-			gameMap: game?.gameState?.gameMap || defaultGameState.gameMap,
-			bombs: game?.gameState?.bombs || defaultGameState.bombs,
-			powerUps: game?.gameState?.powerUps || defaultGameState.powerUps,
-			is3D: game?.gameState?.is3D || defaultGameState.is3D,
-			isSideView:
-				game?.gameState?.isSideView || defaultGameState.isSideView,
-			animationCounter:
-				game?.gameState?.animationCounter ||
-				defaultGameState.animationCounter,
-			config: game?.gameState?.config || defaultGameState.config,
-		},
-		gamePlayers: game?.gamePlayers || {},
-		started: game?.started || false,
-	};
-
 	return {
-		game: _game,
+		game: {
+			...game,
+			gameState: {
+				...(game?.gameState || {}),
+				players: game?.gameState?.players || {},
+				bombs: game?.gameState?.bombs || {},
+				powerUps: game?.gameState?.powerUps || {},
+			},
+			gamePlayers: game?.gamePlayers || {},
+			gameId: game?.gameId || id,
+			started: game?.started || false,
+		},
 		pending,
 		error,
 		isReady: !pending && !error,

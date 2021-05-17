@@ -3,7 +3,7 @@ import { Direction, Player } from 'enums';
 import { GameProvider } from 'store/redux/hooks/useGameProvider';
 import { GameConfigRanges } from 'store/redux/reducers/game/types';
 import theme from 'theme';
-import { CUBE_BASE_TRANSFORM } from 'utils/game';
+import { getCubeBaseTransform } from 'utils/game';
 import { KeyboardConfig, PlayerId, TopLeftCoordinates } from '../types';
 // import CircleCharacter from './CircleCharacter';
 import SpriteCharacter from './SpriteCharacter';
@@ -54,7 +54,7 @@ const Character = ({
 				animate
 				color={theme.palette.color.success}
 				style={{
-					transform: CUBE_BASE_TRANSFORM,
+					transform: getCubeBaseTransform(tileSize),
 					// top,
 					// left,
 				}}

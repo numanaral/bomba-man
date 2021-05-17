@@ -4,7 +4,7 @@ import theme from 'theme';
 import { Explosive, Tile as TileEnum } from 'enums';
 import { isPowerUp } from 'utils/game';
 import { useEffect } from 'react';
-import { GameConfig } from 'store/redux/reducers/game/types';
+import { GameConfig, GameConfigRanges } from 'store/redux/reducers/game/types';
 import Cube from './Cube';
 import Tile from './Tile';
 import { GameMap, Square, TileProps } from '../types';
@@ -12,6 +12,7 @@ import PowerUp from './PowerUp';
 
 interface Props {
 	sizes: GameConfig['sizes'];
+	firingDuration: GameConfigRanges.FiringDuration;
 	gameMap: GameMap;
 	is3D: boolean;
 	isTopView: boolean;
@@ -48,6 +49,7 @@ const Wrapper = styled.div<
 
 const Map: React.FC<Props> = ({
 	sizes: { map: mapSize, tile: tileSize },
+	firingDuration,
 	gameMap,
 	is3D,
 	isTopView,
@@ -115,6 +117,7 @@ const Map: React.FC<Props> = ({
 							animate: shouldAnimate,
 							variant: square,
 							fireSquare,
+							firingDuration,
 							...(hasCollision && {
 								color:
 									theme.palette.color[

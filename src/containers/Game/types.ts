@@ -12,6 +12,7 @@ import * as KeyCode from 'keycode-js';
 import {
 	Bombs,
 	GameConfig,
+	GameConfigRanges,
 	GameState,
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
@@ -34,6 +35,7 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	collisionIndex?: number;
 	animate?: boolean;
 	fireSquare?: Fire;
+	firingDuration?: GameConfigRanges.FiringDuration;
 }
 
 type Fire =
@@ -146,6 +148,7 @@ type GameApi = {
 	error?: false | JSX.Element;
 	// online mode
 } & {
+	started?: boolean;
 	gameId?: OnlineGameId;
 	playerId?: PlayerId;
 };

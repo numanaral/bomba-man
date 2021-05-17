@@ -30,7 +30,7 @@ const useLocalGame: GameApiHookLocal = gameConfig => {
 		provider,
 		state,
 		type: GameType.Local,
-		gamePlayers: Object.keys(state.players).reduce<
+		gamePlayers: Object.keys(state.players || {}).reduce<
 			Record<PlayerId, PlayerCondition>
 		>((acc, playerId) => {
 			acc[playerId as PlayerId] = PlayerCondition.Alive;

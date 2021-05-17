@@ -419,7 +419,8 @@ const canMove = (
 	);
 };
 
-const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotateX(0deg) rotateY(0deg) scale(1, 1)`;
+const getCubeBaseTransform = (tileSize: GameConfigRanges.SquareSize) =>
+	`translateZ(${tileSize / 2}px) rotateX(0deg) rotateY(0deg) scale(1, 1)`;
 /**
  * Since we are moving a flat plane and not a cube, the logical sense of
  * rotating a cube doesn't work. Different type of rotations do no always
@@ -430,11 +431,14 @@ const CUBE_BASE_TRANSFORM = `translateZ(calc(var(--tile-size) / 2 * 1px)) rotate
  *
  * @param characterRef ref object
  */
-const resetRotation = (characterRef: NonNullable<PlayerRef>) => {
+const resetRotation = (
+	characterRef: NonNullable<PlayerRef>,
+	tileSize: GameConfigRanges.SquareSize
+) => {
 	// disable animation
 	characterRef.style.transition = '0ms';
 	// reset
-	characterRef.style.transform = CUBE_BASE_TRANSFORM;
+	characterRef.style.transform = getCubeBaseTransform(tileSize);
 };
 
 const ROTATION_REGEX = {
@@ -529,7 +533,7 @@ const handleMove = (
 		hasMoved = false;
 	}
 
-	if (is3D) resetRotation(ref);
+	if (is3D) resetRotation(ref, sizes.tile);
 	// TODO: Do a write-up on this
 	// this complexity is required for a smooth 3d rotate move
 	// since we are resetting rotation css, we need an async
@@ -968,7 +972,7 @@ export {
 	handleRotateMove,
 	handleMove,
 	resetRotation,
-	CUBE_BASE_TRANSFORM,
+	getCubeBaseTransform,
 	getExplosionScaleSize,
 	getExplosionResults,
 	generateBomb,

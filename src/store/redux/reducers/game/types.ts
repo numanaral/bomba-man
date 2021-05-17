@@ -12,7 +12,7 @@ import {
 import { Direction, PowerUp } from 'enums';
 import * as constants from './constants';
 
-const { KEY, DEFAULT_VALUES, ...actionTypes } = constants;
+const { KEY, ...actionTypes } = constants;
 
 // TODO: merge types?
 

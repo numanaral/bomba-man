@@ -1,9 +1,5 @@
-import { generateDefaultGameState } from 'utils/game';
-import { GameState } from './types';
-
 // Defaults
 const KEY = 'Game';
-const DEFAULT_VALUES: GameState = generateDefaultGameState();
 
 // Types
 const SET_GAME_STATE = `${KEY}/SET_GAME_STATE`;
@@ -27,7 +23,6 @@ const TOGGLE_GAME_NPC = `${KEY}/TOGGLE_GAME_NPC`;
 
 export {
 	KEY,
-	DEFAULT_VALUES,
 	SET_GAME_STATE,
 	START_GAME,
 	END_GAME,

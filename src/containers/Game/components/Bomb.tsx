@@ -7,22 +7,31 @@ import {
 	BombId,
 	GameConfigRanges,
 } from 'store/redux/reducers/game/types';
-import styled, { keyframes } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 import theme from 'theme';
 import { sleep } from 'utils';
 import { PlayerId } from '../types';
 import Cube from './Cube';
 
-const getTransform = (deg: number, is3D: boolean) => {
+const getTransform = (
+	tileSize: GameConfigRanges.SquareSize,
+	deg: number,
+	is3D: boolean
+) => {
 	return `${
 		is3D
-			? `transform: translateZ(calc(var(--tile-size) / 2 * 2px)) rotateX(${deg}deg) rotateY(${deg}deg)`
+			? `transform: translateZ(${
+					(tileSize / 2) * 2
+			  }px) rotateX(${deg}deg) rotateY(${deg}deg)`
 			: `transform: rotate(${deg}deg)`
 	};`;
 };
 
-const incrementalSpeedRotationKeyframes = (is3D = false) => keyframes`
-	0% { ${getTransform(0, is3D)} }
+const incrementalSpeedRotationKeyframes = (
+	tileSize: GameConfigRanges.SquareSize,
+	is3D = false
+) => keyframes`
+	0% { ${getTransform(tileSize, 0, is3D)} }
 	
 	/* 40% -> 100% */
 	${Array(7)
@@ -31,6 +40,7 @@ const incrementalSpeedRotationKeyframes = (is3D = false) => keyframes`
 			(_, ind) =>
 				/* start at 40% */
 				`${(ind + 4) * 10}% { ${getTransform(
+					tileSize,
 					/* gradually increase the rotation degree multiplier */
 					(ind + 1) *
 						((is3D && ((ind < 6 && 90) || 100)) ||
@@ -43,15 +53,18 @@ const incrementalSpeedRotationKeyframes = (is3D = false) => keyframes`
 		.join('\n')}
 `;
 
-const FiringBomb = styled.div`
-	animation: ${incrementalSpeedRotationKeyframes()} linear forwards;
+const FiringBomb = styled.div<StyledProps<Props, 'tileSize'>>`
+	${({ $tileSize }) => css`
+		animation: ${incrementalSpeedRotationKeyframes($tileSize)} linear
+			forwards;
+	`}
 `;
 
-const FiringCubeBomb = styled(Cube)`
-	/* ${({ size }) => `
-		--tile-size: ${size};
-	`} */
-	animation: ${incrementalSpeedRotationKeyframes(true)} linear forwards;
+const FiringCubeBomb = styled(Cube)<StyledProps<Props, 'tileSize'>>`
+	${({ $tileSize }) => css`
+		animation: ${incrementalSpeedRotationKeyframes($tileSize, true)} linear
+			forwards;
+	`}
 `;
 interface Props extends BombType {
 	// skin: Skin;
@@ -133,7 +146,9 @@ const Bomb = ({
 
 	return (
 		(explosionState === ExplosionState.Firing &&
-			((!is3D && <FiringBomb style={bombStyleProps} />) || (
+			((!is3D && (
+				<FiringBomb style={bombStyleProps} $tileSize={tileSize} />
+			)) || (
 				<FiringCubeBomb
 					size={bombSize}
 					top={Number(bombStyleProps.top)}
@@ -143,6 +158,7 @@ const Bomb = ({
 					color={theme.palette.color.error}
 					collisionIndex={1}
 					style={bombStyleProps}
+					$tileSize={tileSize}
 				/>
 			))) ||
 		null

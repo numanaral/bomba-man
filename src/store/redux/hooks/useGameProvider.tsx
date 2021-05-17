@@ -35,10 +35,10 @@ import { Direction } from 'enums';
 
 const useGameProvider = () => {
 	const dispatch = useDispatch();
-	const {
-		sizes,
-		tiles: { blockTileChance },
-	} = useSelector(makeSelectGameConfig());
+	const gameConfig = useSelector(makeSelectGameConfig());
+	const sizes = gameConfig?.sizes;
+	const blockTileChance = gameConfig?.tiles.blockTileChance;
+
 	const players = useSelector(makeSelectGamePlayers());
 
 	const updateGameSettings = useCallback(
@@ -47,7 +47,7 @@ const useGameProvider = () => {
 	);
 
 	const startGame = useCallback(
-		(payload: GameConfig) => {
+		(payload?: GameConfig) => {
 			const gameState = generateDefaultGameState(payload);
 			updateGameSettings(gameState);
 		},

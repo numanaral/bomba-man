@@ -4,21 +4,20 @@ import useOnlineGameProvider from 'store/firebase/hooks/useOnlineGameProvider';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 
 const useOnlineGame: GameApiHookOnline = gameId => {
-	const {
-		pending,
-		error,
-		game: { gameState, gamePlayers },
-	} = useWatchOnlineGame(gameId as string);
+	const { pending, error, game } = useWatchOnlineGame(gameId as string);
 
-	const provider = useOnlineGameProvider(gameId as OnlineGameId, gameState);
+	const provider = useOnlineGameProvider(
+		gameId as OnlineGameId,
+		game?.gameState
+	);
 
 	return {
 		provider,
 		pending,
 		error,
-		state: gameState,
+		state: game?.gameState,
 		type: GameType.Online,
-		gamePlayers,
+		gamePlayers: game?.gamePlayers,
 	};
 };
 

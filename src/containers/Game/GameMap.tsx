@@ -1,4 +1,4 @@
-import { GameConfig } from 'store/redux/reducers/game/types';
+import { GameConfig, GameConfigRanges } from 'store/redux/reducers/game/types';
 import Map from './components/Map';
 import { PickedGameState } from './types';
 
@@ -7,24 +7,12 @@ interface Props
 		'gameMap' | 'is3D' | 'isSideView' | 'animationCounter'
 	> {
 	sizes: GameConfig['sizes'];
+	firingDuration: GameConfigRanges.FiringDuration;
 }
 
-const GameMap: React.FC<Props> = ({
-	sizes,
-	children,
-	gameMap,
-	is3D,
-	isSideView,
-	animationCounter,
-}) => {
+const GameMap: React.FC<Props> = ({ children, isSideView, ...rest }) => {
 	return (
-		<Map
-			sizes={sizes}
-			gameMap={gameMap}
-			is3D={is3D}
-			isTopView={!isSideView}
-			animationCounter={animationCounter}
-		>
+		<Map isTopView={!isSideView} {...rest}>
 			{children}
 		</Map>
 	);

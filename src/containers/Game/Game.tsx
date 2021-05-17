@@ -28,6 +28,7 @@ const useGameProps = (props: GameApi) => {
 		is3D,
 		isSideView,
 		animationCounter,
+		firingDuration: config.duration.bomb.firing,
 	};
 
 	const gameContentProps = {

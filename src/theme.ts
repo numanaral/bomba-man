@@ -2,7 +2,6 @@
 // but lighten of mui is not pleasant, darken of polished is the same..
 import { lighten } from 'polished';
 import { fade } from '@material-ui/core/styles/colorManipulator';
-import { GameConfig } from 'store/redux/reducers/game/types';
 import { createGlobalStyle } from 'styled-components';
 import {
 	responsiveFontSizes,
@@ -67,14 +66,6 @@ const theme = {
 		borderRadius: 'var(--border-radius)',
 		padding: 'var(--padding)',
 	},
-	game: {
-		character: {
-			size: 'var(--character-size)',
-		},
-		tile: {
-			size: 'var(--tile-size)',
-		},
-	},
 	transition: {
 		hover: 'var(--hover-animation-duration)',
 	},
@@ -124,7 +115,7 @@ const COLORS = {
 	'--default-color': '#E4E6EB',
 };
 
-const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
+const GlobalStyles = createGlobalStyle`
 	:root {
 		/* #region COLORS */
 		${Object.entries(COLORS).reduce((acc, [colorKey, colorValue]) => {
@@ -139,16 +130,6 @@ const GlobalStyles = createGlobalStyle<{ $gameConfig: GameConfig }>`
 		/* #region UTILITIES */
 		--border-radius: 4px;
 		--padding: 10px;
-		/* #endregion */
-
-		/* #region GAME */
-		${({ $gameConfig }) => `
-			--character-size: ${$gameConfig.sizes.character}px;
-			--tile-size: ${$gameConfig.sizes.tile}px;
-			--game-size: ${$gameConfig.sizes.map}px;
-			--exploding-duration: ${$gameConfig.duration.bomb.exploding}s;
-			--firing-duration: ${$gameConfig.duration.bomb.firing}s;
-		`}
 		/* #endregion */
 		
 		/* #region ANIMATIONS */

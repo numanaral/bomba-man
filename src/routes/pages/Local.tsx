@@ -21,8 +21,16 @@ const Wrapper = ({ gameProps }: { gameProps: GameApi }) => {
 const Local = ({ location }: RouteComponentPropsWithLocationState) => {
 	const gameConfig = location?.state?.gameConfig;
 	const gameProps = useLocalGame(gameConfig);
+	const gameState = gameProps?.state || {};
+	const hasState = Object.values(gameState).length;
 
-	return gameProps ? <Wrapper gameProps={gameProps} /> : <LoadingIndicator />;
+	if (!hasState) gameProps?.provider.startGame(gameConfig);
+
+	return gameProps && hasState ? (
+		<Wrapper gameProps={gameProps} />
+	) : (
+		<LoadingIndicator />
+	);
 };
 
 export default Local;
