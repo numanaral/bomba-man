@@ -1,6 +1,6 @@
 import { isEmpty, isLoaded, useFirebaseConnect } from 'react-redux-firebase';
 import { useSelector } from 'react-redux';
-import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
+import { makeSelectOnline } from 'store/redux/reducers/firebase/selectors';
 import { generatePlayer } from 'utils/game';
 import LoadingIndicator from 'components/LoadingIndicator';
 import NoAccess from 'components/NoAccess';
@@ -20,15 +20,16 @@ const LazyJoin = loadable(() => import(`routes/pages/Join`));
 const useWatchOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
 	const refKey = `online/${id}`;
-	useFirebaseConnect(refKey);
+	useFirebaseConnect({ path: refKey, queryParams: ['limitToFirst=1'] });
 	const { update, remove } = useFirebaseUtils<OnlineGame>(refKey);
 	const { removeOnlineGame } = useOnlineGameActions();
 
-	const game = useSelector(makeSelectOnlineGame(id));
+	const onlineGames = useSelector(makeSelectOnline());
+	const game = onlineGames?.[id];
 
-	const pending = !isLoaded(game) && <LoadingIndicator />;
+	const pending = !isLoaded(onlineGames) && <LoadingIndicator />;
 	// check for gameState being not defined, otherwise it doesn't return error
-	const error = isEmpty(game, game?.gameState) && (
+	const error = isEmpty(onlineGames, game?.gameState) && (
 		<NoAccess>
 			<LazyJoin noWrapper />
 		</NoAccess>
@@ -77,10 +78,6 @@ const useWatchOnlineGame = (id: string) => {
 			// 1 <= because the state won't be updated just yet
 			if (playerLength <= 1) {
 				removeOnlineGame(id);
-				// 2 <= because the state won't be updated just yet
-				// ??!!: Is this necessary? Change this when restart is added
-			} else if (playerLength <= 2) {
-				onEndGame();
 			}
 		}
 	};
@@ -114,6 +111,7 @@ const useWatchOnlineGame = (id: string) => {
 		onPlayerJoin,
 		onPlayerExit,
 		onStartGame,
+		onEndGame,
 		onPlayerDeath,
 	};
 };
