@@ -39,8 +39,14 @@ type OnlineGameEndProps = {
 const LocalGameEnd = ({ children, gameConfig }: LocalGameEndProps) => {
 	const onCreate = useCreateRoomAndRedirect(GameType.Local);
 
-	const onRestartGame = async () => {
-		onCreate(gameConfig);
+	const onRestartGame = () => {
+		// if a player hits restart immediately, it doesn't
+		// allow state to refresh, thus the player gets pushed
+		// back to the GameEnd screen, this prevents that
+		// TODO: better solution to this
+		setTimeout(() => {
+			onCreate(gameConfig);
+		}, 500);
 	};
 
 	return children({ onRestartGame });
