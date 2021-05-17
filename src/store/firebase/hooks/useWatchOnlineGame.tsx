@@ -1,7 +1,7 @@
 import { isEmpty, isLoaded, useFirebaseConnect } from 'react-redux-firebase';
 import { useSelector } from 'react-redux';
 import { makeSelectOnlineGame } from 'store/redux/reducers/firebase/selectors';
-import { generateDefaultGameState, generatePlayer } from 'utils/game';
+import { generatePlayer } from 'utils/game';
 import LoadingIndicator from 'components/LoadingIndicator';
 import NoAccess from 'components/NoAccess';
 import loadable from 'utils/loadable';
@@ -15,7 +15,7 @@ import useOnlineGameActions from './useOnlineGameActions';
 
 const LazyJoin = loadable(() => import(`routes/pages/Join`));
 
-const defaultGameState = generateDefaultGameState();
+// const defaultGameState = generateDefaultGameState();
 
 const useWatchOnlineGame = (id: string) => {
 	// const { notifyError } = useNotificationProvider();
@@ -24,16 +24,15 @@ const useWatchOnlineGame = (id: string) => {
 	const { update, remove } = useFirebaseUtils<OnlineGame>(refKey);
 	const { removeOnlineGame } = useOnlineGameActions();
 
-	const onlineGameFromFirebase = useSelector(makeSelectOnlineGame(id));
+	const game = useSelector(makeSelectOnlineGame(id));
 
-	const pending = !isLoaded(onlineGameFromFirebase) && <LoadingIndicator />;
-	const error = isEmpty(onlineGameFromFirebase) && (
+	const pending = !isLoaded(game) && <LoadingIndicator />;
+	// check for gameState being not defined, otherwise it doesn't return error
+	const error = isEmpty(game, game?.gameState) && (
 		<NoAccess>
 			<LazyJoin noWrapper />
 		</NoAccess>
 	);
-
-	const game = onlineGameFromFirebase;
 
 	const onPlayerJoin = (playerId: PlayerId, isNPC = false) => {
 		// set player as active
@@ -63,6 +62,7 @@ const useWatchOnlineGame = (id: string) => {
 	const onEndGame = () => {
 		update({
 			started: false,
+			gamePlayers: {},
 		});
 	};
 
@@ -72,7 +72,7 @@ const useWatchOnlineGame = (id: string) => {
 		// remove him from the game state
 		remove(`/gameState/players/${playerId}`);
 
-		if (game.gamePlayers) {
+		if (game?.gamePlayers) {
 			const playerLength = Object.keys(game.gamePlayers).length;
 			// 1 <= because the state won't be updated just yet
 			if (playerLength <= 1) {
@@ -86,6 +86,7 @@ const useWatchOnlineGame = (id: string) => {
 	};
 
 	const onPlayerDeath = (playerId: PlayerId) => {
+		if (!id) return;
 		update<OnlineGame['gamePlayers']>(
 			{
 				[playerId]: PlayerCondition.Dead,
