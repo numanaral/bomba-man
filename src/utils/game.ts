@@ -158,16 +158,30 @@ const getPlayerAndAdjacentCoordinates = (
 		[-1, 0], // Left
 	];
 
-	return Object.values(players).reduce<Array<PlayerAndAdjacentCoordinates>>(
-		(acc, playerConfig) => {
-			const { coordinates, id: playerId } = playerConfig!;
-			const {
-				xSquare,
-				ySquare,
-			} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
-				coordinates,
-				movementSize
-			);
+	const playerConfigs = Object.values(players);
+	const _players: Record<PlayerId, SquareCoordinates> = playerConfigs.length
+		? // if there are given players, map their topLeft coordinates to
+		  // square coordinates first
+		  playerConfigs.reduce<Record<PlayerId, SquareCoordinates>>(
+				(acc, playerConfig) => {
+					const { coordinates, id: playerId } = playerConfig!;
+					const {
+						xSquare,
+						ySquare,
+					} = getSquareCoordinatesFromSquareOrTopLeftCoordinates(
+						coordinates,
+						movementSize
+					);
+					acc[playerId] = { ySquare, xSquare };
+					return acc;
+				},
+				{} as Record<PlayerId, SquareCoordinates>
+		  )
+		: // if no players are given (i.e. online game), assume all 4 corners
+		  getDefaultPlayerStartSquareCoordinates(mapSize);
+
+	return Object.entries(_players).reduce<Array<PlayerAndAdjacentCoordinates>>(
+		(acc, [playerId, { xSquare, ySquare }]) => {
 			// player's coordinate
 			acc.push({ xSquare, ySquare, tile: playerId as Tile });
 			// around coordinates
@@ -181,11 +195,12 @@ const getPlayerAndAdjacentCoordinates = (
 					ySquare: newYSquare,
 				};
 				// make sure we only add squares that are within the boundaries
-				if (isSquareOutOfBoundaries(newSquare, mapSize)) continue;
-				acc.push({
-					...newSquare,
-					tile: Tile.Empty,
-				});
+				if (!isSquareOutOfBoundaries(newSquare, mapSize)) {
+					acc.push({
+						...newSquare,
+						tile: Tile.Empty,
+					});
+				}
 			}
 			return acc;
 		},
