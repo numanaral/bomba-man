@@ -15,6 +15,8 @@ interface Props<Schema> {
 	focusOnFirstElement?: boolean;
 	fullWidth?: boolean;
 	containerProps?: Partial<FormContainerProps>;
+	pending?: boolean;
+	disabled?: boolean;
 }
 
 const Form = <Schema,>({
@@ -26,6 +28,8 @@ const Form = <Schema,>({
 	focusOnFirstElement = false,
 	fullWidth = false,
 	containerProps = {},
+	pending = false,
+	disabled = false,
 }: Props<Schema>) => {
 	const { handleSubmit, utils } = useForm({
 		defaultValues,
@@ -46,6 +50,8 @@ const Form = <Schema,>({
 		<FormContainer
 			onSubmit={handleSubmit}
 			submitText={submitText}
+			pending={pending}
+			disabled={disabled}
 			{..._containerProps}
 		>
 			{items.map(props => (
