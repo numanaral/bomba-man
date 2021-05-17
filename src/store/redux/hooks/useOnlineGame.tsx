@@ -1,18 +1,23 @@
-import { GameApiHook } from 'containers/Game/types';
+import { GameApiHookOnline, OnlineGameId } from 'containers/Game/types';
+import { GameType } from 'enums';
 import useOnlineGameProvider from 'store/firebase/hooks/useOnlineGameProvider';
 import useWatchOnlineGame from 'store/firebase/hooks/useWatchOnlineGame';
 
-const useOnlineGame: GameApiHook = gameId => {
-	const { pending, error, gameState: state } = useWatchOnlineGame(
-		gameId as string
+const useOnlineGame: GameApiHookOnline = gameId => {
+	const { pending, error, game } = useWatchOnlineGame(gameId as string);
+
+	const provider = useOnlineGameProvider(
+		gameId as OnlineGameId,
+		game?.gameState
 	);
-	const provider = useOnlineGameProvider(gameId as string, state);
 
 	return {
 		provider,
 		pending,
 		error,
-		state,
+		state: game?.gameState,
+		type: GameType.Online,
+		gamePlayers: game?.gamePlayers,
 	};
 };
 

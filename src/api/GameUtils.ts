@@ -1,3 +1,4 @@
+import gameConfig from 'config';
 import {
 	Coordinates,
 	Square,
@@ -199,7 +200,6 @@ class GameUtils {
 		// find surrounding objects to modify
 		const { coordinatesToSetOnFire } = getExplosionResults(
 			this.state.gameMap,
-			this.state.players,
 			bombCoordinates,
 			bombSize,
 			this.state.config.sizes
@@ -274,6 +274,18 @@ class GameUtils {
 		this.updaters.updateGameMap(animatableGameMap);
 	};
 
+	updatePlayerDirection = (
+		newPlayerState: Pick<PlayerConfig, 'direction' | 'id'>
+	) => {
+		this.updaters.updatePlayerDirection(newPlayerState);
+	};
+
+	updatePlayerIsWalking = (
+		newPlayerState: Pick<PlayerConfig, 'isWalking' | 'id'>
+	) => {
+		this.updaters.updatePlayerIsWalking(newPlayerState);
+	};
+
 	triggerMove = ({
 		playerId,
 		direction,
@@ -299,7 +311,12 @@ class GameUtils {
 		);
 	};
 
-	makeMove = ({ playerId, newCoordinates }: OnMoveProps) => {
+	makeMove = ({
+		playerId,
+		newCoordinates,
+		direction,
+		hasMoved,
+	}: OnMoveProps) => {
 		if (this.isPlayerDead(playerId)) return;
 		// if there is a powerUp, assign it to the playerState
 		const {
@@ -351,9 +368,10 @@ class GameUtils {
 			lastCoordinateXSquare
 		];
 		// clear lastSquare only if it was the player
+		// and the player has moved
 		// (on a Tile.Empty)
 		// otherwise we can leave whatever was there
-		if (lastSquare === playerId) {
+		if (lastSquare === playerId && hasMoved) {
 			this.setSquare(
 				{
 					ySquare: lastCoordinateYSquare,
@@ -370,7 +388,11 @@ class GameUtils {
 		}
 
 		// update player's topLeft coordinates
-		this.updaters.updatePlayerCoordinates(newCoordinates, playerId);
+		this.updaters.updatePlayerCoordinates(
+			newCoordinates,
+			playerId,
+			direction
+		);
 	};
 
 	dropBomb = (playerId: PlayerId) => {
@@ -429,11 +451,8 @@ class GameUtils {
 
 		const bombSize = this.getBombSizeForPlayer(currentBomb.playerId);
 
-		// remove bomb
-		this.updaters.removeBomb(bombId);
 		const { coordinatesToSetOnFire } = getExplosionResults(
 			this.state.gameMap,
-			this.state.players,
 			bombCoordinates,
 			bombSize,
 			this.state.config.sizes,
@@ -461,6 +480,9 @@ class GameUtils {
 					this.setSquare(coordinates, Tile.Empty);
 				}
 			});
+
+		// remove bomb
+		this.updaters.removeBomb(bombId);
 	};
 
 	triggerGameAnimation = () => {
@@ -482,21 +504,25 @@ class GameUtils {
 		}
 
 		this.updaters.addPlayer(
-			generatePlayer(Player.P2, this.state.config),
+			generatePlayer(Player.P2, this.state.config, {
+				'0': gameConfig.keyboardConfig['1'],
+			}),
 			Player.P2
 		);
 	};
 
+	// temporary
 	toggleGameNpc = () => {
-		if (this.state.players.P4) {
-			this.updaters.removePlayer(Player.P4);
-			return;
-		}
-
-		this.updaters.addPlayer(
-			generatePlayer(Player.P4, this.state.config),
-			Player.P4
-		);
+		(['P3', 'P4'] as Array<PlayerId>).forEach(playerId => {
+			if (this.state.players[playerId]) {
+				this.updaters.removePlayer(playerId);
+			} else {
+				this.updaters.addPlayer(
+					generatePlayer(playerId, this.state.config),
+					playerId
+				);
+			}
+		});
 	};
 	// #endregion
 }

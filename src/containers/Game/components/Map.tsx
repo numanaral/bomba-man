@@ -4,24 +4,31 @@ import theme from 'theme';
 import { Explosive, Tile as TileEnum } from 'enums';
 import { isPowerUp } from 'utils/game';
 import { useEffect } from 'react';
-import { GameConfigRanges } from 'store/redux/reducers/game/types';
+import { GameConfig, GameConfigRanges } from 'store/redux/reducers/game/types';
 import Cube from './Cube';
 import Tile from './Tile';
 import { GameMap, Square, TileProps } from '../types';
 import PowerUp from './PowerUp';
 
 interface Props {
-	size: RangeOf<15, 6>;
+	sizes: GameConfig['sizes'];
+	firingDuration: GameConfigRanges.FiringDuration;
 	gameMap: GameMap;
 	is3D: boolean;
 	isTopView: boolean;
 	animationCounter: number;
-	tileSize: GameConfigRanges.SquareSize;
 }
 
-const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
-	width: ${({ $size }) => `calc(${theme.game.tile.size} * ${$size})`};
-	height: ${({ $size }) => `calc(${theme.game.tile.size} * ${$size})`};
+const Wrapper = styled.div<
+	StyledProps<Props, 'is3D' | 'isTopView'> & {
+		$mapSize: GameConfig['sizes']['map'];
+		$tileSize: GameConfig['sizes']['tile'];
+	}
+>`
+	${({ $mapSize, $tileSize }) => `
+		width: calc(${$tileSize}px * ${$mapSize});
+		height: calc(${$tileSize}px * ${$mapSize});
+	`}
 	border-radius: ${theme.shape.borderRadius};
 	background-color: ${theme.palette.background.secondary};
 	position: relative;
@@ -41,13 +48,13 @@ const Wrapper = styled.div<StyledProps<Props, 'size' | 'is3D' | 'isTopView'>>`
 `;
 
 const Map: React.FC<Props> = ({
-	size,
+	sizes: { map: mapSize, tile: tileSize },
+	firingDuration,
 	gameMap,
 	is3D,
 	isTopView,
 	animationCounter,
 	children,
-	tileSize,
 }) => {
 	// we only need to animate when new collision is set using the button
 	// need to prevent explosion diff from re-animating tiles
@@ -61,7 +68,12 @@ const Map: React.FC<Props> = ({
 
 	let collisionIndex = 1;
 	return (
-		<Wrapper $size={size} $is3D={is3D} $isTopView={isTopView}>
+		<Wrapper
+			$mapSize={mapSize}
+			$tileSize={tileSize}
+			$is3D={is3D}
+			$isTopView={isTopView}
+		>
 			{Object.keys(gameMap).map((outer, outerInd) => {
 				return Object.values(gameMap[outer]).map(
 					(square: Square, innerInd) => {
@@ -105,6 +117,7 @@ const Map: React.FC<Props> = ({
 							animate: shouldAnimate,
 							variant: square,
 							fireSquare,
+							firingDuration,
 							...(hasCollision && {
 								color:
 									theme.palette.color[

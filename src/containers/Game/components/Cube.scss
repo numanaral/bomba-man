@@ -1,7 +1,4 @@
-// below doesn't work..
-// $gameSize: var(--game-size, 15);
-// global
-$gameSize: 15;
+$maxGameSize: 15;
 
 @mixin bouncy-block($i) {
 	animation: bouncy var(--block-animation-duration) ease
@@ -14,7 +11,7 @@ $gameSize: 15;
 		) var(--ease-in-out-back) forwards;
 }
 
-@for $i from 1 through $gameSize * $gameSize {
+@for $i from 1 through $maxGameSize * $maxGameSize {
 	.bouncy-block-#{$i} {
 		@include bouncy-block($i);
 

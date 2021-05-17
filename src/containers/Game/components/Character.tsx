@@ -1,32 +1,35 @@
 import Cube from 'containers/Game/components/Cube';
-import { Player } from 'enums';
+import { Direction, Player } from 'enums';
+import { GameProvider } from 'store/redux/hooks/useGameProvider';
 import { GameConfigRanges } from 'store/redux/reducers/game/types';
 import theme from 'theme';
-import { CUBE_BASE_TRANSFORM } from 'utils/game';
-import {
-	CharacterProps,
-	PlayerId,
-	PlayerKeyboardConfig,
-	TopLeftCoordinates,
-} from '../types';
+import { getCubeBaseTransform } from 'utils/game';
+import { KeyboardConfig, PlayerId, TopLeftCoordinates } from '../types';
 // import CircleCharacter from './CircleCharacter';
 import SpriteCharacter from './SpriteCharacter';
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
 	id: PlayerId;
+	currentOnlinePlayerId?: PlayerId;
 	name: string;
-	// skin: Skin;
 	size: GameConfigRanges.SquareSize;
 	tileSize: GameConfigRanges.SquareSize;
 	coordinates: TopLeftCoordinates;
-	keyboardConfig?: PlayerKeyboardConfig;
+	keyboardConfig?: KeyboardConfig;
 	is3D: boolean;
 	highlight?: boolean;
+	// mainly for sprite
+	// skin: Skin;
+	onPlayerIsWalking?: GameProvider['updatePlayerIsWalking'];
+	isWalking?: boolean;
+	direction?: Direction;
+	isNPC?: boolean;
 }
 
 const Character = ({
 	/* skin */
 	id,
+	currentOnlinePlayerId,
 	name,
 	size,
 	tileSize,
@@ -41,18 +44,6 @@ const Character = ({
 	const _top = padding + top;
 	const _left = padding + left;
 
-	const props: CharacterProps = {
-		id,
-		name: `${name} ${id}`,
-		coordinates: {
-			top: _top,
-			left: _left,
-		},
-		keyboardConfig,
-		highlight,
-		...rest,
-	};
-
 	return (
 		(is3D && (
 			<Cube
@@ -63,16 +54,31 @@ const Character = ({
 				animate
 				color={theme.palette.color.success}
 				style={{
-					transform: CUBE_BASE_TRANSFORM,
+					transform: getCubeBaseTransform(tileSize),
 					// top,
 					// left,
 				}}
 				variant={Player[id]}
 				{...rest}
 			/>
-		)) || <SpriteCharacter {...props} />
+		)) || (
+			<SpriteCharacter
+				id={id}
+				currentOnlinePlayerId={currentOnlinePlayerId}
+				// name={`${name}${id}`}
+				name={id}
+				coordinates={{
+					top: _top,
+					left: _left,
+				}}
+				keyboardConfig={keyboardConfig}
+				highlight={highlight}
+				size={size}
+				{...rest}
+			/>
+		)
 	);
 };
 
-export type { Props };
+export type { Props as CharacterProps };
 export default Character;

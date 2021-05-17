@@ -1,7 +1,4 @@
 // import useAuth from 'store/firebase/hooks/useAuth';
-// TODO: react-router
-// import LoadingIndicator from 'components/LoadingIndicator';
-// import NoAccess from 'components/NoAccess';
 // TODO: notification-provider
 // import useNotificationProvider from 'store/redux/hooks/useNotificationProvider';
 import {
@@ -13,14 +10,15 @@ import {
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { generateRandomGameMap } from 'utils/game';
-import { OnDropBomb } from 'containers/Game/types';
+import { OnDropBomb, PlayerId } from 'containers/Game/types';
 import GameUtils from 'api/GameUtils';
 import OnlineGameUpdater from 'api/OnlineGameUpdater';
 import { useCallback, useEffect, useRef } from 'react';
+import { Direction } from 'enums';
 import useFirebaseUtils from './useFirebaseUtils';
 
 const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
-	const updaters = useFirebaseUtils<GameState>(`online/${gameId}`);
+	const updaters = useFirebaseUtils<GameState>(`online/${gameId}/gameState`);
 	// const { notifyError } = useNotificationProvider();
 	// const { userId } = useAuth();
 
@@ -44,12 +42,27 @@ const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
 	const generateNewCollisionCoordinates = useCallback(() => {
 		updateGameMap({
 			gameMap: generateRandomGameMap(
-				state.current.config.sizes.map,
-				state.current.config.tiles.blockTileChance
+				state.current.config.sizes,
+				state.current.config.tiles.blockTileChance,
+				state.current.players
 			),
 			animate: true,
 		});
 	}, [updateGameMap]);
+
+	const updatePlayerDirection = useCallback(
+		(direction: Direction, id: PlayerId) => {
+			gameUtils.current.updatePlayerDirection({ direction, id });
+		},
+		[]
+	);
+
+	const updatePlayerIsWalking = useCallback(
+		(isWalking: boolean, id: PlayerId) => {
+			gameUtils.current.updatePlayerIsWalking({ isWalking, id });
+		},
+		[]
+	);
 
 	const makeMove = useCallback((props: OnMoveProps) => {
 		gameUtils.current.makeMove(props);
@@ -97,10 +110,15 @@ const useOnlineGameProvider = (gameId: string, gameState: GameState) => {
 		gameUtils.current.toggleGameNpc();
 	}, []);
 
+	const startGame = () => null;
+
 	return {
+		startGame,
 		updateGameSettings,
 		generateNewCollisionCoordinates,
 		// GAME ACTIONS
+		updatePlayerDirection,
+		updatePlayerIsWalking,
 		makeMove,
 		triggerMove,
 		dropBomb,

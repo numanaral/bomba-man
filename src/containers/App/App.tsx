@@ -1,43 +1,30 @@
-import Container from 'components/Container';
-import Game from 'containers/Game';
-import { Provider as StoreProvider } from 'react-redux';
 import configureStore from 'store/redux';
 import { __IS_DEV__ } from 'app';
-import useLocalGame from 'store/redux/hooks/useLocalGame';
 import { getReactReduxFirebaseProps } from 'store/firebase';
 import { ReactReduxFirebaseProvider } from 'react-redux-firebase';
-import useOnlineGame from 'store/redux/hooks/useOnlineGame';
 import ThemeProvider from 'containers/ThemeProvider';
 import './created-by-numan';
+import { Provider as StoreProvider } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
+import Routes from 'routes';
+import Links from './Links';
 
-const initialState = {};
-const store = configureStore(initialState);
+const store = configureStore();
 // @ts-ignore
 if (__IS_DEV__) window.__redux_store = store;
-
-const LocalGame = () => {
-	const gameProps = useLocalGame();
-	return <Game {...gameProps} />;
-};
-
-const OnlineGame = () => {
-	const { pending, error, ...gameProps } = useOnlineGame('game1');
-	return pending || error || <Game {...gameProps} />;
-};
-
-// const ONLINE = true;
-const ONLINE = false;
 
 const App = () => {
 	return (
 		<StoreProvider store={store}>
+			<div id="created-by-numan" />
 			<ReactReduxFirebaseProvider {...getReactReduxFirebaseProps(store)}>
 				<ThemeProvider>
-					<Container>
-						{(ONLINE && <OnlineGame />) || <LocalGame />}
-					</Container>
-					<div id="created-by-numan" />
+					<Router>
+						<Links />
+						<Routes />
+					</Router>
 				</ThemeProvider>
+				<div id="created-by-numan" />
 			</ReactReduxFirebaseProvider>
 		</StoreProvider>
 	);

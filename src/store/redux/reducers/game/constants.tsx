@@ -1,9 +1,5 @@
-import { generateDefaultGameState } from 'utils/game';
-import { GameState } from './types';
-
 // Defaults
 const KEY = 'Game';
-const DEFAULT_VALUES: GameState = generateDefaultGameState();
 
 // Types
 const SET_GAME_STATE = `${KEY}/SET_GAME_STATE`;
@@ -11,6 +7,8 @@ const START_GAME = `${KEY}/START_GAME`;
 const END_GAME = `${KEY}/END_GAME`;
 const SET_GAME_MAP = `${KEY}/SET_GAME_MAP`;
 // GAME ACTIONS
+const CHANGE_DIRECTION = `${KEY}/CHANGE_DIRECTION`;
+const CHANGE_IS_WALKING = `${KEY}/CHANGE_IS_WALKING`;
 const MAKE_MOVE = `${KEY}/MAKE_MOVE`;
 const TRIGGER_MOVE = `${KEY}/TRIGGER_MOVE`;
 const DROP_BOMB = `${KEY}/DROP_BOMB`;
@@ -25,7 +23,6 @@ const TOGGLE_GAME_NPC = `${KEY}/TOGGLE_GAME_NPC`;
 
 export {
 	KEY,
-	DEFAULT_VALUES,
 	SET_GAME_STATE,
 	START_GAME,
 	END_GAME,
@@ -33,6 +30,8 @@ export {
 	TRIGGER_EXPLOSION,
 	ON_EXPLOSION_COMPLETE,
 	// GAME ACTIONS
+	CHANGE_DIRECTION,
+	CHANGE_IS_WALKING,
 	MAKE_MOVE,
 	TRIGGER_MOVE,
 	DROP_BOMB,
