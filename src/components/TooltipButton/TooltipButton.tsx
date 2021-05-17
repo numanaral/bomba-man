@@ -1,4 +1,4 @@
-import { cloneElement, useState } from 'react';
+import React, { cloneElement, useState } from 'react';
 import {
 	Button as MuiButton,
 	IconButtonProps,
@@ -10,14 +10,14 @@ import {
 } from '@material-ui/core';
 import { ButtonProps } from '@material-ui/core/Button';
 import { getElementFromElementOrType } from 'utils/react';
-import LoadingIndicator from 'components/LoadingIndicator';
 import { Palette } from '@material-ui/core/styles/createPalette';
+import LoadingIcon from './LoadingIcon';
 import StyledIconButton from './StyledIconButton';
 import StyledLoadingIconButton from './StyledLoadingIconButton';
 
-type Btn = ButtonProps | IconButtonProps;
+type Btn = ButtonProps & IconButtonProps;
 
-interface Props {
+interface Props extends Btn {
 	// ========== Tooltip props ==========
 	/**
 	 * - Tooltip to display
@@ -35,7 +35,7 @@ interface Props {
 	type?: React.ComponentProps<'button'>['type'];
 	preventDefaultEvent?: boolean;
 	displayTooltipOnClickForMobile?: boolean;
-	loading?: boolean;
+	pending?: boolean;
 	// ========== TextButton props ==========
 	/**
 	 * - Text to display in a text button
@@ -46,7 +46,7 @@ interface Props {
 	// ========== IconButton props ==========
 	/**
 	 * - Icon size
-	 * - 'inherit' loading size is same as default
+	 * - 'inherit' pending size is same as default
 	 */
 	iconSize?: SvgIconProps['fontSize'];
 }
@@ -78,7 +78,7 @@ const TooltipButton = ({
 	type = 'button',
 	preventDefaultEvent = false,
 	displayTooltipOnClickForMobile = true,
-	loading = false,
+	pending = false,
 	// TextButton defaultProps
 	text,
 	variant = 'contained',
@@ -86,8 +86,9 @@ const TooltipButton = ({
 	iconSize = 'default',
 	// IconButton props
 	// MuiButtonProps|MuiIconButtonProps
+	fullWidth,
 	...rest
-}: Props & Btn) => {
+}: Props) => {
 	if (type !== 'submit' && !onClick) {
 		throw new Error(
 			'Either provide an onClick handler or set the type="submit"'
@@ -123,16 +124,18 @@ const TooltipButton = ({
 		onClick?.(e);
 	};
 
+	const _disabled = disabled || pending;
+
 	let button = text ? (
 		<MuiButton
 			variant={variant}
 			color={bg}
 			{...(icon && { startIcon: getElementFromElementOrType(icon) })}
 			onClick={wrappedOnClick}
-			disabled={disabled || loading}
-			// endIcon={(loading && <LoadingIndicator size="small" />) || null}
-			endIcon={(loading && <LoadingIndicator />) || null}
+			disabled={_disabled}
+			endIcon={(pending && <LoadingIcon size="small" />) || null}
 			type={type}
+			fullWidth={fullWidth}
 			{...(rest as ButtonProps)}
 		>
 			{text}
@@ -140,12 +143,12 @@ const TooltipButton = ({
 	) : (
 		<StyledIconButton
 			onClick={wrappedOnClick}
-			disabled={disabled || loading}
+			disabled={_disabled}
 			type={type}
-			$bg={bg}
+			{...(!_disabled && { $bg: bg })}
 			{...(rest as IconButtonProps)}
 		>
-			{loading && <StyledLoadingIconButton $iconSize={iconSize} />}
+			{pending && <StyledLoadingIconButton $iconSize={iconSize} />}
 			{icon &&
 				cloneElement(getElementFromElementOrType(icon), {
 					fontSize: iconSize,
@@ -156,8 +159,15 @@ const TooltipButton = ({
 	let tooltipText = tooltip || text || '';
 
 	// To show tooltip on disabled items
-	if (disabled) {
-		button = <span className="tooltip-wrapper">{button}</span>;
+	if (_disabled) {
+		button = (
+			<span
+				className="tooltip-wrapper"
+				{...(fullWidth && { style: { width: '100%' } })}
+			>
+				{button}
+			</span>
+		);
 		tooltipText += ' (DISABLED)';
 	}
 
@@ -176,4 +186,5 @@ const TooltipButton = ({
 	);
 };
 
+export type { Props as TooltipButtonProps };
 export default TooltipButton;

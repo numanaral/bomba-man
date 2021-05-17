@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import LoadingIndicator from 'components/LoadingIndicator';
 import { SvgIconProps } from '@material-ui/core';
+import LoadingIcon from './LoadingIcon';
 
 type SizeMap = Omit<
 	Record<NonNullable<SvgIconProps['fontSize']>, number>,
@@ -19,7 +19,7 @@ const multiplierMap: SizeMap = {
 	large: 1.7,
 };
 
-const StyledLoadingIconButton = styled(LoadingIndicator)<{
+const StyledLoadingIconButton = styled(LoadingIcon)<{
 	$iconSize: SvgIconProps['fontSize'];
 }>`
 	position: absolute;
