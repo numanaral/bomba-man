@@ -1,2 +1,0 @@
-(this["webpackJsonpbomba-man"]=this["webpackJsonpbomba-man"]||[]).push([[20],{520:function(a,e,n){"use strict";n.r(e);var s=n(549),t=n(545),c=n(6);e.default=function(){return Object(c.jsx)(s.a,{children:Object(c.jsx)(t.a,{children:"You are logged in as a guest!"})})}}}]);
-//# sourceMappingURL=20.9896a13c.chunk.js.map
