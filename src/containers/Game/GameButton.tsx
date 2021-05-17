@@ -12,7 +12,6 @@ const GameButton = ({ active = false, onClick, children, ...rest }: Props) => {
 		<Button
 			style={{ width: '100%', wordWrap: 'break-word', marginBottom: 10 }}
 			variant={active ? 'success' : 'warning'}
-			size="medium"
 			onClick={wrapPreventFocusLock(onClick)}
 			{...rest}
 		>

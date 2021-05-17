@@ -2,86 +2,12 @@
   * Motivation
   * @see https://codepen.io/punkydrewster713/pen/WNrXPrb 
   */
-:root {
-	--pixel-size: 2px;
-	--grid-cell: calc(var(--pixel-size) * 16);
-	--spacing-x: 8px;
-	--spacing-y: 20px;
-	--shadow-size-multiplier: 1.5;
-}
 
 .pixel-art {
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
 	image-rendering: pixelated;
-}
-
-.character {
-	width: var(--character-size);
-	height: var(--character-size);
-	position: absolute;
-	transition-duration: 450ms;
-
-	& .name {
-		z-index: 9999;
-		position: absolute;
-		top: calc(var(--character-size) * 0.2);
-		font-size: calc(var(--character-size) / 2);
-		color: var(--warning-color);
-	}
-
-	& .shadow {
-		position: absolute;
-		// bigger shadow
-		// better come up with a sizing algorithm
-		// width: calc(var(--character-size) * 2);
-		// height: calc(var(--character-size) * 2);
-		// left: calc(var(--character-size) * -0.5);
-		// top: calc(var(--character-size) * -1.2);
-		width: calc(var(--character-size) * 1.5);
-		height: calc(var(--character-size) * 1.5);
-		left: calc(var(--character-size) * -0.25);
-		top: calc(var(--character-size) * -0.75);
-		background: url('./character-shadow.png') no-repeat no-repeat;
-		background-size: 100%;
-	}
-
-	// more "realistic" shadow
-	&[data-walking='true'] .shadow {
-		animation: shadowAnimation 0.3s infinite;
-	}
-
-	& .spritesheet-wrapper {
-		overflow: hidden;
-		position: absolute;
-		width: calc(var(--character-size) * 2);
-		height: calc(var(--character-size) * 2);
-		top: calc(var(--spacing-y) * -2);
-		left: calc(var(--spacing-x) * -2);
-
-		& .spritesheet {
-			position: absolute;
-			background: url(./character-skin-default.png) no-repeat no-repeat;
-			background-size: 100%;
-			width: calc(var(--grid-cell) * 8);
-			height: calc(var(--grid-cell) * 8);
-		}
-	}
-
-	&[data-facing='Right'] .spritesheet {
-		background-position-y: calc(var(--pixel-size) * -32);
-	}
-	&[data-facing='Up'] .spritesheet {
-		background-position-y: calc(var(--pixel-size) * -64);
-	}
-	&[data-facing='Left'] .spritesheet {
-		background-position-y: calc(var(--pixel-size) * -96);
-	}
-	&[data-walking='true'] .spritesheet {
-		animation: walkAnimation 0.6s steps(4) infinite;
-	}
-
-	&[data-highlight='true'] .spritesheet {
-		animation: opacityAnimation 0.6s steps(4) infinite;
-	}
+	image-rendering: crisp-edges;
 }
 
 @keyframes walkAnimation {
@@ -96,10 +22,10 @@
 @keyframes shadowAnimation {
 	from,
 	to {
-		transform: scale(1) translateY(0px);
+		transform: scale(1);
 	}
 	50% {
-		transform: scale(0.8) translateY(4px);
+		transform: scale(0.9);
 	}
 }
 

@@ -9,24 +9,15 @@ const GameSettings = ({ state, provider }: Props) => {
 		generateNewCollisionCoordinates,
 		togglePerspective,
 		toggleDimension,
-		toggleTwoPlayer,
-		toggleNPC,
 	} = provider;
 
-	const {
-		is3D,
-		isSideView,
-		players: { P2, P4: NPC },
-	} = state;
-
-	const player2IsOn = !!P2;
-	const npcIsOn = !!NPC;
+	const { is3D, isSideView } = state;
 
 	const buttons = useMemo(
 		() =>
 			[
 				{
-					label: 'New Collision Coordinates',
+					label: 'Generate New Map',
 					onClick: generateNewCollisionCoordinates,
 				},
 				{
@@ -40,12 +31,6 @@ const GameSettings = ({ state, provider }: Props) => {
 					active: isSideView,
 					disabled: !is3D,
 				},
-				{
-					label: 'Toggle Two-Player Mode',
-					onClick: toggleTwoPlayer,
-					active: player2IsOn,
-				},
-				{ label: 'Toggle NPC', onClick: toggleNPC, active: npcIsOn },
 			].map(({ label, ...rest }) => (
 				<GameButton key={label} {...rest}>
 					{label}
@@ -55,12 +40,8 @@ const GameSettings = ({ state, provider }: Props) => {
 			generateNewCollisionCoordinates,
 			is3D,
 			isSideView,
-			npcIsOn,
-			player2IsOn,
 			toggleDimension,
-			toggleNPC,
 			togglePerspective,
-			toggleTwoPlayer,
 		]
 	);
 

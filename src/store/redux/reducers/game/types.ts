@@ -2,8 +2,9 @@
 import {
 	GameMap,
 	NonNullablePlayerRef,
+	PlayerConfig,
 	PlayerId,
-	PlayerKeyboardConfig,
+	// PlayerKeyboardConfig,
 	Players,
 	SquareCoordinates,
 	TopLeftCoordinates,
@@ -11,7 +12,7 @@ import {
 import { Direction, PowerUp } from 'enums';
 import * as constants from './constants';
 
-const { KEY, DEFAULT_VALUES, ...actionTypes } = constants;
+const { KEY, ...actionTypes } = constants;
 
 // TODO: merge types?
 
@@ -56,13 +57,17 @@ namespace GameConfigRanges {
 	// #endregion
 	// #region GameConfig.sizes
 	export type MapSize = RangeOf<15, 6>;
-	export type SquareSize = 32; // | 64 ?
+	export type SquareSize = 32 | 48 | 64; // | 64 ?
 	// TODO: This wont' be a square movement in the future
-	export type MovementSize = 32; // will be pixellated
+	export type MovementSize = 32 | 48 | 64; // will be pixellated
 	// #endregion
 	// #region GameConfig.duration
-	export type FiringDuration = 0.5 | 0.75 | 1.5 | 2.5 | RangeOf<3, 1>;
+	export type FiringDuration = 1.5 | 2.5 | RangeOf<3, 1>;
 	export type ExplodingDuration = 0.5 | 1 | 1.5;
+	// #endregion
+	// #region GameConfig.players
+	export type HumanPlayerCount = RangeOf<4, 1>;
+	export type NPCPlayerCount = RangeOf<4>;
 	// #endregion
 }
 
@@ -91,6 +96,7 @@ type GameConfig = {
 		/** Movement size */
 		movement: GameConfigRanges.MovementSize; // px
 	};
+	// TODO: pluralize this
 	duration: {
 		bomb: {
 			/** Duration before bomb explodes */
@@ -99,7 +105,13 @@ type GameConfig = {
 			exploding: GameConfigRanges.ExplodingDuration; // second
 		};
 	};
-	keyboardConfig: Partial<Record<PlayerId, PlayerKeyboardConfig>>;
+	players: {
+		/** Human player count in the game */
+		humanPlayers?: GameConfigRanges.HumanPlayerCount; // number
+		/** NPC player count in the game */
+		npcPlayers: GameConfigRanges.NPCPlayerCount; // number
+	};
+	// keyboardConfig: Partial<Record<PlayerId, PlayerKeyboardConfig>>;
 };
 
 // type GameState = Immutable<{
@@ -129,7 +141,8 @@ type GamePayload =
 	| BombId
 	| AnimatableGameMap
 	| OnMoveProps
-	| OnPrepareMoveProps;
+	| OnPrepareMoveProps
+	| PlayerConfig;
 
 type GameAction = {
 	type: ValuesOf<typeof actionTypes>;
@@ -152,12 +165,15 @@ type OnPrepareMoveProps = {
 	ref: NonNullablePlayerRef;
 };
 
-type OnTriggerMove = (props: Omit<OnPrepareMoveProps, 'onComplete'>) => void;
+type TriggerMove = Omit<OnPrepareMoveProps, 'onComplete'>;
+type OnTriggerMove = (props: TriggerMove) => void;
 
 /** Makes the actual move */
 type OnMoveProps = {
 	playerId: PlayerId;
 	newCoordinates: TopLeftCoordinates;
+	direction: Direction;
+	hasMoved: boolean;
 };
 
 type OnMove = (props: OnMoveProps) => void;
@@ -171,6 +187,7 @@ export type {
 	GameAction,
 	GameActionFn,
 	OnPrepareMoveProps,
+	TriggerMove,
 	OnTriggerMove,
 	OnMoveProps,
 	OnMove,

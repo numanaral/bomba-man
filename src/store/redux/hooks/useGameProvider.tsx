@@ -13,29 +13,45 @@ import {
 	onExplosionCompleteInGame,
 	triggerMoveInGame,
 	triggerExplosionInGame,
+	changePlayerDirectionInGame,
+	changePlayerIsWalkingInGame,
 } from 'store/redux/reducers/game/actions';
 import {
 	AnimatableGameMap,
 	BombFn,
 	BombId,
+	GameConfig,
 	GameState,
 	OnMoveProps,
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
-import { generateRandomGameMap } from 'utils/game';
-import { makeSelectGameConfig } from 'store/redux/reducers/game/selectors';
-import { OnDropBomb } from 'containers/Game/types';
+import { generateDefaultGameState, generateRandomGameMap } from 'utils/game';
+import {
+	makeSelectGameConfig,
+	makeSelectGamePlayers,
+} from 'store/redux/reducers/game/selectors';
+import { OnDropBomb, PlayerId } from 'containers/Game/types';
+import { Direction } from 'enums';
 
 const useGameProvider = () => {
 	const dispatch = useDispatch();
-	const {
-		sizes: { map: mapSize },
-		tiles: { blockTileChance },
-	} = useSelector(makeSelectGameConfig());
+	const gameConfig = useSelector(makeSelectGameConfig());
+	const sizes = gameConfig?.sizes;
+	const blockTileChance = gameConfig?.tiles.blockTileChance;
+
+	const players = useSelector(makeSelectGamePlayers());
 
 	const updateGameSettings = useCallback(
 		(payload: GameState) => dispatch(setGameState(payload)),
 		[dispatch]
+	);
+
+	const startGame = useCallback(
+		(payload?: GameConfig) => {
+			const gameState = generateDefaultGameState(payload);
+			updateGameSettings(gameState);
+		},
+		[updateGameSettings]
 	);
 
 	const updateGameMap = useCallback(
@@ -46,13 +62,27 @@ const useGameProvider = () => {
 	const generateNewCollisionCoordinates = useCallback(
 		() =>
 			updateGameMap({
-				gameMap: generateRandomGameMap(mapSize, blockTileChance),
+				gameMap: generateRandomGameMap(sizes, blockTileChance, players),
 				animate: true,
 			}),
-		[blockTileChance, mapSize, updateGameMap]
+		[blockTileChance, sizes, players, updateGameMap]
 	);
 
 	// #region GAME ACTIONS
+	const updatePlayerDirection = useCallback(
+		(direction: Direction, id: PlayerId) => {
+			dispatch(changePlayerDirectionInGame({ direction, id }));
+		},
+		[dispatch]
+	);
+
+	const updatePlayerIsWalking = useCallback(
+		(isWalking: boolean, id: PlayerId) => {
+			dispatch(changePlayerIsWalkingInGame({ isWalking, id }));
+		},
+		[dispatch]
+	);
+
 	const makeMove = useCallback(
 		(props: OnMoveProps) => dispatch(makeMoveInGame(props)),
 		[dispatch]
@@ -110,9 +140,12 @@ const useGameProvider = () => {
 	// #endregion
 
 	return {
+		startGame,
 		updateGameSettings,
 		generateNewCollisionCoordinates,
 		// GAME ACTIONS
+		updatePlayerDirection,
+		updatePlayerIsWalking,
 		makeMove,
 		triggerMove,
 		dropBomb,

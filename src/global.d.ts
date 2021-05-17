@@ -9,9 +9,11 @@
  * // }
  * StyledProps<Props, 'variant' | 'size'>
  */
-declare type StyledProps<T, Keys> = {
+declare type StyledProps<T, Keys = KeysOf<T>> = {
 	[Property in keyof Pick<T, Keys> as `$${string & Property}`]: T[Property];
 };
+
+declare type ReactElementOrElementType = React.ReactElement | React.ElementType;
 
 /**
  * Get the keys of the object as a type
@@ -60,6 +62,8 @@ declare interface DynamicObject {
 
 declare type EmptyFunction = () => void;
 
+declare type NumberOrString = number | string;
+
 /**
  * Allows you to extend to whatever else the function will take. Saves you the
  * trouble of creating a wrapper method.
@@ -87,6 +91,10 @@ declare type EmptyFunction = () => void;
 declare type ReactOnClick<Extends = void> = (
 	e: React.MouseEvent<HTMLButtonElement, MouseEvent> & Extends
 ) => void;
+
+declare type ReactOnButtonClick = React.MouseEventHandler<
+	HTMLAnchorElement | HTMLButtonElement
+>;
 
 declare type BaseColorVariant = 'primary' | 'secondary';
 declare type AlertColorVariant = 'error' | 'success' | 'warning' | 'info';

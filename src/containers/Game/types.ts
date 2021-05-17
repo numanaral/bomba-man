@@ -1,13 +1,24 @@
-import { Direction, Player, PowerUp, Tile, Explosive } from 'enums';
+import {
+	Direction,
+	Player,
+	PowerUp,
+	Tile,
+	Explosive,
+	GameType,
+	GameEndCondition,
+	PlayerCondition,
+} from 'enums';
 import * as KeyCode from 'keycode-js';
 import {
 	Bombs,
 	GameConfig,
+	GameConfigRanges,
 	GameState,
 	OnTriggerMove,
 } from 'store/redux/reducers/game/types';
 import { FontAwesomeIconProps as FontAwesomeBaseIconProps } from '@fortawesome/react-fontawesome';
 import { GameProvider } from 'store/redux/hooks/useGameProvider';
+import { PlayerDisplayProps } from 'containers/WaitingRoom/PlayerDisplay';
 
 // import { Immutable } from 'immer';
 
@@ -24,6 +35,7 @@ interface TileProps extends React.HTMLAttributes<HTMLDivElement> {
 	collisionIndex?: number;
 	animate?: boolean;
 	fireSquare?: Fire;
+	firingDuration?: GameConfigRanges.FiringDuration;
 }
 
 type Fire =
@@ -55,12 +67,11 @@ type KeyboardEventCode = ValuesOf<typeof KeyCode>;
 // TODO: group types into separate folders/files
 
 // #region Character Config Types
-type MovementActions = Record<`Move${Direction}`, KeyboardEventCode>;
-type CharacterActions = {
-	DropBomb: KeyboardEventCode;
-	// Jump: KeyboardEventCode;
-};
-type PlayerKeyboardConfig = MovementActions & CharacterActions;
+// TODO: Maybe convert these to enums?
+type MovementActionKeys = `Move${Direction}`;
+type CharacterActionKeys = 'DropBomb'; // | 'Jump';
+type PlayerActionKeys = MovementActionKeys | CharacterActionKeys;
+type PlayerKeyboardConfig = Record<PlayerActionKeys, KeyboardEventCode>;
 
 type PlayerId = `P${RangeOf<4, 1>}`;
 
@@ -80,11 +91,17 @@ type PlayerState = {
 	powerUps: PowerUps;
 };
 
+// using object because firebase
+type KeyboardConfig = Record<string, PlayerKeyboardConfig> | null; // null for firebase
+
 type PlayerConfig = {
 	id: PlayerId;
 	coordinates: TopLeftCoordinates;
 	state: PlayerState;
-	keyboardConfig: PlayerKeyboardConfig | undefined;
+	keyboardConfig: KeyboardConfig;
+	direction: Direction;
+	isWalking: boolean;
+	isNPC: boolean;
 };
 
 type NonNullablePlayerRef = NonNullable<PlayerRef>;
@@ -99,14 +116,6 @@ type NextMoveProps = {
 type KeyMap = {
 	[key in KeyboardEventCode]?: boolean;
 };
-
-type CharacterProps = {
-	id: PlayerId;
-	name: string;
-	coordinates: TopLeftCoordinates;
-	keyboardConfig?: PlayerKeyboardConfig;
-	highlight?: boolean;
-} & React.HTMLAttributes<HTMLDivElement>;
 
 type NPCActionProps = {
 	playerId: PlayerId;
@@ -126,18 +135,43 @@ type PowerUpOrNull = PowerUp | null;
 
 type FontAwesomeIconProps = Omit<FontAwesomeBaseIconProps, 'icon'>;
 
+type GamePlayers = Partial<Record<PlayerId, PlayerCondition>>;
+
 type GameApi = {
 	provider: GameProvider;
 	state: GameState;
+	type: GameType;
+	gamePlayers: GamePlayers;
+	// firebase
 } & {
 	pending?: false | JSX.Element;
 	error?: false | JSX.Element;
+	// online mode
+} & {
+	started?: boolean;
+	gameId?: OnlineGameId;
+	playerId?: PlayerId;
 };
 
-type GameApiHook = (gameId?: string) => GameApi;
+type GameApiHookOnline = (gameId?: string) => GameApi;
+// it's null if you directly go to /local without /room-creator
+type GameApiHookLocal = (gameConfig?: GameConfig) => GameApi | null;
 
 type PickedGameState<K extends keyof GameState> = {
 	[P in K]: GameState[P];
+};
+
+type OnlineGameId = string;
+
+type OnlineGame = {
+	gameId: OnlineGameId;
+	gameState: GameState;
+	gamePlayers: GamePlayers;
+	started: boolean;
+};
+
+type GameEnd = Omit<PlayerDisplayProps, 'onStart'> & {
+	gameEndCondition: GameEndCondition;
 };
 
 export type {
@@ -150,7 +184,8 @@ export type {
 	Square,
 	GameMap,
 	KeyboardEventCode,
-	PlayerKeyboardConfig,
+	PlayerActionKeys,
+	KeyboardConfig,
 	PlayerId,
 	Players,
 	PlayerRef,
@@ -160,13 +195,17 @@ export type {
 	NonNullablePlayerRef,
 	NextMoveProps,
 	KeyMap,
-	CharacterProps,
 	NPCActionProps,
 	NPCActionFn,
 	Fire,
 	PowerUpOrNull,
 	FontAwesomeIconProps,
 	GameApi,
-	GameApiHook,
+	GameApiHookOnline,
+	GameApiHookLocal,
 	PickedGameState,
+	OnlineGameId,
+	OnlineGame,
+	GamePlayers,
+	GameEnd,
 };

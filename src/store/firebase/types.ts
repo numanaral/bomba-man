@@ -1,6 +1,6 @@
-import { GameState } from 'store/redux/reducers/game/types';
 // eslint-disable-next-line import/no-unresolved
 import { DataSnapshot } from '@firebase/database-types';
+import { OnlineGame } from 'containers/Game/types';
 
 namespace FirebaseObjects {
 	export type Sortable = {
@@ -43,10 +43,10 @@ namespace FirebaseUtils {
 		cb?: PromiseCallback
 	];
 
-	export type CreateProps<RootSchema, OverrideSchema> = CreateOrUpdateProps<
-		RootSchema,
-		OverrideSchema
-	>;
+	export type CreateProps<RootSchema, OverrideSchema> = [
+		...CreateOrUpdateProps<RootSchema, OverrideSchema>,
+		...[key?: string]
+	];
 
 	export type ReadProps<RootSchema, OverrideSchema> = [
 		state: OverridableType<RootSchema, OverrideSchema>
@@ -72,11 +72,11 @@ namespace FirebaseSchema {
 	};
 
 	export type FirebaseSchema = {
-		online: GameState;
+		online: OnlineGame;
 	};
 
 	// TODO: Once we have are collecting data, update this
 	export type FirestoreSchema = FirebaseObjects.Generic;
 }
 
-export type { FirebaseObjects, FirebaseUtils, FirebaseSchema };
+export type { FirebaseObjects, FirebaseUtils, FirebaseSchema, DataSnapshot };
