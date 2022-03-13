@@ -8,6 +8,7 @@
 	- Any provider can easily extend and create a wrapper following the factory
 		- redux (local) and firebase (online) are the two providers as of now
 		- Chose firebase for easy setup + easy auth, but a node server with socket.io is what I plan to implement in the future. I didn't want to deploy a server just yet and just get it up and running, firebase can be integrated on a static app so it's perfect to get the ground up.
+- Inspiration & Sprite Credit: [Danger Crew](https://thedangercrew.com/) and [@drewconley](https://www.youtube.com/c/drewconley)
 
 #### Landing Page
 ![landing page](docs/assets/gifs/landing.gif)
